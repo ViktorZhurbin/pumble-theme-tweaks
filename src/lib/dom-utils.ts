@@ -1,15 +1,19 @@
+import { PROPERTY_NAMES } from "./config";
+
 /**
- * Applies a CSS variable to the document root with !important
+ * Applies a CSS variable to the document root
  */
 export function applyCSSVariable(name: string, value: string) {
 	document.documentElement.style.setProperty(name, value);
 }
 
 /**
- * Removes CSS overrides from the document root
+ * Removes only CSS variables that were applied by this extension
  */
 export function resetCSSOverrides() {
-	document.documentElement.style = "";
+	PROPERTY_NAMES.forEach((propertyName) => {
+		document.documentElement.style.removeProperty(propertyName);
+	});
 }
 
 /**
