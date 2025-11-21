@@ -6,7 +6,7 @@ import "./shared.css";
 /**
  * Mounts a Svelte component to the DOM
  */
-function mountApp(component: Component, targetId = "app") {
+const mountApp = (component: Component, targetId = "app") => {
 	const target = document.getElementById(targetId);
 
 	if (!target) {
@@ -14,6 +14,6 @@ function mountApp(component: Component, targetId = "app") {
 	}
 
 	return mount(component, { target });
-}
+};
 
 export const app = mountApp(App);

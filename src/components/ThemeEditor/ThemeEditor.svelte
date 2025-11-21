@@ -29,7 +29,7 @@
 		PRESET_SAVE_DEBOUNCE_MS
 	);
 
-	async function handleReset() {
+	const handleReset = async () => {
 		if (!tabId || !themeName) return;
 
 		logger.info("Resetting theme overrides", { theme: themeName });
@@ -40,9 +40,9 @@
 
 		pickerValues = values;
 		logger.debug("Theme reset complete");
-	}
+	};
 
-	function handleColorChange(varName: string, value: string) {
+	const handleColorChange = (varName: string, value: string) => {
 		if (!tabId || !themeName) return;
 
 		pickerValues[varName] = value;
@@ -50,7 +50,7 @@
 		SendMessage.updateVar(tabId, varName, value);
 
 		savePresetVarDebounced(themeName, varName, value);
-	}
+	};
 
 	onMount(async () => {
 		const tab = await ChromeUtils.getActiveTab();

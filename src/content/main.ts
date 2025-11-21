@@ -7,7 +7,7 @@ import { type Message, MessageType } from "@/types";
 logger.info("Content script loaded", { timestamp: new Date().toISOString() });
 
 // Initialize: Apply saved overrides for current theme on page load
-function initializeTheme() {
+const initializeTheme = () => {
 	const initialTheme = DomUtils.getCurrentTheme();
 	if (initialTheme) {
 		logger.debug("Applying saved overrides for initial theme", {
@@ -15,7 +15,7 @@ function initializeTheme() {
 		});
 		ThemeManager.applyOverridesAndUpdateBadge(initialTheme);
 	}
-}
+};
 
 // Wait for DOM to be ready before initializing
 if (document.readyState === "loading") {

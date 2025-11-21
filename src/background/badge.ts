@@ -4,7 +4,7 @@ import { type Message, MessageType } from "@/types";
 /**
  * Updates the extension badge for a specific tab
  */
-function updateBadge(tabId: number, isOn: boolean): void {
+const updateBadge = (tabId: number, isOn: boolean) => {
 	logger.debug("Updating badge", { tabId, isOn });
 	if (isOn) {
 		chrome.action.setBadgeText({ text: "ON", tabId });
@@ -12,7 +12,7 @@ function updateBadge(tabId: number, isOn: boolean): void {
 	} else {
 		chrome.action.setBadgeText({ text: "", tabId });
 	}
-}
+};
 
 // Listen for badge update requests from content script
 chrome.runtime.onMessage.addListener((msg: Message, sender) => {
