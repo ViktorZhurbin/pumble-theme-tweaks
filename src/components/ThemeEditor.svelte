@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { onDestroy, onMount } from "svelte";
 	import { Storage } from "@/lib/storage";
 	import { CSS_VARIABLES } from "@/lib/config";
 	import { SendMessage } from "@/lib/messaging";
@@ -12,6 +12,13 @@
 	let error = $state<string | null>(null);
 	let pickerValues = $state<Record<string, string>>({});
 	let loading = $state(true);
+
+	let storageListener:
+		| ((
+				changes: { [key: string]: chrome.storage.StorageChange },
+				area: chrome.storage.AreaName
+		  ) => void)
+		| null = null;
 
 	async function handleReset() {
 		if (!tabId || !themeName) return;
@@ -59,14 +66,26 @@
 		loading = false;
 
 		// Listen for external storage changes
-		chrome.storage.onChanged.addListener((changes, area) => {
+		storageListener = (changes, area) => {
 			if (area === "sync" && changes.theme_presets && tabId && themeName) {
-				console.log("Theme presets changed externally. Refreshing UI...");
-				getPickerValues(tabId, themeName).then((values) => {
-					pickerValues = values;
-				});
+				getPickerValues(tabId, themeName)
+					.then((values) => {
+						pickerValues = values;
+					})
+					.catch((err) => {
+						console.error("Failed to refresh picker values:", err);
+					});
 			}
-		});
+		};
+
+		chrome.storage.onChanged.addListener(storageListener);
+	});
+
+	onDestroy(() => {
+		// Cleanup: remove listener when component is destroyed
+		if (storageListener) {
+			chrome.storage.onChanged.removeListener(storageListener);
+		}
 	});
 </script>
 
@@ -89,7 +108,7 @@
 					<input
 						id={config.propertyName}
 						type="color"
-						value={pickerValues[config.propertyName] || "#000000"}
+						value={pickerValues[config.propertyName]}
 						oninput={(e) =>
 							handleColorChange(
 								config.propertyName,

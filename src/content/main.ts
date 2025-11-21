@@ -12,7 +12,7 @@ import {
 } from "@/lib/theme-manager";
 import { type Message, MessageType } from "@/types";
 
-console.log("Content Script: Loaded", new Date(Date.now()).toISOString());
+console.log("Content Script: Loaded", new Date().toISOString());
 
 // Initialize: Apply saved overrides for current theme on page load
 const initialTheme = getCurrentTheme();
@@ -46,10 +46,15 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 });
 
 // Watch for theme changes and handle accordingly
-watchThemeChanges((newTheme) => {
+const themeObserver = watchThemeChanges((newTheme) => {
 	resetCSSOverrides();
 
 	if (newTheme) {
 		applyOverridesAndUpdateBadge(newTheme);
 	}
+});
+
+// Cleanup: disconnect observer when page unloads
+window.addEventListener("unload", () => {
+	themeObserver.disconnect();
 });

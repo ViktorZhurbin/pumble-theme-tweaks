@@ -15,9 +15,7 @@ export async function getPickerValues(
 
 	CSS_VARIABLES.forEach((config) => {
 		values[config.propertyName] =
-			storedPreset?.[config.propertyName] ||
-			currentValues[config.propertyName] ||
-			"#000000";
+			storedPreset?.[config.propertyName] || currentValues[config.propertyName];
 	});
 
 	return values;
