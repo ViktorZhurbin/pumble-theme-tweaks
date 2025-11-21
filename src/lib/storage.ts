@@ -4,10 +4,15 @@ import { logger } from "./logger";
 /**
  * Gets all theme presets from storage
  */
-async function getAllPresets() {
-	const result = await chrome.storage.sync.get<StorageData>("theme_presets");
-
-	return result.theme_presets ?? {};
+async function getAllPresets(): Promise<ThemePresets> {
+	try {
+		const result =
+			await chrome.storage.sync.get<StorageData>("theme_presets");
+		return result.theme_presets ?? {};
+	} catch (err) {
+		logger.error("Storage read error:", err);
+		return {};
+	}
 }
 
 /**
@@ -51,7 +56,12 @@ async function deletePreset(themeName: string) {
 
 	if (presets[themeName]) {
 		delete presets[themeName];
-		await chrome.storage.sync.set({ theme_presets: presets });
+		try {
+			await chrome.storage.sync.set({ theme_presets: presets });
+		} catch (err) {
+			logger.error("Storage delete error:", err);
+			throw err;
+		}
 	}
 }
 
