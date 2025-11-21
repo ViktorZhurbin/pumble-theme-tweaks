@@ -1,7 +1,5 @@
 import { type Message, MessageType } from "@/types";
 
-// console.log("Background Service Worker: Loaded");
-
 /**
  * Updates the extension badge for a specific tab
  */
