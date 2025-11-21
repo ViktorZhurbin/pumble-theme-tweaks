@@ -1,0 +1,20 @@
+{
+	"manifest_version": 3,
+	"name": "Pumble Color Changer",
+	"version": "1.0",
+	"description": "Change Pumble colors in web browser.",
+	"permissions": ["storage"],
+	"action": {
+		"default_popup": "popup.html",
+		"default_title": "Change Pumble Color"
+	},
+	"background": {
+		"service_worker": "background.js"
+	},
+	"content_scripts": [
+		{
+			"matches": ["https://app.pumble.com/*"],
+			"js": ["content.js"]
+		}
+	]
+}
