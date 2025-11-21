@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { deleteStoredPreset } from "@/lib/storage";
+	import { Storage } from "@/lib/storage";
 	import { CSS_VARIABLES } from "@/lib/config";
 	import { SendMessage } from "@/lib/messaging";
 	import { debouncedSave } from "./helpers/debouncedSave";
@@ -19,7 +19,7 @@
 	async function handleReset(): Promise<void> {
 		if (!tabId || !themeName) return;
 
-		await deleteStoredPreset(themeName);
+		await Storage.deletePreset(themeName);
 
 		await SendMessage.resetVars(tabId);
 		const values = await getPickerValues(tabId, themeName);

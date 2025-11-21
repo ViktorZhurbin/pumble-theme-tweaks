@@ -4,13 +4,13 @@ import {
 	resetCSSOverrides,
 } from "./dom-utils";
 import { SendMessage } from "./messaging";
-import { getStoredPreset } from "./storage";
+import { Storage } from "./storage";
 
 /**
  * Applies CSS variable overrides for a specific theme
  */
 export async function applyThemePreset(themeName: string) {
-	const overrides = await getStoredPreset(themeName);
+	const overrides = await Storage.getPreset(themeName);
 
 	// console.log({ overrides });
 
@@ -39,7 +39,7 @@ export async function handleThemeSwitch(newThemeName: string): Promise<void> {
 	}
 
 	// Apply preset for new theme if it exists
-	const overrides = await getStoredPreset(newThemeName);
+	const overrides = await Storage.getPreset(newThemeName);
 
 	if (overrides && Object.keys(overrides).length > 0) {
 		console.log(`Applying saved preset for theme: ${newThemeName}`);

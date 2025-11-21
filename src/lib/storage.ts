@@ -3,7 +3,7 @@ import type { StorageData, ThemePresets } from "@/types";
 /**
  * Gets all theme presets from storage
  */
-export async function getAllStoredPresets() {
+async function getAllPresets() {
 	const result = await chrome.storage.sync.get<StorageData>("theme_presets");
 
 	return result.theme_presets ?? {};
@@ -12,10 +12,10 @@ export async function getAllStoredPresets() {
 /**
  * Gets preset for a specific theme
  */
-export async function getStoredPreset(
+async function getPreset(
 	themeName: string,
 ): Promise<ThemePresets[string] | undefined> {
-	const presets = await getAllStoredPresets();
+	const presets = await getAllPresets();
 
 	return presets[themeName];
 }
@@ -23,12 +23,12 @@ export async function getStoredPreset(
 /**
  * Saves a single CSS variable for a theme
  */
-export async function saveStoredPresetVar(
+async function savePresetVar(
 	themeName: string,
 	varName: string,
 	value: string,
 ) {
-	const presets = await getAllStoredPresets();
+	const presets = await getAllPresets();
 
 	if (!presets[themeName]) {
 		presets[themeName] = {};
@@ -45,11 +45,17 @@ export async function saveStoredPresetVar(
 /**
  * Deletes all overrides for a specific theme
  */
-export async function deleteStoredPreset(themeName: string) {
-	const presets = await getAllStoredPresets();
+async function deletePreset(themeName: string) {
+	const presets = await getAllPresets();
 
 	if (presets[themeName]) {
 		delete presets[themeName];
 		await chrome.storage.sync.set({ theme_presets: presets });
 	}
 }
+
+export const Storage = {
+	getPreset,
+	savePresetVar,
+	deletePreset,
+};

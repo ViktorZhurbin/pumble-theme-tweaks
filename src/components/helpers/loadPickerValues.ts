@@ -1,6 +1,6 @@
 import { CSS_VARIABLES } from "@/lib/config";
 import { SendMessage } from "@/lib/messaging";
-import { getStoredPreset } from "@/lib/storage";
+import { Storage } from "@/lib/storage";
 
 export async function getPickerValues(
 	currentTabId: number,
@@ -8,7 +8,7 @@ export async function getPickerValues(
 ) {
 	const varNames = CSS_VARIABLES.map((v) => v.name);
 	const [storedPreset, liveValues] = await Promise.all([
-		getStoredPreset(currentTheme),
+		Storage.getPreset(currentTheme),
 		SendMessage.readVars(currentTabId, varNames),
 	]);
 
