@@ -1,147 +1,147 @@
 <script lang="ts">
-import { onMount } from "svelte";
-import { CSS_VARIABLES } from "@/lib/config";
-import {
-	getThemePreset,
-	deleteThemePreset,
-	saveThemeVariable,
-} from "@/lib/storage";
-import {
-	requestVariableValues,
-	requestThemeName,
-	sendResetVars,
-	sendUpdateVar,
-} from "@/lib/messaging";
-import { debounce } from "@/lib/dom-utils";
+	import { onMount } from "svelte";
+	import {
+		deleteThemePreset,
+		getThemePreset,
+		saveThemeVariable,
+	} from "@/lib/storage";
+	import { CSS_VARIABLES } from "@/lib/config";
+	import {
+		requestThemeName,
+		requestVariableValues,
+		sendResetVars,
+		sendUpdateVar,
+	} from "@/lib/messaging";
+	import { debounce } from "@/lib/dom-utils";
 
-let themeName = $state<string | null>(null);
-let tabId = $state<number | null>(null);
-let error = $state<string | null>(null);
-let pickerValues = $state<Record<string, string>>({});
-let loading = $state(true);
+	let themeName = $state<string | null>(null);
+	let tabId = $state<number | null>(null);
+	let error = $state<string | null>(null);
+	let pickerValues = $state<Record<string, string>>({});
+	let loading = $state(true);
 
-/**
- * Gets the active tab
- */
-async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
-	const [tab] = await chrome.tabs.query({
-		active: true,
-		currentWindow: true,
-	});
-	return tab || null;
-}
-
-/**
- * Loads all UI elements with current data
- */
-async function loadUI(
-	currentTabId: number,
-	currentTheme: string,
-): Promise<void> {
-	const varNames = CSS_VARIABLES.map((v) => v.name);
-	const [savedSettings, liveValues] = await Promise.all([
-		getThemePreset(currentTheme),
-		requestVariableValues(currentTabId, varNames),
-	]);
-
-	const values: Record<string, string> = {};
-	CSS_VARIABLES.forEach((config) => {
-		values[config.name] =
-			savedSettings[config.name] || liveValues[config.name] || "#000000";
-	});
-
-	pickerValues = values;
-}
-
-/**
- * Refreshes picker values without recreating UI
- */
-async function refreshUI(
-	currentTabId: number,
-	currentTheme: string,
-): Promise<void> {
-	const varNames = CSS_VARIABLES.map((v) => v.name);
-	const [savedSettings, liveValues] = await Promise.all([
-		getThemePreset(currentTheme),
-		requestVariableValues(currentTabId, varNames),
-	]);
-
-	const values: Record<string, string> = {};
-	CSS_VARIABLES.forEach((config) => {
-		values[config.name] =
-			savedSettings[config.name] || liveValues[config.name] || "#000000";
-	});
-
-	pickerValues = values;
-}
-
-/**
- * Handles the reset button click
- */
-async function handleReset(): Promise<void> {
-	if (!tabId || !themeName) return;
-
-	await deleteThemePreset(themeName);
-
-	const varNames = CSS_VARIABLES.map((v) => v.name);
-	await sendResetVars(tabId, varNames);
-	await refreshUI(tabId, themeName);
-}
-
-/**
- * Handles color input change
- */
-function handleColorChange(varName: string, value: string): void {
-	if (!tabId || !themeName) return;
-
-	pickerValues[varName] = value;
-	sendUpdateVar(tabId, varName, value);
-
-	// Debounced save to storage
-	debouncedSave(themeName, varName, value);
-}
-
-// Debounced save function
-const debouncedSave = debounce(
-	(theme: string, varName: string, value: string) => {
-		saveThemeVariable(theme, varName, value);
-	},
-	500,
-);
-
-/**
- * Initialize the component
- */
-onMount(async () => {
-	const tab = await getActiveTab();
-
-	if (!tab?.id) {
-		error = "Please open a Pumble tab";
-		loading = false;
-		return;
+	/**
+	 * Gets the active tab
+	 */
+	async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
+		const [tab] = await chrome.tabs.query({
+			active: true,
+			currentWindow: true,
+		});
+		return tab || null;
 	}
 
-	tabId = tab.id;
-	const currentTheme = await requestThemeName(tab.id);
+	/**
+	 * Loads all UI elements with current data
+	 */
+	async function loadUI(
+		currentTabId: number,
+		currentTheme: string
+	): Promise<void> {
+		const varNames = CSS_VARIABLES.map((v) => v.name);
+		const [savedSettings, liveValues] = await Promise.all([
+			getThemePreset(currentTheme),
+			requestVariableValues(currentTabId, varNames),
+		]);
 
-	if (!currentTheme) {
-		error = "Unable to detect Pumble theme";
-		loading = false;
-		return;
+		const values: Record<string, string> = {};
+		CSS_VARIABLES.forEach((config) => {
+			values[config.name] =
+				savedSettings[config.name] || liveValues[config.name] || "#000000";
+		});
+
+		pickerValues = values;
 	}
 
-	themeName = currentTheme;
-	await loadUI(tab.id, currentTheme);
-	loading = false;
+	/**
+	 * Refreshes picker values without recreating UI
+	 */
+	async function refreshUI(
+		currentTabId: number,
+		currentTheme: string
+	): Promise<void> {
+		const varNames = CSS_VARIABLES.map((v) => v.name);
+		const [savedSettings, liveValues] = await Promise.all([
+			getThemePreset(currentTheme),
+			requestVariableValues(currentTabId, varNames),
+		]);
 
-	// Listen for external storage changes
-	chrome.storage.onChanged.addListener((changes, area) => {
-		if (area === "sync" && changes.theme_presets && tabId && themeName) {
-			console.log("Theme presets changed externally. Refreshing UI...");
-			refreshUI(tabId, themeName);
+		const values: Record<string, string> = {};
+		CSS_VARIABLES.forEach((config) => {
+			values[config.name] =
+				savedSettings[config.name] || liveValues[config.name] || "#000000";
+		});
+
+		pickerValues = values;
+	}
+
+	/**
+	 * Handles the reset button click
+	 */
+	async function handleReset(): Promise<void> {
+		if (!tabId || !themeName) return;
+
+		await deleteThemePreset(themeName);
+
+		const varNames = CSS_VARIABLES.map((v) => v.name);
+		await sendResetVars(tabId, varNames);
+		await refreshUI(tabId, themeName);
+	}
+
+	/**
+	 * Handles color input change
+	 */
+	function handleColorChange(varName: string, value: string): void {
+		if (!tabId || !themeName) return;
+
+		pickerValues[varName] = value;
+		sendUpdateVar(tabId, varName, value);
+
+		// Debounced save to storage
+		debouncedSave(themeName, varName, value);
+	}
+
+	// Debounced save function
+	const debouncedSave = debounce(
+		(theme: string, varName: string, value: string) => {
+			saveThemeVariable(theme, varName, value);
+		},
+		500
+	);
+
+	/**
+	 * Initialize the component
+	 */
+	onMount(async () => {
+		const tab = await getActiveTab();
+
+		if (!tab?.id) {
+			error = "Please open a Pumble tab";
+			loading = false;
+			return;
 		}
+
+		tabId = tab.id;
+		const currentTheme = await requestThemeName(tab.id);
+
+		if (!currentTheme) {
+			error = "Unable to detect Pumble theme";
+			loading = false;
+			return;
+		}
+
+		themeName = currentTheme;
+		await loadUI(tab.id, currentTheme);
+		loading = false;
+
+		// Listen for external storage changes
+		chrome.storage.onChanged.addListener((changes, area) => {
+			if (area === "sync" && changes.theme_presets && tabId && themeName) {
+				console.log("Theme presets changed externally. Refreshing UI...");
+				refreshUI(tabId, themeName);
+			}
+		});
 	});
-});
 </script>
 
 <div class="container">

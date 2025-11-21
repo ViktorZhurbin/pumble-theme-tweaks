@@ -1,4 +1,4 @@
-import { MessageType, type UpdateBadgeMessage, type Message } from "@/types";
+import { type Message, MessageType, type UpdateBadgeMessage } from "@/types";
 
 console.log("Background Service Worker: Loaded");
 
