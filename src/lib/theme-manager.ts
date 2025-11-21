@@ -7,52 +7,34 @@ import { SendMessage } from "./messaging";
 import { Storage } from "./storage";
 
 /**
- * Applies CSS variable overrides for a specific theme
+ * Applies CSS variable overrides and updates badge accordingly
  */
-export async function applyThemePreset(themeName: string) {
+async function applyOverridesAndUpdateBadge(themeName: string): Promise<void> {
 	const overrides = await Storage.getPreset(themeName);
+	const hasOverrides = !!overrides && Object.keys(overrides).length > 0;
 
-	// console.log({ overrides });
-
-	if (overrides && Object.keys(overrides).length > 0) {
-		// console.log(`Applying preset for theme: ${themeName}`, overrides);
+	if (hasOverrides) {
 		Object.entries(overrides).forEach(([key, value]) => {
 			applyCSSVariable(key, value);
 		});
-		SendMessage.updateBadge(true);
-	} else {
-		// console.log(`No preset found for theme: ${themeName}`);
-		SendMessage.updateBadge(false);
 	}
+
+	SendMessage.updateBadge(hasOverrides);
+}
+
+/**
+ * Applies CSS variable overrides for a specific theme
+ */
+export async function applyThemePreset(themeName: string): Promise<void> {
+	await applyOverridesAndUpdateBadge(themeName);
 }
 
 /**
  * Handles theme switch: clears old overrides and applies new ones
  */
 export async function handleThemeSwitch(newThemeName: string): Promise<void> {
-	// Clear all variables first
 	resetCSSOverrides();
-
-	if (!newThemeName) {
-		SendMessage.updateBadge(false);
-		return;
-	}
-
-	// Apply preset for new theme if it exists
-	const overrides = await Storage.getPreset(newThemeName);
-
-	if (overrides && Object.keys(overrides).length > 0) {
-		// console.log(`Applying saved preset for theme: ${newThemeName}`);
-		Object.entries(overrides).forEach(([key, value]) => {
-			applyCSSVariable(key, value);
-		});
-		SendMessage.updateBadge(true);
-	} else {
-		// console.log(
-		// 	`No preset found for theme: ${newThemeName}, overrides removed`,
-		// );
-		SendMessage.updateBadge(false);
-	}
+	await applyOverridesAndUpdateBadge(newThemeName);
 }
 
 /**
@@ -72,7 +54,6 @@ export function watchThemeChanges(
 				const newTheme = getCurrentTheme();
 
 				if (newTheme !== currentTheme) {
-					// console.log(`Theme changed from "${currentTheme}" to "${newTheme}"`);
 					const oldTheme = currentTheme;
 					currentTheme = newTheme;
 					if (newTheme) {
