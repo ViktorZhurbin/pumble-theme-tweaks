@@ -11,9 +11,9 @@ const applyCSSVariable = (name: string, value: string) => {
  * Removes only CSS variables that were applied by this extension
  */
 const resetCSSOverrides = () => {
-	PROPERTY_NAMES.forEach((propertyName) => {
+	for (const propertyName of PROPERTY_NAMES) {
 		document.documentElement.style.removeProperty(propertyName);
-	});
+	}
 };
 
 /**
@@ -26,15 +26,14 @@ const getCurrentTheme = () => {
 /**
  * Reads current computed values of CSS variables
  */
-const getCSSVariables = (variableNames: string[]) => {
+const getCSSVariables = () => {
 	const computed = getComputedStyle(document.documentElement);
-	const values: Record<string, string> = {};
 
-	variableNames.forEach((name) => {
-		values[name] = computed.getPropertyValue(name).trim();
-	});
+	return PROPERTY_NAMES.reduce<Record<string, string>>((acc, propertyName) => {
+		acc[propertyName] = computed.getPropertyValue(propertyName).trim();
 
-	return values;
+		return acc;
+	}, {});
 };
 
 export const DomUtils = {

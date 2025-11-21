@@ -27,7 +27,12 @@ function getVars(tabId: number): Promise<Record<string, string>> {
 			tabId,
 			{ type: MessageType.READ_VARS },
 			(response) => {
-				resolve(chrome.runtime.lastError ? {} : response || {});
+				if (chrome.runtime.lastError) {
+					console.error("Failed to read variables:", chrome.runtime.lastError);
+					resolve({}); // Or reject(chrome.runtime.lastError)
+				} else {
+					resolve(response || {});
+				}
 			},
 		);
 	});

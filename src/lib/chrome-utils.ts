@@ -16,14 +16,15 @@ const getPickerValues = async (currentTabId: number, currentTheme: string) => {
 		SendMessage.getVars(currentTabId),
 	]);
 
-	const values: Record<string, string> = {};
+	return CSS_VARIABLES.reduce<Record<string, string>>(
+		(acc, { propertyName }) => {
+			acc[propertyName] =
+				storedPreset?.[propertyName] || currentValues[propertyName];
 
-	CSS_VARIABLES.forEach((config) => {
-		values[config.propertyName] =
-			storedPreset?.[config.propertyName] || currentValues[config.propertyName];
-	});
-
-	return values;
+			return acc;
+		},
+		{},
+	);
 };
 
 export const ChromeUtils = {

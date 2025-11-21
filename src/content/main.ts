@@ -1,4 +1,3 @@
-import { PROPERTY_NAMES } from "@/constants/config";
 import { DomUtils } from "@/lib/dom-utils";
 import { SendMessage } from "@/lib/messaging";
 import { ThemeManager } from "@/lib/theme-manager";
@@ -20,7 +19,8 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 	}
 
 	if (msg.type === MessageType.READ_VARS) {
-		const currentValues = DomUtils.getCSSVariables(PROPERTY_NAMES);
+		const currentValues = DomUtils.getCSSVariables();
+
 		sendResponse(currentValues);
 	}
 

@@ -12,9 +12,9 @@ const applyOverridesAndUpdateBadge = async (
 	const hasOverrides = !!overrides && Object.keys(overrides).length > 0;
 
 	if (hasOverrides) {
-		Object.entries(overrides).forEach(([key, value]) => {
+		for (const [key, value] of Object.entries(overrides)) {
 			DomUtils.applyCSSVariable(key, value);
-		});
+		}
 	}
 
 	SendMessage.updateBadge(hasOverrides);
