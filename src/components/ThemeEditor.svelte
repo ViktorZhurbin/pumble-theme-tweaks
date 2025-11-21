@@ -12,7 +12,7 @@
 		sendResetVars,
 		sendUpdateVar,
 	} from "@/lib/messaging";
-	import { debounce } from "@/lib/dom-utils";
+	import { debounce } from "@/lib/debounce";
 
 	let themeName = $state<string | null>(null);
 	let tabId = $state<number | null>(null);
