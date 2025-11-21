@@ -6,7 +6,7 @@ import zip from "vite-plugin-zip-pack";
 import manifest from "./manifest.config";
 import { name, version } from "./package.json";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
 	resolve: {
 		alias: {
 			"@": `${path.resolve(__dirname, "src")}`,
@@ -15,7 +15,7 @@ export default defineConfig({
 	plugins: [
 		svelte({
 			compilerOptions: {
-				dev: true,
+				dev: mode === "development",
 			},
 		}),
 		crx({ manifest }),
@@ -26,4 +26,4 @@ export default defineConfig({
 			origin: [/chrome-extension:\/\//],
 		},
 	},
-});
+}));
