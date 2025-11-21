@@ -1,4 +1,4 @@
-import { PROPERTY_NAMES } from "../constants/config";
+import { PROPERTY_NAMES } from "@/constants/config";
 
 /**
  * Applies a CSS variable to the document root

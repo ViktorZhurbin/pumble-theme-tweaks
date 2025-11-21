@@ -6,7 +6,7 @@ import {
 	type UpdateBadgeMessage,
 	type UpdateVarMessage,
 } from "@/types";
-import { logger } from "./logger";
+import { logger } from "@/lib/logger";
 
 /**
  * Sends a message to update a CSS variable in the active tab

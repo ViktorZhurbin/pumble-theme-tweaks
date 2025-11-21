@@ -1,7 +1,7 @@
-import { DomUtils } from "./dom-utils";
-import { logger } from "./logger";
-import { SendMessage } from "./messaging";
-import { Storage } from "./storage";
+import { DomUtils } from "@/lib/dom-utils";
+import { logger } from "@/lib/logger";
+import { SendMessage } from "@/lib/messaging";
+import { Storage } from "@/lib/storage";
 
 /**
  * Applies CSS variable overrides and updates badge accordingly

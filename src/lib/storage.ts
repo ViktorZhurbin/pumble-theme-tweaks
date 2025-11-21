@@ -1,5 +1,5 @@
 import type { StorageData, ThemePresets } from "@/types";
-import { logger } from "./logger";
+import { logger } from "@/lib/logger";
 
 /**
  * Gets all theme presets from storage
