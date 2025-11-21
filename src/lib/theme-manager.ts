@@ -1,35 +1,35 @@
-import { applyCSSVariable, getCurrentTheme } from "./dom-utils";
+import { DomUtils } from "./dom-utils";
 import { SendMessage } from "./messaging";
 import { Storage } from "./storage";
 
 /**
  * Applies CSS variable overrides and updates badge accordingly
  */
-export async function applyOverridesAndUpdateBadge(
+const applyOverridesAndUpdateBadge = async (
 	themeName: string,
-): Promise<void> {
+): Promise<void> => {
 	const overrides = await Storage.getPreset(themeName);
 	const hasOverrides = !!overrides && Object.keys(overrides).length > 0;
 
 	if (hasOverrides) {
 		Object.entries(overrides).forEach(([key, value]) => {
-			applyCSSVariable(key, value);
+			DomUtils.applyCSSVariable(key, value);
 		});
 	}
 
 	SendMessage.updateBadge(hasOverrides);
-}
+};
 
 /**
  * Watches for theme changes (class attribute changes on html element)
  */
-export function watchThemeChanges(
+const watchThemeChanges = (
 	onThemeChange: (newTheme: string | null, oldTheme: string | null) => void,
-): MutationObserver {
-	let currentTheme = getCurrentTheme();
+): MutationObserver => {
+	let currentTheme = DomUtils.getCurrentTheme();
 
 	const observer = new MutationObserver(() => {
-		const newTheme = getCurrentTheme();
+		const newTheme = DomUtils.getCurrentTheme();
 
 		if (newTheme !== currentTheme) {
 			const oldTheme = currentTheme;
@@ -44,4 +44,9 @@ export function watchThemeChanges(
 	});
 
 	return observer;
-}
+};
+
+export const ThemeManager = {
+	applyOverridesAndUpdateBadge,
+	watchThemeChanges,
+};

@@ -1,44 +1,36 @@
-import { PROPERTY_NAMES } from "@/lib/config";
-import {
-	applyCSSVariable,
-	getCurrentTheme,
-	readCSSVariables,
-	resetCSSOverrides,
-} from "@/lib/dom-utils";
+import { PROPERTY_NAMES } from "@/constants/config";
+import { DomUtils } from "@/lib/dom-utils";
 import { SendMessage } from "@/lib/messaging";
-import {
-	applyOverridesAndUpdateBadge,
-	watchThemeChanges,
-} from "@/lib/theme-manager";
+import { ThemeManager } from "@/lib/theme-manager";
 import { type Message, MessageType } from "@/types";
 
 console.log("Content Script: Loaded", new Date().toISOString());
 
 // Initialize: Apply saved overrides for current theme on page load
-const initialTheme = getCurrentTheme();
+const initialTheme = DomUtils.getCurrentTheme();
 if (initialTheme) {
-	applyOverridesAndUpdateBadge(initialTheme);
+	ThemeManager.applyOverridesAndUpdateBadge(initialTheme);
 }
 
 // Listen for messages from popup
 chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 	if (msg.type === MessageType.UPDATE_VAR) {
-		applyCSSVariable(msg.varName, msg.value);
+		DomUtils.applyCSSVariable(msg.varName, msg.value);
 		SendMessage.updateBadge(true);
 	}
 
 	if (msg.type === MessageType.READ_VARS) {
-		const currentValues = readCSSVariables(PROPERTY_NAMES);
+		const currentValues = DomUtils.getCSSVariables(PROPERTY_NAMES);
 		sendResponse(currentValues);
 	}
 
 	if (msg.type === MessageType.GET_THEME) {
-		const theme = getCurrentTheme();
+		const theme = DomUtils.getCurrentTheme();
 		sendResponse({ theme });
 	}
 
 	if (msg.type === MessageType.RESET_VARS) {
-		resetCSSOverrides();
+		DomUtils.resetCSSOverrides();
 		SendMessage.updateBadge(false);
 	}
 
@@ -46,11 +38,11 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 });
 
 // Watch for theme changes and handle accordingly
-const themeObserver = watchThemeChanges((newTheme) => {
-	resetCSSOverrides();
+const themeObserver = ThemeManager.watchThemeChanges((newTheme) => {
+	DomUtils.resetCSSOverrides();
 
 	if (newTheme) {
-		applyOverridesAndUpdateBadge(newTheme);
+		ThemeManager.applyOverridesAndUpdateBadge(newTheme);
 	}
 });
 

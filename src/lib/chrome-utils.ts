@@ -1,14 +1,19 @@
-import { CSS_VARIABLES } from "@/lib/config";
+import { CSS_VARIABLES } from "@/constants/config";
 import { SendMessage } from "@/lib/messaging";
 import { Storage } from "@/lib/storage";
 
-export async function getPickerValues(
-	currentTabId: number,
-	currentTheme: string,
-) {
+const getActiveTab = async () => {
+	const [tab] = await chrome.tabs.query({
+		active: true,
+		currentWindow: true,
+	});
+	return tab || null;
+};
+
+const getPickerValues = async (currentTabId: number, currentTheme: string) => {
 	const [storedPreset, currentValues] = await Promise.all([
 		Storage.getPreset(currentTheme),
-		SendMessage.readVars(currentTabId),
+		SendMessage.getVars(currentTabId),
 	]);
 
 	const values: Record<string, string> = {};
@@ -19,4 +24,9 @@ export async function getPickerValues(
 	});
 
 	return values;
-}
+};
+
+export const ChromeUtils = {
+	getActiveTab,
+	getPickerValues,
+};

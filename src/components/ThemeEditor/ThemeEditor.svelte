@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { onDestroy, onMount } from "svelte";
 	import { Storage } from "@/lib/storage";
-	import { CSS_VARIABLES } from "@/lib/config";
+	import { CSS_VARIABLES } from "@/constants/config";
 	import { SendMessage } from "@/lib/messaging";
-	import { debouncedSave } from "./helpers/debouncedSave";
-	import { getActiveTab } from "./helpers/getActiveTab";
-	import { getPickerValues } from "./helpers/loadPickerValues";
+	import { ChromeUtils } from "@/lib/chrome-utils";
+	import { Utils } from "@/lib/utils";
 
 	let themeName = $state<string | null>(null);
 	let tabId = $state<number | null>(null);
@@ -26,7 +25,7 @@
 		await Storage.deletePreset(themeName);
 
 		await SendMessage.resetVars(tabId);
-		const values = await getPickerValues(tabId, themeName);
+		const values = await ChromeUtils.getPickerValues(tabId, themeName);
 
 		pickerValues = values;
 	}
@@ -38,11 +37,11 @@
 
 		SendMessage.updateVar(tabId, varName, value);
 
-		debouncedSave(themeName, varName, value);
+		Utils.debounce(Storage.savePresetVar, 500)(themeName, varName, value);
 	}
 
 	onMount(async () => {
-		const tab = await getActiveTab();
+		const tab = await ChromeUtils.getActiveTab();
 
 		if (!tab?.id) {
 			error = "Please open a Pumble tab";
@@ -60,7 +59,7 @@
 		}
 
 		themeName = currentTheme;
-		const values = await getPickerValues(tabId, themeName);
+		const values = await ChromeUtils.getPickerValues(tabId, themeName);
 
 		pickerValues = values;
 		loading = false;
@@ -68,7 +67,7 @@
 		// Listen for external storage changes
 		storageListener = (changes, area) => {
 			if (area === "sync" && changes.theme_presets && tabId && themeName) {
-				getPickerValues(tabId, themeName)
+				ChromeUtils.getPickerValues(tabId, themeName)
 					.then((values) => {
 						pickerValues = values;
 					})

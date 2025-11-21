@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ThemeEditor from "@/components/ThemeEditor.svelte";
+	import ThemeEditor from "./ThemeEditor/ThemeEditor.svelte";
 </script>
 
 <ThemeEditor />

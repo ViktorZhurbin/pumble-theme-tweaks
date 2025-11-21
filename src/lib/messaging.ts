@@ -21,7 +21,7 @@ function updateVar(tabId: number, varName: string, value: string): void {
 /**
  * Requests current CSS variable values from the page
  */
-function readVars(tabId: number): Promise<Record<string, string>> {
+function getVars(tabId: number): Promise<Record<string, string>> {
 	return new Promise((resolve) => {
 		chrome.tabs.sendMessage<ReadVarsMessage>(
 			tabId,
@@ -73,7 +73,7 @@ function updateBadge(badgeOn: boolean): void {
 
 export const SendMessage = {
 	updateVar,
-	readVars,
+	getVars,
 	getTheme,
 	resetVars,
 	updateBadge,

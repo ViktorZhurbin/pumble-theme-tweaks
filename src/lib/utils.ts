@@ -1,12 +1,13 @@
 // biome-ignore lint/suspicious/noExplicitAny: it's fine
-export function debounce<T extends (...args: any[]) => any>(
-	func: T,
-	wait: number,
-): (...args: Parameters<T>) => void {
+const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
 	let timeout: ReturnType<typeof setTimeout> | undefined;
 
-	return (...args) => {
+	return (...args: Parameters<T>) => {
 		clearTimeout(timeout);
 		timeout = setTimeout(() => func(...args), wait);
 	};
-}
+};
+
+export const Utils = {
+	debounce,
+};

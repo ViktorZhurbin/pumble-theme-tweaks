@@ -1,32 +1,32 @@
-import { PROPERTY_NAMES } from "./config";
+import { PROPERTY_NAMES } from "../constants/config";
 
 /**
  * Applies a CSS variable to the document root
  */
-export function applyCSSVariable(name: string, value: string) {
+const applyCSSVariable = (name: string, value: string) => {
 	document.documentElement.style.setProperty(name, value);
-}
+};
 
 /**
  * Removes only CSS variables that were applied by this extension
  */
-export function resetCSSOverrides() {
+const resetCSSOverrides = () => {
 	PROPERTY_NAMES.forEach((propertyName) => {
 		document.documentElement.style.removeProperty(propertyName);
 	});
-}
+};
 
 /**
  * Gets the current theme name from the first class on the html element
  */
-export function getCurrentTheme() {
+const getCurrentTheme = () => {
 	return document.documentElement.classList[0] || null;
-}
+};
 
 /**
  * Reads current computed values of CSS variables
  */
-export function readCSSVariables(variableNames: string[]) {
+const getCSSVariables = (variableNames: string[]) => {
 	const computed = getComputedStyle(document.documentElement);
 	const values: Record<string, string> = {};
 
@@ -35,4 +35,11 @@ export function readCSSVariables(variableNames: string[]) {
 	});
 
 	return values;
-}
+};
+
+export const DomUtils = {
+	applyCSSVariable,
+	resetCSSOverrides,
+	getCurrentTheme,
+	getCSSVariables,
+};
