@@ -1,19 +1,21 @@
-import type { ThemePresets } from '@/types'
+import type { ThemePresets } from "@/types";
 
 /**
  * Gets all theme presets from storage
  */
 export async function getAllPresets(): Promise<ThemePresets> {
-	const result = await chrome.storage.sync.get(['theme_presets'])
-	return result.theme_presets || {}
+	const result = await chrome.storage.sync.get(["theme_presets"]);
+	return result.theme_presets || {};
 }
 
 /**
  * Gets preset for a specific theme
  */
-export async function getThemePreset(themeName: string): Promise<Record<string, string>> {
-	const presets = await getAllPresets()
-	return presets[themeName] || {}
+export async function getThemePreset(
+	themeName: string,
+): Promise<Record<string, string>> {
+	const presets = await getAllPresets();
+	return presets[themeName] || {};
 }
 
 /**
@@ -22,19 +24,19 @@ export async function getThemePreset(themeName: string): Promise<Record<string, 
 export async function saveThemeVariable(
 	themeName: string,
 	varName: string,
-	value: string
+	value: string,
 ): Promise<void> {
-	const presets = await getAllPresets()
+	const presets = await getAllPresets();
 
 	if (!presets[themeName]) {
-		presets[themeName] = {}
+		presets[themeName] = {};
 	}
-	presets[themeName][varName] = value
+	presets[themeName][varName] = value;
 
 	try {
-		await chrome.storage.sync.set({ theme_presets: presets })
+		await chrome.storage.sync.set({ theme_presets: presets });
 	} catch (err) {
-		console.warn('Storage write error:', err)
+		console.warn("Storage write error:", err);
 	}
 }
 
@@ -42,11 +44,11 @@ export async function saveThemeVariable(
  * Deletes all overrides for a specific theme
  */
 export async function deleteThemePreset(themeName: string): Promise<void> {
-	const presets = await getAllPresets()
+	const presets = await getAllPresets();
 
 	if (presets[themeName]) {
-		delete presets[themeName]
-		await chrome.storage.sync.set({ theme_presets: presets })
+		delete presets[themeName];
+		await chrome.storage.sync.set({ theme_presets: presets });
 	}
 }
 
@@ -54,12 +56,12 @@ export async function deleteThemePreset(themeName: string): Promise<void> {
  * Gets all CSS variable names that are used across all presets
  */
 export async function getAllUsedVariableNames(): Promise<Set<string>> {
-	const presets = await getAllPresets()
-	const varNames = new Set<string>()
+	const presets = await getAllPresets();
+	const varNames = new Set<string>();
 
 	Object.values(presets).forEach((preset) => {
-		Object.keys(preset).forEach((varName) => varNames.add(varName))
-	})
+		Object.keys(preset).forEach((varName) => varNames.add(varName));
+	});
 
-	return varNames
+	return varNames;
 }
