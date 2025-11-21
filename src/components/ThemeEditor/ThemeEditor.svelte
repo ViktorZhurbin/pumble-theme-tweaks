@@ -12,6 +12,7 @@
 	let error = $state<string | null>(null);
 	let pickerValues = $state<Record<string, string>>({});
 	let loading = $state(true);
+	let applyOverrides = $state(true);
 
 	let storageListener:
 		| ((
@@ -50,6 +51,22 @@
 		SendMessage.updateVar(tabId, varName, value);
 
 		savePresetVarDebounced(themeName, varName, value);
+	};
+
+	const handleToggleOverrides = async () => {
+		if (!tabId) return;
+
+		if (applyOverrides) {
+			// Apply all stored picker values
+			logger.debug("Applying theme overrides");
+			for (const [varName, value] of Object.entries(pickerValues)) {
+				SendMessage.updateVar(tabId, varName, value);
+			}
+		} else {
+			// Remove CSS overrides but keep storage
+			logger.debug("Removing theme overrides from document");
+			await SendMessage.resetVars(tabId);
+		}
 	};
 
 	onMount(async () => {
@@ -107,23 +124,30 @@
 </script>
 
 <div class="container">
-	<h3>Theme Editor</h3>
+	<h3>Theme Tweaks</h3>
 
 	{#if loading}
 		<p>Loading...</p>
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else}
-		{#if themeName}
-			<div class="theme-label">Theme: {themeName}</div>
-		{/if}
+		<div class="toggle-container">
+			<label for="toggle-overrides" class="toggle-label">
+				<input
+					id="toggle-overrides"
+					type="checkbox"
+					bind:checked={applyOverrides}
+					onchange={handleToggleOverrides}
+				/>
+				{applyOverrides ? "Tweaks ON" : "Tweaks OFF"}
+			</label>
+		</div>
 
 		<div class="pickers-container">
 			{#each CSS_VARIABLES as config (config.propertyName)}
-				<div class="picker-group">
-					<label for={config.propertyName}>{config.label}</label>
+				<label class="picker-group" class:inactive={!applyOverrides}>
+					<span class="picker-label">{config.label}</span>
 					<input
-						id={config.propertyName}
 						type="color"
 						value={pickerValues[config.propertyName]}
 						oninput={(e) => {
@@ -132,7 +156,7 @@
 							}
 						}}
 					/>
-				</div>
+				</label>
 			{/each}
 		</div>
 
@@ -142,42 +166,87 @@
 
 <style>
 	h3 {
-		margin-top: 0;
 		text-align: center;
-		font-size: 2rem;
 	}
 
-	.theme-label {
-		font-size: 1rem;
-		margin-bottom: 10px;
+	.toggle-container {
+		margin-bottom: 16px;
+	}
+
+	.toggle-label {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-size: 1.3rem;
+		line-height: 1.4;
+		cursor: pointer;
+		user-select: none;
+	}
+
+	input[type="checkbox"] {
+		width: 18px;
+		height: 18px;
+		cursor: pointer;
+		flex-shrink: 0;
 	}
 
 	.error {
 		color: #d32f2f;
 		text-align: center;
+		font-size: 0.875rem;
+		line-height: 1.4;
 	}
 
 	.pickers-container {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
-		margin-bottom: 20px;
+		margin-bottom: 24px;
 	}
 
 	.picker-group {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		background: white;
-		padding: 8px 10px;
+		background: rgba(255, 255, 255, 0.05);
+		padding: 10px 12px;
 		border-radius: 6px;
+		border: 1px solid rgba(255, 255, 255, 0.1);
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		transition: all 0.2s ease-in-out;
+		cursor: pointer;
 	}
 
-	label {
+	.picker-group:hover:not(.inactive) {
+		background: rgba(255, 255, 255, 0.08);
+		border-color: rgba(255, 255, 255, 0.15);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+		transform: translateY(-1px);
+	}
+
+	.picker-group.inactive {
+		opacity: 0.4;
+		pointer-events: none;
+		cursor: not-allowed;
+	}
+
+	.picker-label {
 		font-weight: 600;
-		font-size: 14px;
-		color: #444;
+		font-size: 0.875rem;
+		line-height: 1.4;
+	}
+
+	@media (prefers-color-scheme: light) {
+		.picker-group {
+			background: #ffffff;
+			border-color: rgba(0, 0, 0, 0.1);
+		}
+
+		.picker-group:hover:not(.inactive) {
+			background: #f8f8f8;
+			border-color: rgba(0, 0, 0, 0.15);
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		}
 	}
 
 	input[type="color"] {
@@ -186,23 +255,24 @@
 		cursor: pointer;
 		border: none;
 		background: none;
+		flex-shrink: 0;
 	}
 
 	.reset-btn {
 		width: 100%;
-		padding: 10px;
-		background-color: #fff;
-		border: 1px solid #ccc;
-		color: #666;
-		border-radius: 4px;
-		cursor: pointer;
-		font-size: 13px;
-		transition: all 0.2s;
+		background-color: #f44336;
+		color: white;
+		box-shadow: 0 2px 4px rgba(244, 67, 54, 0.2);
 	}
 
 	.reset-btn:hover {
-		background-color: #eee;
-		color: #333;
-		border-color: #bbb;
+		background-color: #d32f2f;
+		box-shadow: 0 3px 6px rgba(244, 67, 54, 0.3);
+		transform: translateY(-1px);
+	}
+
+	.reset-btn:active {
+		transform: translateY(0);
+		box-shadow: 0 1px 2px rgba(244, 67, 54, 0.2);
 	}
 </style>
