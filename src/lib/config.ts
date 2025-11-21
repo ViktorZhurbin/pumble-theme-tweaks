@@ -6,14 +6,16 @@ import type { CSSVariableConfig } from "@/types";
 export const CSS_VARIABLES: CSSVariableConfig[] = [
 	{
 		label: "Top & sidebar",
-		name: "--palette-secondary-main",
+		propertyName: "--palette-secondary-main",
 	},
 	{
 		label: "Create button",
-		name: "--palette-primary-main",
+		propertyName: "--palette-primary-main",
 	},
 	{
 		label: "Main view bg",
-		name: "--background",
+		propertyName: "--background",
 	},
 ];
+
+export const PROPERTY_NAMES = CSS_VARIABLES.map((v) => v.propertyName);

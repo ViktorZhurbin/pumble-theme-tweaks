@@ -6,17 +6,18 @@ export async function getPickerValues(
 	currentTabId: number,
 	currentTheme: string,
 ) {
-	const varNames = CSS_VARIABLES.map((v) => v.name);
-	const [storedPreset, liveValues] = await Promise.all([
+	const [storedPreset, currentValues] = await Promise.all([
 		Storage.getPreset(currentTheme),
-		SendMessage.readVars(currentTabId, varNames),
+		SendMessage.readVars(currentTabId),
 	]);
 
 	const values: Record<string, string> = {};
 
 	CSS_VARIABLES.forEach((config) => {
-		values[config.name] =
-			storedPreset?.[config.name] || liveValues[config.name] || "#000000";
+		values[config.propertyName] =
+			storedPreset?.[config.propertyName] ||
+			currentValues[config.propertyName] ||
+			"#000000";
 	});
 
 	return values;

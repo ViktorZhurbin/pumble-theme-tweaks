@@ -3,7 +3,7 @@
  */
 export interface CSSVariableConfig {
 	label: string;
-	name: string;
+	propertyName: string;
 }
 
 /**
@@ -45,7 +45,6 @@ export interface UpdateVarMessage {
 
 export interface ReadVarsMessage {
 	type: MessageType.READ_VARS;
-	vars: string[];
 }
 
 export interface GetThemeMessage {

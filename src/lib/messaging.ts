@@ -21,14 +21,11 @@ function updateVar(tabId: number, varName: string, value: string): void {
 /**
  * Requests current CSS variable values from the page
  */
-function readVars(
-	tabId: number,
-	variableNames: string[],
-): Promise<Record<string, string>> {
+function readVars(tabId: number): Promise<Record<string, string>> {
 	return new Promise((resolve) => {
 		chrome.tabs.sendMessage<ReadVarsMessage>(
 			tabId,
-			{ type: MessageType.READ_VARS, vars: variableNames },
+			{ type: MessageType.READ_VARS },
 			(response) => {
 				resolve(chrome.runtime.lastError ? {} : response || {});
 			},

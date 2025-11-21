@@ -1,3 +1,4 @@
+import { PROPERTY_NAMES } from "@/lib/config";
 import {
 	applyCSSVariable,
 	getCurrentTheme,
@@ -6,8 +7,7 @@ import {
 } from "@/lib/dom-utils";
 import { SendMessage } from "@/lib/messaging";
 import {
-	applyThemePreset,
-	handleThemeSwitch,
+	applyOverridesAndUpdateBadge,
 	watchThemeChanges,
 } from "@/lib/theme-manager";
 import { type Message, MessageType } from "@/types";
@@ -17,7 +17,7 @@ console.log("Content Script: Loaded", new Date(Date.now()).toISOString());
 // Initialize: Apply saved overrides for current theme on page load
 const initialTheme = getCurrentTheme();
 if (initialTheme) {
-	applyThemePreset(initialTheme);
+	applyOverridesAndUpdateBadge(initialTheme);
 }
 
 // Listen for messages from popup
@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 	}
 
 	if (msg.type === MessageType.READ_VARS) {
-		const currentValues = readCSSVariables(msg.vars);
+		const currentValues = readCSSVariables(PROPERTY_NAMES);
 		sendResponse(currentValues);
 	}
 
@@ -47,5 +47,9 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 
 // Watch for theme changes and handle accordingly
 watchThemeChanges((newTheme) => {
-	handleThemeSwitch(newTheme);
+	resetCSSOverrides();
+
+	if (newTheme) {
+		applyOverridesAndUpdateBadge(newTheme);
+	}
 });

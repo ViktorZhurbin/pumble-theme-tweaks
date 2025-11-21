@@ -83,16 +83,16 @@
 		{/if}
 
 		<div class="pickers-container">
-			{#each CSS_VARIABLES as config (config.name)}
+			{#each CSS_VARIABLES as config (config.propertyName)}
 				<div class="picker-group">
-					<label for={config.name}>{config.label}</label>
+					<label for={config.propertyName}>{config.label}</label>
 					<input
-						id={config.name}
+						id={config.propertyName}
 						type="color"
-						value={pickerValues[config.name] || "#000000"}
+						value={pickerValues[config.propertyName] || "#000000"}
 						oninput={(e) =>
 							handleColorChange(
-								config.name,
+								config.propertyName,
 								(e.target as HTMLInputElement).value
 							)}
 					/>
