@@ -1,4 +1,4 @@
-import { type Message, MessageType, type UpdateBadgeMessage } from "@/types";
+import { type Message, MessageType } from "@/types";
 
 // console.log("Background Service Worker: Loaded");
 
@@ -17,8 +17,6 @@ function updateBadge(tabId: number, isOn: boolean): void {
 // Listen for badge update requests from content script
 chrome.runtime.onMessage.addListener((msg: Message, sender) => {
 	if (msg.type === MessageType.UPDATE_BADGE && sender.tab?.id) {
-		const badgeMsg = msg as UpdateBadgeMessage;
-		// console.log({ badgeMsg, tabId: sender.tab.id });
-		updateBadge(sender.tab.id, badgeMsg.isOn);
+		updateBadge(sender.tab.id, msg.isOn);
 	}
 });

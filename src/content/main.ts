@@ -12,7 +12,7 @@ import {
 } from "@/lib/theme-manager";
 import { type Message, MessageType } from "@/types";
 
-console.log("Content Script: Loaded");
+console.log("Content Script: Loaded", new Date(Date.now()).toISOString());
 
 // Initialize: Apply saved overrides for current theme on page load
 const initialTheme = getCurrentTheme();
