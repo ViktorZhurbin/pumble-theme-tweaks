@@ -125,11 +125,11 @@
 						id={config.propertyName}
 						type="color"
 						value={pickerValues[config.propertyName]}
-						oninput={(e) =>
-							handleColorChange(
-								config.propertyName,
-								(e.target as HTMLInputElement).value
-							)}
+						oninput={(e) => {
+							if (e.target instanceof HTMLInputElement) {
+								handleColorChange(config.propertyName, e.target.value);
+							}
+						}}
 					/>
 				</div>
 			{/each}
