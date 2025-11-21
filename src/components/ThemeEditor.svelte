@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import {
-		deleteThemePreset,
-		getThemePreset,
-		saveThemeVariable,
+		deleteStoredPreset,
+		getStoredPreset,
+		saveStoredPresetVar,
 	} from "@/lib/storage";
 	import { CSS_VARIABLES } from "@/lib/config";
 	import {
@@ -39,15 +39,15 @@
 		currentTheme: string
 	): Promise<void> {
 		const varNames = CSS_VARIABLES.map((v) => v.name);
-		const [savedSettings, liveValues] = await Promise.all([
-			getThemePreset(currentTheme),
+		const [storedPreset, liveValues] = await Promise.all([
+			getStoredPreset(currentTheme),
 			requestVariableValues(currentTabId, varNames),
 		]);
 
 		const values: Record<string, string> = {};
 		CSS_VARIABLES.forEach((config) => {
 			values[config.name] =
-				savedSettings[config.name] || liveValues[config.name] || "#000000";
+				storedPreset?.[config.name] || liveValues[config.name] || "#000000";
 		});
 
 		pickerValues = values;
@@ -61,15 +61,15 @@
 		currentTheme: string
 	): Promise<void> {
 		const varNames = CSS_VARIABLES.map((v) => v.name);
-		const [savedSettings, liveValues] = await Promise.all([
-			getThemePreset(currentTheme),
+		const [storedPreset, liveValues] = await Promise.all([
+			getStoredPreset(currentTheme),
 			requestVariableValues(currentTabId, varNames),
 		]);
 
 		const values: Record<string, string> = {};
 		CSS_VARIABLES.forEach((config) => {
 			values[config.name] =
-				savedSettings[config.name] || liveValues[config.name] || "#000000";
+				storedPreset?.[config.name] || liveValues[config.name] || "#000000";
 		});
 
 		pickerValues = values;
@@ -81,10 +81,9 @@
 	async function handleReset(): Promise<void> {
 		if (!tabId || !themeName) return;
 
-		await deleteThemePreset(themeName);
+		await deleteStoredPreset(themeName);
 
-		const varNames = CSS_VARIABLES.map((v) => v.name);
-		await sendResetVars(tabId, varNames);
+		await sendResetVars(tabId);
 		await refreshUI(tabId, themeName);
 	}
 
@@ -104,7 +103,7 @@
 	// Debounced save function
 	const debouncedSave = debounce(
 		(theme: string, varName: string, value: string) => {
-			saveThemeVariable(theme, varName, value);
+			saveStoredPresetVar(theme, varName, value);
 		},
 		500
 	);

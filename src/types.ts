@@ -54,12 +54,11 @@ export interface GetThemeMessage {
 
 export interface ResetVarsMessage {
 	type: MessageType.RESET_VARS;
-	vars: string[];
 }
 
 export interface UpdateBadgeMessage {
 	type: MessageType.UPDATE_BADGE;
-	hasOverrides: boolean;
+	isOn: boolean;
 }
 
 export type Message =

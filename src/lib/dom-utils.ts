@@ -1,30 +1,28 @@
 /**
  * Applies a CSS variable to the document root with !important
  */
-export function applyCSSVariable(name: string, value: string): void {
-	document.documentElement.style.setProperty(name, value, "important");
+export function applyCSSVariable(name: string, value: string) {
+	document.documentElement.style.setProperty(name, value);
 }
 
 /**
- * Removes a CSS variable from the document root
+ * Removes CSS overrides from the document root
  */
-export function removeCSSVariable(name: string): void {
-	document.documentElement.style.removeProperty(name);
+export function resetCSSOverrides() {
+	document.documentElement.style = "";
 }
 
 /**
  * Gets the current theme name from the first class on the html element
  */
-export function getCurrentTheme(): string | null {
+export function getCurrentTheme() {
 	return document.documentElement.classList[0] || null;
 }
 
 /**
  * Reads current computed values of CSS variables
  */
-export function readCSSVariables(
-	variableNames: string[],
-): Record<string, string> {
+export function readCSSVariables(variableNames: string[]) {
 	const computed = getComputedStyle(document.documentElement);
 	const values: Record<string, string> = {};
 

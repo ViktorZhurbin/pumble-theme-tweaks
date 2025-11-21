@@ -2,9 +2,9 @@ import {
 	applyCSSVariable,
 	getCurrentTheme,
 	readCSSVariables,
-	removeCSSVariable,
+	resetCSSOverrides,
 } from "@/lib/dom-utils";
-import { notifyBadgeUpdate } from "@/lib/messaging";
+import { setBadgeOn } from "@/lib/messaging";
 import {
 	applyThemePreset,
 	handleThemeSwitch,
@@ -21,10 +21,10 @@ if (initialTheme) {
 }
 
 // Listen for messages from popup
-chrome.runtime.onMessage.addListener((msg: Message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 	if (msg.type === MessageType.UPDATE_VAR) {
 		applyCSSVariable(msg.varName, msg.value);
-		notifyBadgeUpdate(true);
+		setBadgeOn(true);
 	}
 
 	if (msg.type === MessageType.READ_VARS) {
@@ -38,12 +38,9 @@ chrome.runtime.onMessage.addListener((msg: Message, sender, sendResponse) => {
 	}
 
 	if (msg.type === MessageType.RESET_VARS) {
-		console.log("Resetting variables:", msg.vars);
-		msg.vars.forEach((name) => {
-			removeCSSVariable(name);
-		});
-		notifyBadgeUpdate(false);
-		sendResponse({ status: "reset_complete" });
+		resetCSSOverrides();
+		setBadgeOn(false);
+		sendResponse({ status: "OK" });
 	}
 
 	return true; // Keep message channel open for async response

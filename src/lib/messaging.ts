@@ -1,4 +1,11 @@
-import { MessageType } from "@/types";
+import {
+	type GetThemeMessage,
+	MessageType,
+	type ReadVarsMessage,
+	type ResetVarsMessage,
+	type UpdateBadgeMessage,
+	type UpdateVarMessage,
+} from "@/types";
 
 /**
  * Sends a message to update a CSS variable in the active tab
@@ -8,7 +15,7 @@ export function sendUpdateVar(
 	varName: string,
 	value: string,
 ): void {
-	chrome.tabs.sendMessage(tabId, {
+	chrome.tabs.sendMessage<UpdateVarMessage>(tabId, {
 		type: MessageType.UPDATE_VAR,
 		varName,
 		value,
@@ -23,7 +30,7 @@ export function requestVariableValues(
 	variableNames: string[],
 ): Promise<Record<string, string>> {
 	return new Promise((resolve) => {
-		chrome.tabs.sendMessage(
+		chrome.tabs.sendMessage<ReadVarsMessage>(
 			tabId,
 			{ type: MessageType.READ_VARS, vars: variableNames },
 			(response) => {
@@ -38,7 +45,7 @@ export function requestVariableValues(
  */
 export function requestThemeName(tabId: number): Promise<string | null> {
 	return new Promise((resolve) => {
-		chrome.tabs.sendMessage(
+		chrome.tabs.sendMessage<GetThemeMessage>(
 			tabId,
 			{ type: MessageType.GET_THEME },
 			(response) => {
@@ -51,14 +58,11 @@ export function requestThemeName(tabId: number): Promise<string | null> {
 /**
  * Sends a reset command to clear CSS variable overrides
  */
-export function sendResetVars(
-	tabId: number,
-	variableNames: string[],
-): Promise<void> {
+export function sendResetVars(tabId: number): Promise<void> {
 	return new Promise((resolve) => {
-		chrome.tabs.sendMessage(
+		chrome.tabs.sendMessage<ResetVarsMessage>(
 			tabId,
-			{ type: MessageType.RESET_VARS, vars: variableNames },
+			{ type: MessageType.RESET_VARS },
 			() => resolve(),
 		);
 	});
@@ -67,9 +71,9 @@ export function sendResetVars(
 /**
  * Notifies background script to update the badge
  */
-export function notifyBadgeUpdate(hasOverrides: boolean): void {
-	chrome.runtime.sendMessage({
+export function setBadgeOn(isOn: boolean): void {
+	chrome.runtime.sendMessage<UpdateBadgeMessage>({
 		type: MessageType.UPDATE_BADGE,
-		hasOverrides,
+		isOn,
 	});
 }
