@@ -1,74 +1,17 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import {
-		deleteStoredPreset,
-		getStoredPreset,
-		saveStoredPresetVar,
-	} from "@/lib/storage";
+	import { deleteStoredPreset } from "@/lib/storage";
 	import { CSS_VARIABLES } from "@/lib/config";
 	import { SendMessage } from "@/lib/messaging";
-	import { debounce } from "@/lib/debounce";
+	import { debouncedSave } from "./helpers/debouncedSave";
+	import { getActiveTab } from "./helpers/getActiveTab";
+	import { getPickerValues } from "./helpers/loadPickerValues";
 
 	let themeName = $state<string | null>(null);
 	let tabId = $state<number | null>(null);
 	let error = $state<string | null>(null);
 	let pickerValues = $state<Record<string, string>>({});
 	let loading = $state(true);
-
-	/**
-	 * Gets the active tab
-	 */
-	async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
-		const [tab] = await chrome.tabs.query({
-			active: true,
-			currentWindow: true,
-		});
-		return tab || null;
-	}
-
-	/**
-	 * Loads all UI elements with current data
-	 */
-	async function loadUI(
-		currentTabId: number,
-		currentTheme: string
-	): Promise<void> {
-		const varNames = CSS_VARIABLES.map((v) => v.name);
-		const [storedPreset, liveValues] = await Promise.all([
-			getStoredPreset(currentTheme),
-			SendMessage.readVars(currentTabId, varNames),
-		]);
-
-		const values: Record<string, string> = {};
-		CSS_VARIABLES.forEach((config) => {
-			values[config.name] =
-				storedPreset?.[config.name] || liveValues[config.name] || "#000000";
-		});
-
-		pickerValues = values;
-	}
-
-	/**
-	 * Refreshes picker values without recreating UI
-	 */
-	async function refreshUI(
-		currentTabId: number,
-		currentTheme: string
-	): Promise<void> {
-		const varNames = CSS_VARIABLES.map((v) => v.name);
-		const [storedPreset, liveValues] = await Promise.all([
-			getStoredPreset(currentTheme),
-			SendMessage.readVars(currentTabId, varNames),
-		]);
-
-		const values: Record<string, string> = {};
-		CSS_VARIABLES.forEach((config) => {
-			values[config.name] =
-				storedPreset?.[config.name] || liveValues[config.name] || "#000000";
-		});
-
-		pickerValues = values;
-	}
 
 	/**
 	 * Handles the reset button click
@@ -79,7 +22,9 @@
 		await deleteStoredPreset(themeName);
 
 		await SendMessage.resetVars(tabId);
-		await refreshUI(tabId, themeName);
+		const values = await getPickerValues(tabId, themeName);
+
+		pickerValues = values;
 	}
 
 	/**
@@ -89,19 +34,11 @@
 		if (!tabId || !themeName) return;
 
 		pickerValues[varName] = value;
+
 		SendMessage.updateVar(tabId, varName, value);
 
-		// Debounced save to storage
 		debouncedSave(themeName, varName, value);
 	}
-
-	// Debounced save function
-	const debouncedSave = debounce(
-		(theme: string, varName: string, value: string) => {
-			saveStoredPresetVar(theme, varName, value);
-		},
-		500
-	);
 
 	/**
 	 * Initialize the component
@@ -125,14 +62,18 @@
 		}
 
 		themeName = currentTheme;
-		await loadUI(tab.id, currentTheme);
+		const values = await getPickerValues(tabId, themeName);
+
+		pickerValues = values;
 		loading = false;
 
 		// Listen for external storage changes
 		chrome.storage.onChanged.addListener((changes, area) => {
 			if (area === "sync" && changes.theme_presets && tabId && themeName) {
 				console.log("Theme presets changed externally. Refreshing UI...");
-				refreshUI(tabId, themeName);
+				getPickerValues(tabId, themeName).then((values) => {
+					pickerValues = values;
+				});
 			}
 		});
 	});
