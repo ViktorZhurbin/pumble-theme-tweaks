@@ -13,6 +13,10 @@ export const CSS_VARIABLES: CSSVariableConfig[] = [
 		propertyName: "--palette-primary-main",
 	},
 	{
+		label: "Search border",
+		propertyName: "--main-search-stroke",
+	},
+	{
 		label: "Main view bg",
 		propertyName: "--background",
 	},

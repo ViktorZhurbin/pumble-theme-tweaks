@@ -6,6 +6,8 @@
 	import { ChromeUtils } from "@/lib/chrome-utils";
 	import { Utils } from "@/lib/utils";
 	import { logger } from "@/lib/logger";
+	import ThemeToggle from "./ThemeToggle.svelte";
+	import ColorPicker from "./ColorPicker.svelte";
 
 	let themeName = $state<string | null>(null);
 	let tabId = $state<number | null>(null);
@@ -131,32 +133,16 @@
 	{:else if error}
 		<p class="error">{error}</p>
 	{:else}
-		<div class="toggle-container">
-			<label for="toggle-overrides" class="toggle-label">
-				<input
-					id="toggle-overrides"
-					type="checkbox"
-					bind:checked={applyOverrides}
-					onchange={handleToggleOverrides}
-				/>
-				{applyOverrides ? "Tweaks ON" : "Tweaks OFF"}
-			</label>
-		</div>
+		<ThemeToggle bind:checked={applyOverrides} onchange={handleToggleOverrides} />
 
 		<div class="pickers-container">
 			{#each CSS_VARIABLES as config (config.propertyName)}
-				<label class="picker-group" class:inactive={!applyOverrides}>
-					<span class="picker-label">{config.label}</span>
-					<input
-						type="color"
-						value={pickerValues[config.propertyName]}
-						oninput={(e) => {
-							if (e.target instanceof HTMLInputElement) {
-								handleColorChange(config.propertyName, e.target.value);
-							}
-						}}
-					/>
-				</label>
+				<ColorPicker
+					label={config.label}
+					value={pickerValues[config.propertyName]}
+					inactive={!applyOverrides}
+					oninput={(value) => handleColorChange(config.propertyName, value)}
+				/>
 			{/each}
 		</div>
 
@@ -167,27 +153,6 @@
 <style>
 	h3 {
 		text-align: center;
-	}
-
-	.toggle-container {
-		margin-bottom: 16px;
-	}
-
-	.toggle-label {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		font-size: 1.3rem;
-		line-height: 1.4;
-		cursor: pointer;
-		user-select: none;
-	}
-
-	input[type="checkbox"] {
-		width: 18px;
-		height: 18px;
-		cursor: pointer;
-		flex-shrink: 0;
 	}
 
 	.error {
@@ -202,60 +167,6 @@
 		flex-direction: column;
 		gap: 10px;
 		margin-bottom: 24px;
-	}
-
-	.picker-group {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		background: rgba(255, 255, 255, 0.05);
-		padding: 10px 12px;
-		border-radius: 6px;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-		transition: all 0.2s ease-in-out;
-		cursor: pointer;
-	}
-
-	.picker-group:hover:not(.inactive) {
-		background: rgba(255, 255, 255, 0.08);
-		border-color: rgba(255, 255, 255, 0.15);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-		transform: translateY(-1px);
-	}
-
-	.picker-group.inactive {
-		opacity: 0.4;
-		pointer-events: none;
-		cursor: not-allowed;
-	}
-
-	.picker-label {
-		font-weight: 600;
-		font-size: 0.875rem;
-		line-height: 1.4;
-	}
-
-	@media (prefers-color-scheme: light) {
-		.picker-group {
-			background: #ffffff;
-			border-color: rgba(0, 0, 0, 0.1);
-		}
-
-		.picker-group:hover:not(.inactive) {
-			background: #f8f8f8;
-			border-color: rgba(0, 0, 0, 0.15);
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		}
-	}
-
-	input[type="color"] {
-		width: 40px;
-		height: 30px;
-		cursor: pointer;
-		border: none;
-		background: none;
-		flex-shrink: 0;
 	}
 
 	.reset-btn {
