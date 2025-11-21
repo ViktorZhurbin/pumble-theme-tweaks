@@ -21,11 +21,12 @@
 		| null = null;
 
 	// Create debounced save function once
+	const PRESET_SAVE_DEBOUNCE_MS = 500;
 	const savePresetVarDebounced = Utils.debounce(
 		(theme: string, varName: string, value: string) => {
 			Storage.savePresetVar(theme, varName, value);
 		},
-		500
+		PRESET_SAVE_DEBOUNCE_MS
 	);
 
 	async function handleReset() {
