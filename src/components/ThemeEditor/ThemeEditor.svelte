@@ -20,6 +20,14 @@
 		  ) => void)
 		| null = null;
 
+	// Create debounced save function once
+	const savePresetVarDebounced = Utils.debounce(
+		(theme: string, varName: string, value: string) => {
+			Storage.savePresetVar(theme, varName, value);
+		},
+		500
+	);
+
 	async function handleReset() {
 		if (!tabId || !themeName) return;
 
@@ -40,7 +48,7 @@
 
 		SendMessage.updateVar(tabId, varName, value);
 
-		Utils.debounce(Storage.savePresetVar, 500)(themeName, varName, value);
+		savePresetVarDebounced(themeName, varName, value);
 	}
 
 	onMount(async () => {
