@@ -5,6 +5,7 @@
 	import { SendMessage } from "@/lib/messaging";
 	import { ChromeUtils } from "@/lib/chrome-utils";
 	import { Utils } from "@/lib/utils";
+	import { logger } from "@/lib/logger";
 
 	let themeName = $state<string | null>(null);
 	let tabId = $state<number | null>(null);
@@ -22,12 +23,14 @@
 	async function handleReset() {
 		if (!tabId || !themeName) return;
 
+		logger.info("Resetting theme overrides", { theme: themeName });
 		await Storage.deletePreset(themeName);
 
 		await SendMessage.resetVars(tabId);
 		const values = await ChromeUtils.getPickerValues(tabId, themeName);
 
 		pickerValues = values;
+		logger.debug("Theme reset complete");
 	}
 
 	function handleColorChange(varName: string, value: string) {
@@ -63,16 +66,22 @@
 
 		pickerValues = values;
 		loading = false;
+		logger.info("ThemeEditor initialized", {
+			theme: themeName,
+			tabId,
+			variableCount: Object.keys(values).length,
+		});
 
 		// Listen for external storage changes
 		storageListener = (changes, area) => {
 			if (area === "sync" && changes.theme_presets && tabId && themeName) {
+				logger.debug("Storage changed externally, refreshing picker values");
 				ChromeUtils.getPickerValues(tabId, themeName)
 					.then((values) => {
 						pickerValues = values;
 					})
 					.catch((err) => {
-						console.error("Failed to refresh picker values:", err);
+						logger.error("Failed to refresh picker values:", err);
 					});
 			}
 		};

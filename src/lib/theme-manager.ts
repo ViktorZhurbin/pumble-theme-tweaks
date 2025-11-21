@@ -1,4 +1,5 @@
 import { DomUtils } from "./dom-utils";
+import { logger } from "./logger";
 import { SendMessage } from "./messaging";
 import { Storage } from "./storage";
 
@@ -12,9 +13,15 @@ const applyOverridesAndUpdateBadge = async (
 	const hasOverrides = !!overrides && Object.keys(overrides).length > 0;
 
 	if (hasOverrides) {
+		logger.debug("Applying theme overrides", {
+			theme: themeName,
+			count: Object.keys(overrides).length,
+		});
 		for (const [key, value] of Object.entries(overrides)) {
 			DomUtils.applyCSSVariable(key, value);
 		}
+	} else {
+		logger.debug("No overrides found for theme", { theme: themeName });
 	}
 
 	SendMessage.updateBadge(hasOverrides);

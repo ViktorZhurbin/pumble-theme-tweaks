@@ -1,9 +1,11 @@
+import { logger } from "@/lib/logger";
 import { type Message, MessageType } from "@/types";
 
 /**
  * Updates the extension badge for a specific tab
  */
 function updateBadge(tabId: number, isOn: boolean): void {
+	logger.debug("Updating badge", { tabId, isOn });
 	if (isOn) {
 		chrome.action.setBadgeText({ text: "ON", tabId });
 		chrome.action.setBadgeBackgroundColor({ color: "#4CAF50", tabId });

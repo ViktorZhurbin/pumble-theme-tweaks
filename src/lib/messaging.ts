@@ -6,6 +6,7 @@ import {
 	type UpdateBadgeMessage,
 	type UpdateVarMessage,
 } from "@/types";
+import { logger } from "./logger";
 
 /**
  * Sends a message to update a CSS variable in the active tab
@@ -28,7 +29,7 @@ function getVars(tabId: number): Promise<Record<string, string>> {
 			{ type: MessageType.READ_VARS },
 			(response) => {
 				if (chrome.runtime.lastError) {
-					console.error("Failed to read variables:", chrome.runtime.lastError);
+					logger.error("Failed to read variables:", chrome.runtime.lastError);
 					resolve({}); // Or reject(chrome.runtime.lastError)
 				} else {
 					resolve(response || {});

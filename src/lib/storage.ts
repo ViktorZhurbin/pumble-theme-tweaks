@@ -1,4 +1,5 @@
 import type { StorageData, ThemePresets } from "@/types";
+import { logger } from "./logger";
 
 /**
  * Gets all theme presets from storage
@@ -38,7 +39,7 @@ async function savePresetVar(
 	try {
 		await chrome.storage.sync.set({ theme_presets: presets });
 	} catch (err) {
-		console.warn("Storage write error:", err);
+		logger.warn("Storage write error:", err);
 	}
 }
 
