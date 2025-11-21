@@ -1,16 +1,16 @@
 import {
 	applyCSSVariable,
-	removeCSSVariable,
 	getCurrentTheme,
 	readCSSVariables,
+	removeCSSVariable,
 } from "@/lib/dom-utils";
+import { notifyBadgeUpdate } from "@/lib/messaging";
 import {
 	applyThemePreset,
 	handleThemeSwitch,
 	watchThemeChanges,
 } from "@/lib/theme-manager";
-import { notifyBadgeUpdate } from "@/lib/messaging";
-import { MessageType, type Message } from "@/types";
+import { type Message, MessageType } from "@/types";
 
 console.log("Content Script: Loaded");
 
