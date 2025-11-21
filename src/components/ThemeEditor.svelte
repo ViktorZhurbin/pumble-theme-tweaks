@@ -13,10 +13,7 @@
 	let pickerValues = $state<Record<string, string>>({});
 	let loading = $state(true);
 
-	/**
-	 * Handles the reset button click
-	 */
-	async function handleReset(): Promise<void> {
+	async function handleReset() {
 		if (!tabId || !themeName) return;
 
 		await Storage.deletePreset(themeName);
@@ -27,10 +24,7 @@
 		pickerValues = values;
 	}
 
-	/**
-	 * Handles color input change
-	 */
-	function handleColorChange(varName: string, value: string): void {
+	function handleColorChange(varName: string, value: string) {
 		if (!tabId || !themeName) return;
 
 		pickerValues[varName] = value;
@@ -40,9 +34,6 @@
 		debouncedSave(themeName, varName, value);
 	}
 
-	/**
-	 * Initialize the component
-	 */
 	onMount(async () => {
 		const tab = await getActiveTab();
 

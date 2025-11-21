@@ -40,7 +40,6 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 	if (msg.type === MessageType.RESET_VARS) {
 		resetCSSOverrides();
 		SendMessage.updateBadge(false);
-		sendResponse({ status: "OK" });
 	}
 
 	return true; // Keep message channel open for async response

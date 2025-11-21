@@ -42,15 +42,15 @@ export async function handleThemeSwitch(newThemeName: string): Promise<void> {
 	const overrides = await Storage.getPreset(newThemeName);
 
 	if (overrides && Object.keys(overrides).length > 0) {
-		console.log(`Applying saved preset for theme: ${newThemeName}`);
+		// console.log(`Applying saved preset for theme: ${newThemeName}`);
 		Object.entries(overrides).forEach(([key, value]) => {
 			applyCSSVariable(key, value);
 		});
 		SendMessage.updateBadge(true);
 	} else {
-		console.log(
-			`No preset found for theme: ${newThemeName}, overrides removed`,
-		);
+		// console.log(
+		// 	`No preset found for theme: ${newThemeName}, overrides removed`,
+		// );
 		SendMessage.updateBadge(false);
 	}
 }
@@ -72,7 +72,7 @@ export function watchThemeChanges(
 				const newTheme = getCurrentTheme();
 
 				if (newTheme !== currentTheme) {
-					console.log(`Theme changed from "${currentTheme}" to "${newTheme}"`);
+					// console.log(`Theme changed from "${currentTheme}" to "${newTheme}"`);
 					const oldTheme = currentTheme;
 					currentTheme = newTheme;
 					if (newTheme) {
