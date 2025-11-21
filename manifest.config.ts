@@ -16,7 +16,7 @@ export default defineManifest({
 		default_title: "Change Pumble theme colors",
 	},
 	background: {
-		service_worker: "src/background/index.ts",
+		service_worker: "src/background/badge.ts",
 	},
 	content_scripts: [
 		{
