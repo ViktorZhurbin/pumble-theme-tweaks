@@ -1,8 +1,9 @@
 import { mount } from "svelte";
 import App from "./App.svelte";
-import "./style.css";
+import "@/styles/shared.css";
 
 const app = mount(App, {
+	// biome-ignore lint/style/noNonNullAssertion: it's ok
 	target: document.getElementById("app")!,
 });
 
