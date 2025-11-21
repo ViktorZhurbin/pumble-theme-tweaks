@@ -17,10 +17,18 @@ const resetCSSOverrides = () => {
 };
 
 /**
- * Gets the current theme name from the first class on the html element
+ * Gets the current theme name from the html element classes
+ * Assumes theme is one of the classes on the root element
  */
-const getCurrentTheme = () => {
-	return document.documentElement.classList[0] || null;
+const getCurrentTheme = (): string | null => {
+	const classList = Array.from(document.documentElement.classList);
+
+	// Look for theme-like classes
+	const themeClass = classList.find(
+		(className) => className.includes("dark") || className.includes("light"),
+	);
+
+	return themeClass || null;
 };
 
 /**
