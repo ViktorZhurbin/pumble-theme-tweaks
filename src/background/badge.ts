@@ -17,6 +17,6 @@ function updateBadge(tabId: number, isOn: boolean): void {
 // Listen for badge update requests from content script
 chrome.runtime.onMessage.addListener((msg: Message, sender) => {
 	if (msg.type === MessageType.UPDATE_BADGE && sender.tab?.id) {
-		updateBadge(sender.tab.id, msg.isOn);
+		updateBadge(sender.tab.id, msg.badgeOn);
 	}
 });

@@ -58,7 +58,7 @@ export interface ResetVarsMessage {
 
 export interface UpdateBadgeMessage {
 	type: MessageType.UPDATE_BADGE;
-	isOn: boolean;
+	badgeOn: boolean;
 }
 
 export type Message =

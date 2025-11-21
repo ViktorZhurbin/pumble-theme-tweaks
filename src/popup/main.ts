@@ -3,6 +3,7 @@ import App from "./App.svelte";
 import "./style.css";
 
 const app = mount(App, {
+	// biome-ignore lint/style/noNonNullAssertion: it's ok
 	target: document.getElementById("app")!,
 });
 

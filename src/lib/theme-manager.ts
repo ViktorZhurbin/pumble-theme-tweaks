@@ -3,7 +3,7 @@ import {
 	getCurrentTheme,
 	resetCSSOverrides,
 } from "./dom-utils";
-import { setBadgeOn } from "./messaging";
+import { SendMessage } from "./messaging";
 import { getStoredPreset } from "./storage";
 
 /**
@@ -19,10 +19,10 @@ export async function applyThemePreset(themeName: string) {
 		Object.entries(overrides).forEach(([key, value]) => {
 			applyCSSVariable(key, value);
 		});
-		setBadgeOn(true);
+		SendMessage.updateBadge(true);
 	} else {
 		// console.log(`No preset found for theme: ${themeName}`);
-		setBadgeOn(false);
+		SendMessage.updateBadge(false);
 	}
 }
 
@@ -34,7 +34,7 @@ export async function handleThemeSwitch(newThemeName: string): Promise<void> {
 	resetCSSOverrides();
 
 	if (!newThemeName) {
-		setBadgeOn(false);
+		SendMessage.updateBadge(false);
 		return;
 	}
 
@@ -46,12 +46,12 @@ export async function handleThemeSwitch(newThemeName: string): Promise<void> {
 		Object.entries(overrides).forEach(([key, value]) => {
 			applyCSSVariable(key, value);
 		});
-		setBadgeOn(true);
+		SendMessage.updateBadge(true);
 	} else {
 		console.log(
 			`No preset found for theme: ${newThemeName}, overrides removed`,
 		);
-		setBadgeOn(false);
+		SendMessage.updateBadge(false);
 	}
 }
 

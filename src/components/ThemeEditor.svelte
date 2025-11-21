@@ -6,12 +6,7 @@
 		saveStoredPresetVar,
 	} from "@/lib/storage";
 	import { CSS_VARIABLES } from "@/lib/config";
-	import {
-		requestThemeName,
-		requestVariableValues,
-		sendResetVars,
-		sendUpdateVar,
-	} from "@/lib/messaging";
+	import { SendMessage } from "@/lib/messaging";
 	import { debounce } from "@/lib/debounce";
 
 	let themeName = $state<string | null>(null);
@@ -41,7 +36,7 @@
 		const varNames = CSS_VARIABLES.map((v) => v.name);
 		const [storedPreset, liveValues] = await Promise.all([
 			getStoredPreset(currentTheme),
-			requestVariableValues(currentTabId, varNames),
+			SendMessage.readVars(currentTabId, varNames),
 		]);
 
 		const values: Record<string, string> = {};
@@ -63,7 +58,7 @@
 		const varNames = CSS_VARIABLES.map((v) => v.name);
 		const [storedPreset, liveValues] = await Promise.all([
 			getStoredPreset(currentTheme),
-			requestVariableValues(currentTabId, varNames),
+			SendMessage.readVars(currentTabId, varNames),
 		]);
 
 		const values: Record<string, string> = {};
@@ -83,7 +78,7 @@
 
 		await deleteStoredPreset(themeName);
 
-		await sendResetVars(tabId);
+		await SendMessage.resetVars(tabId);
 		await refreshUI(tabId, themeName);
 	}
 
@@ -94,7 +89,7 @@
 		if (!tabId || !themeName) return;
 
 		pickerValues[varName] = value;
-		sendUpdateVar(tabId, varName, value);
+		SendMessage.updateVar(tabId, varName, value);
 
 		// Debounced save to storage
 		debouncedSave(themeName, varName, value);
@@ -121,7 +116,7 @@
 		}
 
 		tabId = tab.id;
-		const currentTheme = await requestThemeName(tab.id);
+		const currentTheme = await SendMessage.getTheme(tab.id);
 
 		if (!currentTheme) {
 			error = "Unable to detect Pumble theme";

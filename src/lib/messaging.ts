@@ -10,11 +10,7 @@ import {
 /**
  * Sends a message to update a CSS variable in the active tab
  */
-export function sendUpdateVar(
-	tabId: number,
-	varName: string,
-	value: string,
-): void {
+function updateVar(tabId: number, varName: string, value: string): void {
 	chrome.tabs.sendMessage<UpdateVarMessage>(tabId, {
 		type: MessageType.UPDATE_VAR,
 		varName,
@@ -25,7 +21,7 @@ export function sendUpdateVar(
 /**
  * Requests current CSS variable values from the page
  */
-export function requestVariableValues(
+function readVars(
 	tabId: number,
 	variableNames: string[],
 ): Promise<Record<string, string>> {
@@ -43,7 +39,7 @@ export function requestVariableValues(
 /**
  * Requests the current theme name from the page
  */
-export function requestThemeName(tabId: number): Promise<string | null> {
+function getTheme(tabId: number): Promise<string | null> {
 	return new Promise((resolve) => {
 		chrome.tabs.sendMessage<GetThemeMessage>(
 			tabId,
@@ -58,7 +54,7 @@ export function requestThemeName(tabId: number): Promise<string | null> {
 /**
  * Sends a reset command to clear CSS variable overrides
  */
-export function sendResetVars(tabId: number): Promise<void> {
+function resetVars(tabId: number): Promise<void> {
 	return new Promise((resolve) => {
 		chrome.tabs.sendMessage<ResetVarsMessage>(
 			tabId,
@@ -71,9 +67,17 @@ export function sendResetVars(tabId: number): Promise<void> {
 /**
  * Notifies background script to update the badge
  */
-export function setBadgeOn(isOn: boolean): void {
+function updateBadge(badgeOn: boolean): void {
 	chrome.runtime.sendMessage<UpdateBadgeMessage>({
 		type: MessageType.UPDATE_BADGE,
-		isOn,
+		badgeOn,
 	});
 }
+
+export const SendMessage = {
+	updateVar,
+	readVars,
+	getTheme,
+	resetVars,
+	updateBadge,
+};

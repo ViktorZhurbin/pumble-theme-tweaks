@@ -4,7 +4,7 @@ import {
 	readCSSVariables,
 	resetCSSOverrides,
 } from "@/lib/dom-utils";
-import { setBadgeOn } from "@/lib/messaging";
+import { SendMessage } from "@/lib/messaging";
 import {
 	applyThemePreset,
 	handleThemeSwitch,
@@ -24,7 +24,7 @@ if (initialTheme) {
 chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 	if (msg.type === MessageType.UPDATE_VAR) {
 		applyCSSVariable(msg.varName, msg.value);
-		setBadgeOn(true);
+		SendMessage.updateBadge(true);
 	}
 
 	if (msg.type === MessageType.READ_VARS) {
@@ -39,7 +39,7 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 
 	if (msg.type === MessageType.RESET_VARS) {
 		resetCSSOverrides();
-		setBadgeOn(false);
+		SendMessage.updateBadge(false);
 		sendResponse({ status: "OK" });
 	}
 
