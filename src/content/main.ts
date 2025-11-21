@@ -7,12 +7,21 @@ import { type Message, MessageType } from "@/types";
 logger.info("Content script loaded", { timestamp: new Date().toISOString() });
 
 // Initialize: Apply saved overrides for current theme on page load
-const initialTheme = DomUtils.getCurrentTheme();
-if (initialTheme) {
-	logger.debug("Applying saved overrides for initial theme", {
-		theme: initialTheme,
-	});
-	ThemeManager.applyOverridesAndUpdateBadge(initialTheme);
+function initializeTheme() {
+	const initialTheme = DomUtils.getCurrentTheme();
+	if (initialTheme) {
+		logger.debug("Applying saved overrides for initial theme", {
+			theme: initialTheme,
+		});
+		ThemeManager.applyOverridesAndUpdateBadge(initialTheme);
+	}
+}
+
+// Wait for DOM to be ready before initializing
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", initializeTheme);
+} else {
+	initializeTheme();
 }
 
 // Listen for messages from popup
