@@ -1,3 +1,4 @@
+import { logger } from "@/lib/logger";
 import {
 	type GetThemeMessage,
 	MessageType,
@@ -6,23 +7,22 @@ import {
 	type UpdateBadgeMessage,
 	type UpdateVarMessage,
 } from "@/types";
-import { logger } from "@/lib/logger";
 
 /**
  * Sends a message to update a CSS variable in the active tab
  */
-function updateVar(tabId: number, varName: string, value: string): void {
+const updateVar = (tabId: number, varName: string, value: string) => {
 	chrome.tabs.sendMessage<UpdateVarMessage>(tabId, {
 		type: MessageType.UPDATE_VAR,
 		varName,
 		value,
 	});
-}
+};
 
 /**
  * Requests current CSS variable values from the page
  */
-function getVars(tabId: number): Promise<Record<string, string>> {
+const getVars = (tabId: number): Promise<Record<string, string>> => {
 	return new Promise((resolve) => {
 		chrome.tabs.sendMessage<ReadVarsMessage>(
 			tabId,
@@ -30,52 +30,62 @@ function getVars(tabId: number): Promise<Record<string, string>> {
 			(response) => {
 				if (chrome.runtime.lastError) {
 					logger.error("Failed to read variables:", chrome.runtime.lastError);
-					resolve({}); // Or reject(chrome.runtime.lastError)
+					resolve({});
 				} else {
 					resolve(response || {});
 				}
 			},
 		);
 	});
-}
+};
 
 /**
  * Requests the current theme name from the page
  */
-function getTheme(tabId: number): Promise<string | null> {
+const getTheme = (tabId: number): Promise<string | null> => {
 	return new Promise((resolve) => {
 		chrome.tabs.sendMessage<GetThemeMessage>(
 			tabId,
 			{ type: MessageType.GET_THEME },
 			(response) => {
-				resolve(chrome.runtime.lastError ? null : response?.theme || null);
+				if (chrome.runtime.lastError) {
+					logger.error("Failed to get theme:", chrome.runtime.lastError);
+					resolve(null);
+				} else {
+					resolve(response?.theme || null);
+				}
 			},
 		);
 	});
-}
+};
 
 /**
  * Sends a reset command to clear CSS variable overrides
  */
-function resetVars(tabId: number): Promise<void> {
+const resetVars = (tabId: number): Promise<void> => {
 	return new Promise((resolve) => {
 		chrome.tabs.sendMessage<ResetVarsMessage>(
 			tabId,
 			{ type: MessageType.RESET_VARS },
-			() => resolve(),
+			() => {
+				if (chrome.runtime.lastError) {
+					logger.error("Failed to reset variables:", chrome.runtime.lastError);
+				}
+				resolve();
+			},
 		);
 	});
-}
+};
 
 /**
  * Notifies background script to update the badge
  */
-function updateBadge(badgeOn: boolean): void {
+const updateBadge = (badgeOn: boolean) => {
 	chrome.runtime.sendMessage<UpdateBadgeMessage>({
 		type: MessageType.UPDATE_BADGE,
 		badgeOn,
 	});
-}
+};
 
 export const SendMessage = {
 	updateVar,
