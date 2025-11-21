@@ -68,7 +68,8 @@ const themeObserver = ThemeManager.watchThemeChanges((newTheme, oldTheme) => {
 	}
 });
 
-// Cleanup: disconnect observer when page unloads
-window.addEventListener("unload", () => {
+// Cleanup: disconnect observer when page hides (more reliable than unload)
+window.addEventListener("pagehide", () => {
+	logger.debug("Page hiding, disconnecting observer");
 	themeObserver.disconnect();
 });
