@@ -5,10 +5,10 @@ interface ThemeToggleProps {
 	onChange: (checked: boolean) => void;
 }
 
-export function ThemeToggle({ checked, onChange }: ThemeToggleProps) {
+export function ThemeToggle(props: ThemeToggleProps) {
 	const handleChange = (e: Event) => {
 		const target = e.target as HTMLInputElement;
-		onChange(target.checked);
+		props.onChange(target.checked);
 	};
 
 	return (
@@ -17,10 +17,10 @@ export function ThemeToggle({ checked, onChange }: ThemeToggleProps) {
 				<input
 					id="toggle-overrides"
 					type="checkbox"
-					checked={checked}
+					checked={props.checked}
 					onChange={handleChange}
 				/>
-				{checked ? "Tweaks ON" : "Tweaks OFF"}
+				{props.checked ? "Tweaks ON" : "Tweaks OFF"}
 			</label>
 		</div>
 	);

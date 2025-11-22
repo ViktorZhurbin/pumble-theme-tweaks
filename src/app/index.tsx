@@ -1,9 +1,9 @@
-import { render } from "preact";
+import { render } from "solid-js/web";
 import { App } from "@/components/App";
 import "./shared.css";
 
 /**
- * Mounts the Preact app to the DOM
+ * Mounts the SolidJS app to the DOM
  */
 const mountApp = (targetId = "app") => {
 	const target = document.getElementById(targetId);
@@ -12,7 +12,7 @@ const mountApp = (targetId = "app") => {
 		throw new Error(`Could not find element with id "${targetId}"`);
 	}
 
-	render(<App />, target);
+	render(() => <App />, target);
 };
 
 export const app = mountApp();

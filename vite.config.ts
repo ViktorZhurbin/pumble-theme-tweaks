@@ -1,6 +1,6 @@
 import path from "node:path";
 import { crx } from "@crxjs/vite-plugin";
-import preact from "@preact/preset-vite";
+import solid from "vite-plugin-solid";
 import { defineConfig } from "vite";
 import zip from "vite-plugin-zip-pack";
 import manifest from "./manifest.config";
@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
 		},
 	},
 	plugins: [
-		preact(),
+		solid(),
 		crx({ manifest }),
 		zip({ outDir: "release", outFileName: `crx-${name}-${version}.zip` }),
 	],

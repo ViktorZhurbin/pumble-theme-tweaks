@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { createSignal, onMount, onCleanup, For, Show } from "solid-js";
 import { CSS_VARIABLES } from "@/constants/config";
 import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
@@ -10,156 +10,157 @@ import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function ThemeEditor() {
-	const [themeName, setThemeName] = useState<string | null>(null);
-	const [tabId, setTabId] = useState<number | null>(null);
-	const [error, setError] = useState<string | null>(null);
-	const [pickerValues, setPickerValues] = useState<Record<string, string>>({});
-	const [loading, setLoading] = useState(true);
-	const [applyOverrides, setApplyOverrides] = useState(true);
+	const [themeName, setThemeName] = createSignal<string | null>(null);
+	const [tabId, setTabId] = createSignal<number | null>(null);
+	const [error, setError] = createSignal<string | null>(null);
+	const [pickerValues, setPickerValues] = createSignal<Record<string, string>>({});
+	const [loading, setLoading] = createSignal(true);
+	const [applyOverrides, setApplyOverrides] = createSignal(true);
 
-	const storageListenerRef = useRef<
-		| ((
-				changes: { [key: string]: chrome.storage.StorageChange },
-				area: chrome.storage.AreaName,
-		  ) => void)
-		| null
-	>(null);
+	let storageListener: ((
+		changes: { [key: string]: chrome.storage.StorageChange },
+		area: chrome.storage.AreaName
+	) => void) | null = null;
 
-	const savePresetVarDebounced = useRef(
-		Utils.debounce((theme: string, varName: string, value: string) => {
+	const PRESET_SAVE_DEBOUNCE_MS = 500;
+	const savePresetVarDebounced = Utils.debounce(
+		(theme: string, varName: string, value: string) => {
 			Storage.savePresetVar(theme, varName, value);
-		}, 500),
-	).current;
+		},
+		PRESET_SAVE_DEBOUNCE_MS
+	);
 
 	const handleReset = async () => {
-		if (!tabId || !themeName) return;
+		const currentTabId = tabId();
+		const currentThemeName = themeName();
+		if (!currentTabId || !currentThemeName) return;
 
-		logger.info("Resetting theme overrides", { theme: themeName });
-		await Storage.deletePreset(themeName);
+		logger.info("Resetting theme overrides", { theme: currentThemeName });
+		await Storage.deletePreset(currentThemeName);
 
-		await SendMessage.resetVars(tabId);
-		const values = await ChromeUtils.getPickerValues(tabId, themeName);
+		await SendMessage.resetVars(currentTabId);
+		const values = await ChromeUtils.getPickerValues(currentTabId, currentThemeName);
 
 		setPickerValues(values);
 		logger.debug("Theme reset complete");
 	};
 
 	const handleColorChange = (varName: string, value: string) => {
-		if (!tabId || !themeName) return;
+		const currentTabId = tabId();
+		const currentThemeName = themeName();
+		if (!currentTabId || !currentThemeName) return;
 
 		setPickerValues((prev) => ({ ...prev, [varName]: value }));
 
-		SendMessage.updateVar(tabId, varName, value);
+		SendMessage.updateVar(currentTabId, varName, value);
 
-		savePresetVarDebounced(themeName, varName, value);
+		savePresetVarDebounced(currentThemeName, varName, value);
 	};
 
 	const handleToggleOverrides = async () => {
-		if (!tabId) return;
+		const currentTabId = tabId();
+		if (!currentTabId) return;
 
-		if (applyOverrides) {
+		if (applyOverrides()) {
 			logger.debug("Applying theme overrides");
-			for (const [varName, value] of Object.entries(pickerValues)) {
-				SendMessage.updateVar(tabId, varName, value);
+			for (const [varName, value] of Object.entries(pickerValues())) {
+				SendMessage.updateVar(currentTabId, varName, value);
 			}
 		} else {
 			logger.debug("Removing theme overrides from document");
-			await SendMessage.resetVars(tabId);
+			await SendMessage.resetVars(currentTabId);
 		}
 	};
 
-	useEffect(() => {
-		const initialize = async () => {
-			const tab = await ChromeUtils.getActiveTab();
+	onMount(async () => {
+		const tab = await ChromeUtils.getActiveTab();
 
-			if (!tab?.id) {
-				setError("Please open a Pumble tab");
-				setLoading(false);
-				return;
-			}
-
-			setTabId(tab.id);
-			const currentTheme = await SendMessage.getTheme(tab.id);
-
-			if (!currentTheme) {
-				setError("Unable to detect Pumble theme");
-				setLoading(false);
-				return;
-			}
-
-			setThemeName(currentTheme);
-			const values = await ChromeUtils.getPickerValues(tab.id, currentTheme);
-
-			setPickerValues(values);
+		if (!tab?.id) {
+			setError("Please open a Pumble tab");
 			setLoading(false);
-			logger.info("ThemeEditor initialized", {
-				theme: currentTheme,
-				tabId: tab.id,
-				variableCount: Object.keys(values).length,
-			});
+			return;
+		}
 
-			storageListenerRef.current = (changes, area) => {
-				if (area === "sync" && changes.theme_presets && tabId && themeName) {
-					logger.debug("Storage changed externally, refreshing picker values");
-					ChromeUtils.getPickerValues(tabId, themeName)
-						.then((values) => {
-							setPickerValues(values);
-						})
-						.catch((err) => {
-							logger.error("Failed to refresh picker values:", err);
-						});
-				}
-			};
+		setTabId(tab.id);
+		const currentTheme = await SendMessage.getTheme(tab.id);
 
-			chrome.storage.onChanged.addListener(storageListenerRef.current);
-		};
+		if (!currentTheme) {
+			setError("Unable to detect Pumble theme");
+			setLoading(false);
+			return;
+		}
 
-		initialize();
+		setThemeName(currentTheme);
+		const values = await ChromeUtils.getPickerValues(tab.id, currentTheme);
 
-		return () => {
-			if (storageListenerRef.current) {
-				chrome.storage.onChanged.removeListener(storageListenerRef.current);
+		setPickerValues(values);
+		setLoading(false);
+		logger.info("ThemeEditor initialized", {
+			theme: currentTheme,
+			tabId: tab.id,
+			variableCount: Object.keys(values).length,
+		});
+
+		storageListener = (changes, area) => {
+			if (area === "sync" && changes.theme_presets && tabId() && themeName()) {
+				logger.debug("Storage changed externally, refreshing picker values");
+				ChromeUtils.getPickerValues(tabId()!, themeName()!)
+					.then((values) => {
+						setPickerValues(values);
+					})
+					.catch((err) => {
+						logger.error("Failed to refresh picker values:", err);
+					});
 			}
 		};
-	}, []);
+
+		chrome.storage.onChanged.addListener(storageListener);
+	});
+
+	onCleanup(() => {
+		if (storageListener) {
+			chrome.storage.onChanged.removeListener(storageListener);
+		}
+	});
 
 	return (
 		<div class={styles.container}>
 			<h3>Theme Tweaks</h3>
 
-			{loading && <p>Loading...</p>}
+			<Show when={loading()}>
+				<p>Loading...</p>
+			</Show>
 
-			{error && <p class={styles.error}>{error}</p>}
+			<Show when={error()}>
+				<p class={styles.error}>{error()}</p>
+			</Show>
 
-			{!loading && !error && (
-				<>
-					<ThemeToggle
-						checked={applyOverrides}
-						onChange={(checked) => {
-							setApplyOverrides(checked);
-							handleToggleOverrides();
-						}}
-					/>
+			<Show when={!loading() && !error()}>
+				<ThemeToggle
+					checked={applyOverrides()}
+					onChange={(checked) => {
+						setApplyOverrides(checked);
+						handleToggleOverrides();
+					}}
+				/>
 
-					<div class={styles.pickersContainer}>
-						{CSS_VARIABLES.map((config) => (
+				<div class={styles.pickersContainer}>
+					<For each={CSS_VARIABLES}>
+						{(config) => (
 							<ColorPicker
-								key={config.propertyName}
 								label={config.label}
-								value={pickerValues[config.propertyName] || ""}
-								inactive={!applyOverrides}
-								onInput={(value) =>
-									handleColorChange(config.propertyName, value)
-								}
+								value={pickerValues()[config.propertyName] || ""}
+								inactive={!applyOverrides()}
+								onInput={(value) => handleColorChange(config.propertyName, value)}
 							/>
-						))}
-					</div>
+						)}
+					</For>
+				</div>
 
-					<button type="button" class={styles.resetBtn} onClick={handleReset}>
-						Reset
-					</button>
-				</>
-			)}
+				<button type="button" class={styles.resetBtn} onClick={handleReset}>
+					Reset
+				</button>
+			</Show>
 		</div>
 	);
 }

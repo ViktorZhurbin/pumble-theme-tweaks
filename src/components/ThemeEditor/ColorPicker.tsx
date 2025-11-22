@@ -7,25 +7,16 @@ interface ColorPickerProps {
 	onInput: (value: string) => void;
 }
 
-export function ColorPicker({
-	label,
-	value,
-	inactive = false,
-	onInput,
-}: ColorPickerProps) {
+export function ColorPicker(props: ColorPickerProps) {
 	const handleInput = (e: Event) => {
 		const target = e.target as HTMLInputElement;
-		onInput(target.value);
+		props.onInput(target.value);
 	};
 
-	const pickerClass = inactive
-		? `${styles.pickerGroup} ${styles.inactive}`
-		: styles.pickerGroup;
-
 	return (
-		<label class={pickerClass}>
-			<span class={styles.pickerLabel}>{label}</span>
-			<input type="color" value={value} onInput={handleInput} />
+		<label class={styles.pickerGroup} classList={{ [styles.inactive]: props.inactive }}>
+			<span class={styles.pickerLabel}>{props.label}</span>
+			<input type="color" value={props.value} onInput={handleInput} />
 		</label>
 	);
 }

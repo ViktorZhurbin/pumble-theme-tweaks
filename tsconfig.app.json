@@ -11,8 +11,8 @@
 			"@/*": ["src/*"]
 		},
 		"resolveJsonModule": true,
-		"jsx": "react-jsx",
-		"jsxImportSource": "preact",
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
 		"allowJs": true,
 		"checkJs": true,
 		"strict": true,
