@@ -18,7 +18,7 @@ export function ThemeEditor() {
 		{},
 	);
 	const [loading, setLoading] = createSignal(true);
-	const [applyTweaks, setApplyTweaks] = createSignal(true);
+	const [tweaksOn, setTweaksOn] = createSignal(true);
 
 	const TWEAKS_SAVE_DEBOUNCE_MS = 500;
 	const savePropertyDebounced = Utils.debounce(
@@ -63,7 +63,7 @@ export function ThemeEditor() {
 		await ThemeEditorService.toggleTweaks(
 			currentTabId,
 			currentThemeName,
-			applyTweaks(),
+			tweaksOn(),
 			pickerValues(),
 		);
 	};
@@ -78,7 +78,7 @@ export function ThemeEditor() {
 
 			const [values, disabled] = await loadThemeData(currentTabId, theme);
 			setPickerValues(values);
-			setApplyTweaks(!disabled);
+			setTweaksOn(!disabled);
 
 			logger.info("ThemeEditor initialized", {
 				theme,
@@ -105,23 +105,21 @@ export function ThemeEditor() {
 
 			<Show when={!loading() && !error()}>
 				<ThemeToggle
-					checked={applyTweaks()}
+					checked={tweaksOn()}
 					onChange={(checked) => {
-						setApplyTweaks(checked);
+						setTweaksOn(checked);
 						handleToggleTweaks();
 					}}
 				/>
 
 				<div class={styles.pickersContainer}>
 					<For each={PROPERTIES}>
-						{(config) => (
+						{({ label, propertyName }) => (
 							<ColorPicker
-								label={config.label}
-								value={pickerValues()[config.propertyName] || ""}
-								inactive={!applyTweaks()}
-								onInput={(value) =>
-									handleColorChange(config.propertyName, value)
-								}
+								label={label}
+								value={pickerValues()[propertyName] || ""}
+								inactive={!tweaksOn()}
+								onInput={(value) => handleColorChange(propertyName, value)}
 							/>
 						)}
 					</For>

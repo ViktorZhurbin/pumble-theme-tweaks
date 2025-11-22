@@ -13,7 +13,7 @@ const getActiveTab = async () => {
 
 const getPickerValues = async (currentTabId: number, currentTheme: string) => {
 	try {
-		const [storedTweaks, currentValues] = await Promise.all([
+		const [storedTweaks, currentThemeTweaks] = await Promise.all([
 			Storage.getTweaks(currentTheme),
 			SendMessage.getProperties(currentTabId),
 		]);
@@ -22,7 +22,7 @@ const getPickerValues = async (currentTabId: number, currentTheme: string) => {
 			(acc, propertyName) => {
 				acc[propertyName] =
 					storedTweaks?.cssProperties[propertyName] ||
-					currentValues[propertyName];
+					currentThemeTweaks[propertyName];
 
 				return acc;
 			},
