@@ -1,12 +1,4 @@
 /// <reference types="vite/client" />
-/// <reference types="svelte" />
-
-// Svelte component type declarations
-declare module "*.svelte" {
-	import type { Component } from "svelte";
-	const component: Component;
-	export default component;
-}
 
 // Asset type declarations
 declare module "*.svg" {

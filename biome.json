@@ -6,7 +6,7 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["**", "!!**/dist", "!!**/*.svelte"]
+		"includes": ["**", "!!**/dist"]
 	},
 	"formatter": {
 		"enabled": true,

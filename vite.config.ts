@@ -1,6 +1,6 @@
 import path from "node:path";
 import { crx } from "@crxjs/vite-plugin";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
+import preact from "@preact/preset-vite";
 import { defineConfig } from "vite";
 import zip from "vite-plugin-zip-pack";
 import manifest from "./manifest.config";
@@ -13,11 +13,7 @@ export default defineConfig(({ mode }) => ({
 		},
 	},
 	plugins: [
-		svelte({
-			compilerOptions: {
-				dev: mode === "development",
-			},
-		}),
+		preact(),
 		crx({ manifest }),
 		zip({ outDir: "release", outFileName: `crx-${name}-${version}.zip` }),
 	],
