@@ -109,9 +109,11 @@ export function ThemeEditor() {
 		});
 
 		storageListener = (changes, area) => {
-			if (area === "sync" && changes.theme_presets && tabId() && themeName()) {
+			const currentTabId = tabId();
+			const currentThemeName = themeName();
+			if (area === "sync" && changes.theme_presets && currentTabId && currentThemeName) {
 				logger.debug("Storage changed externally, refreshing picker values");
-				ChromeUtils.getPickerValues(tabId()!, themeName()!)
+				ChromeUtils.getPickerValues(currentTabId, currentThemeName)
 					.then((values) => {
 						setPickerValues(values);
 					})
