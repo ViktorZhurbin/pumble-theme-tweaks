@@ -1,4 +1,4 @@
-import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { createSignal, onMount, onCleanup, For, Show } from "solid-js";
 import { CSS_VARIABLES } from "@/constants/config";
 import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
@@ -6,32 +6,28 @@ import { SendMessage } from "@/lib/messaging";
 import { Storage } from "@/lib/storage";
 import { Utils } from "@/lib/utils";
 import { ColorPicker } from "./ColorPicker";
+import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
-import "./ThemeEditor.css";
 
 export function ThemeEditor() {
 	const [themeName, setThemeName] = createSignal<string | null>(null);
 	const [tabId, setTabId] = createSignal<number | null>(null);
 	const [error, setError] = createSignal<string | null>(null);
-	const [pickerValues, setPickerValues] = createSignal<Record<string, string>>(
-		{},
-	);
+	const [pickerValues, setPickerValues] = createSignal<Record<string, string>>({});
 	const [loading, setLoading] = createSignal(true);
 	const [applyOverrides, setApplyOverrides] = createSignal(true);
 
-	let storageListener:
-		| ((
-				changes: { [key: string]: chrome.storage.StorageChange },
-				area: chrome.storage.AreaName,
-		  ) => void)
-		| null = null;
+	let storageListener: ((
+		changes: { [key: string]: chrome.storage.StorageChange },
+		area: chrome.storage.AreaName
+	) => void) | null = null;
 
 	const PRESET_SAVE_DEBOUNCE_MS = 500;
 	const savePresetVarDebounced = Utils.debounce(
 		(theme: string, varName: string, value: string) => {
 			Storage.savePresetVar(theme, varName, value);
 		},
-		PRESET_SAVE_DEBOUNCE_MS,
+		PRESET_SAVE_DEBOUNCE_MS
 	);
 
 	const handleReset = async () => {
@@ -43,10 +39,7 @@ export function ThemeEditor() {
 		await Storage.deletePreset(currentThemeName);
 
 		await SendMessage.resetVars(currentTabId);
-		const values = await ChromeUtils.getPickerValues(
-			currentTabId,
-			currentThemeName,
-		);
+		const values = await ChromeUtils.getPickerValues(currentTabId, currentThemeName);
 
 		setPickerValues(values);
 		logger.debug("Theme reset complete");
@@ -131,7 +124,7 @@ export function ThemeEditor() {
 	});
 
 	return (
-		<div class="container">
+		<div class={styles.container}>
 			<h3>Theme Tweaks</h3>
 
 			<Show when={loading()}>
@@ -139,7 +132,7 @@ export function ThemeEditor() {
 			</Show>
 
 			<Show when={error()}>
-				<p class="error">{error()}</p>
+				<p class={styles.error}>{error()}</p>
 			</Show>
 
 			<Show when={!loading() && !error()}>
@@ -151,22 +144,20 @@ export function ThemeEditor() {
 					}}
 				/>
 
-				<div class="pickers-container">
+				<div class={styles.pickersContainer}>
 					<For each={CSS_VARIABLES}>
 						{(config) => (
 							<ColorPicker
 								label={config.label}
 								value={pickerValues()[config.propertyName] || ""}
 								inactive={!applyOverrides()}
-								onInput={(value) =>
-									handleColorChange(config.propertyName, value)
-								}
+								onInput={(value) => handleColorChange(config.propertyName, value)}
 							/>
 						)}
 					</For>
 				</div>
 
-				<button type="button" class="reset-btn" onClick={handleReset}>
+				<button type="button" class={styles.resetBtn} onClick={handleReset}>
 					Reset
 				</button>
 			</Show>

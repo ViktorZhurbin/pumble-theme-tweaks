@@ -1,8 +1,8 @@
-.toggle-container {
+.toggleContainer {
 	margin-bottom: 16px;
 }
 
-.toggle-label {
+.toggleLabel {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -12,7 +12,7 @@
 	user-select: none;
 }
 
-.toggle-label input[type="checkbox"] {
+.toggleLabel input[type="checkbox"] {
 	width: 18px;
 	height: 18px;
 	cursor: pointer;
