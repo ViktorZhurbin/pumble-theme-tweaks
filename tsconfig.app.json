@@ -1,7 +1,10 @@
 {
 	"compilerOptions": {
+		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
 		"target": "ESNext",
 		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
 		"moduleDetection": "force",
 		"useDefineForClassFields": true,
 		"baseUrl": ".",
@@ -10,20 +13,16 @@
 		"paths": {
 			"@/*": ["src/*"]
 		},
-		"resolveJsonModule": true,
-		"jsx": "preserve",
-		"jsxImportSource": "solid-js",
-		"allowJs": true,
-		"checkJs": true,
+		"types": ["vite/client", "chrome"],
+		"allowImportingTsExtensions": true,
 		"strict": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noEmit": true,
 		"isolatedModules": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"noUncheckedSideEffectImports": true
 	},
-	"include": [
-		"src/**/*.ts",
-		"src/**/*.d.ts",
-		"src/**/*.js",
-		"src/**/*.tsx",
-		"src/**/*.jsx"
-	]
+	"include": ["src", "manifest.config.ts"]
 }

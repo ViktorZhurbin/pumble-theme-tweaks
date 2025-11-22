@@ -1,12 +1,12 @@
 import path from "node:path";
 import { crx } from "@crxjs/vite-plugin";
-import solid from "vite-plugin-solid";
 import { defineConfig } from "vite";
+import solid from "vite-plugin-solid";
 import zip from "vite-plugin-zip-pack";
 import manifest from "./manifest.config";
 import { name, version } from "./package.json";
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
 	resolve: {
 		alias: {
 			"@": `${path.resolve(__dirname, "src")}`,
@@ -22,4 +22,4 @@ export default defineConfig(({ mode }) => ({
 			origin: [/chrome-extension:\/\//],
 		},
 	},
-}));
+});

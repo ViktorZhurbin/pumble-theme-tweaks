@@ -1,9 +1,10 @@
 import { defineManifest } from "@crxjs/vite-plugin";
+import pkg from "./package.json";
 
 export default defineManifest({
 	manifest_version: 3,
-	name: "Pumble Theme Tweak",
-	version: "1.0.0",
+	name: pkg.name,
+	version: pkg.version,
 	description: "Change Pumble colors in web browser.",
 	icons: {
 		48: "public/logo.png",
