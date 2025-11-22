@@ -1,4 +1,4 @@
-import styles from "./ThemeToggle.module.css";
+import "./ThemeToggle.css";
 
 interface ThemeToggleProps {
 	checked: boolean;
@@ -12,8 +12,8 @@ export function ThemeToggle(props: ThemeToggleProps) {
 	};
 
 	return (
-		<div class={styles.toggleContainer}>
-			<label for="toggle-overrides" class={styles.toggleLabel}>
+		<div class="toggle-container">
+			<label for="toggle-overrides" class="toggle-label">
 				<input
 					id="toggle-overrides"
 					type="checkbox"

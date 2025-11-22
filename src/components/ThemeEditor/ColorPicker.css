@@ -1,4 +1,4 @@
-.pickerGroup {
+.picker-group {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -11,39 +11,39 @@
 	cursor: pointer;
 }
 
-.pickerGroup:hover:not(.inactive) {
+.picker-group:hover:not(.inactive) {
 	background: rgba(255, 255, 255, 0.08);
 	border-color: rgba(255, 255, 255, 0.15);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 	transform: translateY(-1px);
 }
 
-.pickerGroup.inactive {
+.picker-group.inactive {
 	opacity: 0.4;
 	pointer-events: none;
 	cursor: not-allowed;
 }
 
-.pickerLabel {
+.picker-label {
 	font-weight: 600;
 	font-size: 0.875rem;
 	line-height: 1.4;
 }
 
 @media (prefers-color-scheme: light) {
-	.pickerGroup {
+	.picker-group {
 		background: #ffffff;
 		border-color: rgba(0, 0, 0, 0.1);
 	}
 
-	.pickerGroup:hover:not(.inactive) {
+	.picker-group:hover:not(.inactive) {
 		background: #f8f8f8;
 		border-color: rgba(0, 0, 0, 0.15);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 }
 
-.pickerGroup input[type="color"] {
+.picker-group input[type="color"] {
 	width: 40px;
 	height: 30px;
 	cursor: pointer;
