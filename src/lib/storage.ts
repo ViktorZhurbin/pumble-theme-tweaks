@@ -35,9 +35,7 @@ const saveProperty = async (
 ) => {
 	const tweaks = await getAllTweaks();
 
-	if (!tweaks[themeName]) {
-		tweaks[themeName] = { disabled: false, cssProperties: {} };
-	}
+	tweaks[themeName] ??= { disabled: false, cssProperties: {} };
 	tweaks[themeName].cssProperties[propertyName] = value;
 
 	try {
@@ -79,11 +77,8 @@ const getDisabled = async (themeName: string): Promise<boolean> => {
 const setDisabled = async (themeName: string, disabled: boolean) => {
 	const tweaks = await getAllTweaks();
 
-	if (!tweaks[themeName]) {
-		tweaks[themeName] = { disabled, cssProperties: {} };
-	} else {
-		tweaks[themeName].disabled = disabled;
-	}
+	tweaks[themeName] ??= { disabled: false, cssProperties: {} };
+	tweaks[themeName].disabled = disabled;
 
 	try {
 		await chrome.storage.sync.set({ theme_tweaks: tweaks });

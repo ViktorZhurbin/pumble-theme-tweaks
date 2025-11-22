@@ -1,4 +1,4 @@
-import { PROPERTIES } from "@/constants/properties";
+import { PROPERTIES, PROPERTY_NAMES } from "@/constants/properties";
 import { logger } from "@/lib/logger";
 import { SendMessage } from "@/lib/messaging";
 import { Storage } from "@/lib/storage";
@@ -18,8 +18,8 @@ const getPickerValues = async (currentTabId: number, currentTheme: string) => {
 			SendMessage.getProperties(currentTabId),
 		]);
 
-		return PROPERTIES.reduce<Record<string, string>>(
-			(acc, { propertyName }) => {
+		return PROPERTY_NAMES.reduce<Record<string, string>>(
+			(acc, propertyName) => {
 				acc[propertyName] =
 					storedTweaks?.cssProperties[propertyName] ||
 					currentValues[propertyName];
