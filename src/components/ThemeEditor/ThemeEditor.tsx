@@ -1,4 +1,4 @@
-import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { createSignal, For, onMount, Show } from "solid-js";
 import { CSS_VARIABLES } from "@/constants/config";
 import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
@@ -18,13 +18,6 @@ export function ThemeEditor() {
 	);
 	const [loading, setLoading] = createSignal(true);
 	const [applyOverrides, setApplyOverrides] = createSignal(true);
-
-	let storageListener:
-		| ((
-				changes: { [key: string]: chrome.storage.StorageChange },
-				area: chrome.storage.AreaName,
-		  ) => void)
-		| null = null;
 
 	const PRESET_SAVE_DEBOUNCE_MS = 500;
 	const savePresetVarDebounced = Utils.debounce(
@@ -107,29 +100,6 @@ export function ThemeEditor() {
 			tabId: tab.id,
 			variableCount: Object.keys(values).length,
 		});
-
-		storageListener = (changes, area) => {
-			const currentTabId = tabId();
-			const currentThemeName = themeName();
-			if (area === "sync" && changes.theme_presets && currentTabId && currentThemeName) {
-				logger.debug("Storage changed externally, refreshing picker values");
-				ChromeUtils.getPickerValues(currentTabId, currentThemeName)
-					.then((values) => {
-						setPickerValues(values);
-					})
-					.catch((err) => {
-						logger.error("Failed to refresh picker values:", err);
-					});
-			}
-		};
-
-		chrome.storage.onChanged.addListener(storageListener);
-	});
-
-	onCleanup(() => {
-		if (storageListener) {
-			chrome.storage.onChanged.removeListener(storageListener);
-		}
 	});
 
 	return (
