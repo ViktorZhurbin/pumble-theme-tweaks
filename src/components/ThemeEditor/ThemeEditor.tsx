@@ -76,6 +76,9 @@ export function ThemeEditor() {
 			logger.debug("Removing theme overrides from document");
 			await SendMessage.resetVars(currentTabId);
 		}
+
+		// Update badge to reflect current state
+		SendMessage.updateBadge(enabled);
 	};
 
 	onMount(async () => {

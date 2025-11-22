@@ -32,7 +32,6 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 			value: msg.value,
 		});
 		DomUtils.applyCSSVariable(msg.varName, msg.value);
-		SendMessage.updateBadge(true);
 	}
 
 	if (msg.type === MessageType.READ_VARS) {
@@ -52,7 +51,6 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 	if (msg.type === MessageType.RESET_VARS) {
 		logger.debug("Resetting CSS overrides");
 		DomUtils.resetCSSOverrides();
-		SendMessage.updateBadge(false);
 	}
 
 	return true; // Keep message channel open for async response
@@ -65,6 +63,9 @@ const themeObserver = ThemeManager.watchThemeChanges((newTheme, oldTheme) => {
 
 	if (newTheme) {
 		ThemeManager.applyOverridesAndUpdateBadge(newTheme);
+	} else {
+		// No theme detected - ensure badge is inactive
+		SendMessage.updateBadge(false);
 	}
 });
 
