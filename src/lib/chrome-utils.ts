@@ -21,7 +21,8 @@ const getPickerValues = async (currentTabId: number, currentTheme: string) => {
 		return CSS_VARIABLES.reduce<Record<string, string>>(
 			(acc, { propertyName }) => {
 				acc[propertyName] =
-					storedPreset?.[propertyName] || currentValues[propertyName];
+					storedPreset?.cssProperties[propertyName] ||
+					currentValues[propertyName];
 
 				return acc;
 			},

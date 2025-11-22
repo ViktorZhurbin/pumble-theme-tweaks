@@ -36,9 +36,9 @@ const savePresetVar = async (
 	const presets = await getAllPresets();
 
 	if (!presets[themeName]) {
-		presets[themeName] = {};
+		presets[themeName] = { disabled: false, cssProperties: {} };
 	}
-	presets[themeName][varName] = value;
+	presets[themeName].cssProperties[varName] = value;
 
 	try {
 		await chrome.storage.sync.set({ theme_presets: presets });
@@ -64,8 +64,38 @@ const deletePreset = async (themeName: string) => {
 	}
 };
 
+/**
+ * Gets whether overrides are disabled for a specific theme
+ * Returns false (enabled) if preset doesn't exist
+ */
+const getDisabled = async (themeName: string): Promise<boolean> => {
+	const preset = await getPreset(themeName);
+	return preset?.disabled ?? false; // Default to enabled (not disabled)
+};
+
+/**
+ * Sets the disabled state for a specific theme
+ */
+const setDisabled = async (themeName: string, disabled: boolean) => {
+	const presets = await getAllPresets();
+
+	if (!presets[themeName]) {
+		presets[themeName] = { disabled, cssProperties: {} };
+	} else {
+		presets[themeName].disabled = disabled;
+	}
+
+	try {
+		await chrome.storage.sync.set({ theme_presets: presets });
+	} catch (err) {
+		logger.warn("Storage write error:", err);
+	}
+};
+
 export const Storage = {
 	getPreset,
 	savePresetVar,
 	deletePreset,
+	getDisabled,
+	setDisabled,
 };

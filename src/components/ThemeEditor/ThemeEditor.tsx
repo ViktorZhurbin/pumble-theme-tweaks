@@ -59,9 +59,15 @@ export function ThemeEditor() {
 
 	const handleToggleOverrides = async () => {
 		const currentTabId = tabId();
-		if (!currentTabId) return;
+		const currentThemeName = themeName();
+		if (!currentTabId || !currentThemeName) return;
 
-		if (applyOverrides()) {
+		const enabled = applyOverrides();
+
+		// Save disabled state (inverse of enabled)
+		await Storage.setDisabled(currentThemeName, !enabled);
+
+		if (enabled) {
 			logger.debug("Applying theme overrides");
 			for (const [varName, value] of Object.entries(pickerValues())) {
 				SendMessage.updateVar(currentTabId, varName, value);
@@ -91,14 +97,19 @@ export function ThemeEditor() {
 		}
 
 		setThemeName(currentTheme);
-		const values = await ChromeUtils.getPickerValues(tab.id, currentTheme);
+		const [values, disabled] = await Promise.all([
+			ChromeUtils.getPickerValues(tab.id, currentTheme),
+			Storage.getDisabled(currentTheme),
+		]);
 
 		setPickerValues(values);
+		setApplyOverrides(!disabled); // disabled: false = enabled: true
 		setLoading(false);
 		logger.info("ThemeEditor initialized", {
 			theme: currentTheme,
 			tabId: tab.id,
 			variableCount: Object.keys(values).length,
+			enabled: !disabled,
 		});
 	});
 

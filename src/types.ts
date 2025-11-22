@@ -12,7 +12,10 @@ export interface CSSVariableConfig {
  */
 export interface ThemePresets {
 	[themeName: string]: {
-		[varName: string]: string;
+		disabled: boolean;
+		cssProperties: {
+			[varName: string]: string;
+		};
 	};
 }
 

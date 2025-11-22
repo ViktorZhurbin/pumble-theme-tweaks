@@ -17,7 +17,7 @@ const applyOverridesAndUpdateBadge = async (
 			theme: themeName,
 			count: Object.keys(overrides).length,
 		});
-		for (const [key, value] of Object.entries(overrides)) {
+		for (const [key, value] of Object.entries(overrides.cssProperties)) {
 			DomUtils.applyCSSVariable(key, value);
 		}
 	} else {
