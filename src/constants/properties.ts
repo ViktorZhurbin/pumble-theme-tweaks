@@ -1,9 +1,9 @@
-import type { CSSVariableConfig } from "@/types";
+import type { PropertyItem } from "@/types";
 
 /**
- * Configuration for CSS variables that can be customized
+ * Configuration for CSS properties that can be customized
  */
-export const CSS_VARIABLES: CSSVariableConfig[] = [
+export const PROPERTIES: PropertyItem[] = [
 	{
 		label: "Top & sidebar",
 		propertyName: "--palette-secondary-main",
@@ -22,4 +22,4 @@ export const CSS_VARIABLES: CSSVariableConfig[] = [
 	},
 ];
 
-export const PROPERTY_NAMES = CSS_VARIABLES.map((v) => v.propertyName);
+export const PROPERTY_NAMES = PROPERTIES.map((v) => v.propertyName);

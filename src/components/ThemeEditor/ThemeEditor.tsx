@@ -1,5 +1,5 @@
 import { createSignal, For, onMount, Show } from "solid-js";
-import { CSS_VARIABLES } from "@/constants/config";
+import { PROPERTIES } from "@/constants/properties";
 import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
 import { SendMessage } from "@/lib/messaging";
@@ -8,6 +8,7 @@ import { Utils } from "@/lib/utils";
 import { ColorPicker } from "./ColorPicker";
 import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
+import { ThemeEditorService } from "./theme-editor.service";
 
 export function ThemeEditor() {
 	const [themeName, setThemeName] = createSignal<string | null>(null);
@@ -17,14 +18,14 @@ export function ThemeEditor() {
 		{},
 	);
 	const [loading, setLoading] = createSignal(true);
-	const [applyOverrides, setApplyOverrides] = createSignal(true);
+	const [applyTweaks, setApplyTweaks] = createSignal(true);
 
-	const PRESET_SAVE_DEBOUNCE_MS = 500;
-	const savePresetVarDebounced = Utils.debounce(
-		(theme: string, varName: string, value: string) => {
-			Storage.savePresetVar(theme, varName, value);
+	const TWEAKS_SAVE_DEBOUNCE_MS = 500;
+	const savePropertyDebounced = Utils.debounce(
+		(theme: string, propertyName: string, value: string) => {
+			Storage.saveProperty(theme, propertyName, value);
 		},
-		PRESET_SAVE_DEBOUNCE_MS,
+		TWEAKS_SAVE_DEBOUNCE_MS,
 	);
 
 	const handleReset = async () => {
@@ -32,88 +33,62 @@ export function ThemeEditor() {
 		const currentThemeName = themeName();
 		if (!currentTabId || !currentThemeName) return;
 
-		logger.info("Resetting theme overrides", { theme: currentThemeName });
-		await Storage.deletePreset(currentThemeName);
-
-		await SendMessage.resetVars(currentTabId);
-		const values = await ChromeUtils.getPickerValues(
+		const values = await ThemeEditorService.resetTheme(
 			currentTabId,
 			currentThemeName,
 		);
-
 		setPickerValues(values);
-		logger.debug("Theme reset complete");
 	};
 
-	const handleColorChange = (varName: string, value: string) => {
+	const handleColorChange = (propertyName: string, value: string) => {
 		const currentTabId = tabId();
 		const currentThemeName = themeName();
 		if (!currentTabId || !currentThemeName) return;
 
-		setPickerValues((prev) => ({ ...prev, [varName]: value }));
-
-		SendMessage.updateVar(currentTabId, varName, value);
-
-		savePresetVarDebounced(currentThemeName, varName, value);
+		setPickerValues((prev) => ({ ...prev, [propertyName]: value }));
+		savePropertyDebounced(currentThemeName, propertyName, value);
+		ThemeEditorService.updateColor(
+			currentTabId,
+			currentThemeName,
+			propertyName,
+			value,
+		);
 	};
 
-	const handleToggleOverrides = async () => {
+	const handleToggleTweaks = async () => {
 		const currentTabId = tabId();
 		const currentThemeName = themeName();
 		if (!currentTabId || !currentThemeName) return;
 
-		const enabled = applyOverrides();
-
-		// Save disabled state (inverse of enabled)
-		await Storage.setDisabled(currentThemeName, !enabled);
-
-		if (enabled) {
-			logger.debug("Applying theme overrides");
-			for (const [varName, value] of Object.entries(pickerValues())) {
-				SendMessage.updateVar(currentTabId, varName, value);
-			}
-		} else {
-			logger.debug("Removing theme overrides from document");
-			await SendMessage.resetVars(currentTabId);
-		}
-
-		// Update badge to reflect current state
-		SendMessage.updateBadge(enabled);
+		await ThemeEditorService.toggleTweaks(
+			currentTabId,
+			currentThemeName,
+			applyTweaks(),
+			pickerValues(),
+		);
 	};
 
 	onMount(async () => {
-		const tab = await ChromeUtils.getActiveTab();
+		try {
+			const currentTabId = await initializeTab();
+			setTabId(currentTabId);
 
-		if (!tab?.id) {
-			setError("Please open a Pumble tab");
+			const theme = await initializeTheme(currentTabId);
+			setThemeName(theme);
+
+			const [values, disabled] = await loadThemeData(currentTabId, theme);
+			setPickerValues(values);
+			setApplyTweaks(!disabled);
+
+			logger.info("ThemeEditor initialized", {
+				theme,
+				tabId: currentTabId,
+			});
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Unknown error");
+		} finally {
 			setLoading(false);
-			return;
 		}
-
-		setTabId(tab.id);
-		const currentTheme = await SendMessage.getTheme(tab.id);
-
-		if (!currentTheme) {
-			setError("Unable to detect Pumble theme");
-			setLoading(false);
-			return;
-		}
-
-		setThemeName(currentTheme);
-		const [values, disabled] = await Promise.all([
-			ChromeUtils.getPickerValues(tab.id, currentTheme),
-			Storage.getDisabled(currentTheme),
-		]);
-
-		setPickerValues(values);
-		setApplyOverrides(!disabled); // disabled: false = enabled: true
-		setLoading(false);
-		logger.info("ThemeEditor initialized", {
-			theme: currentTheme,
-			tabId: tab.id,
-			variableCount: Object.keys(values).length,
-			enabled: !disabled,
-		});
 	});
 
 	return (
@@ -130,20 +105,20 @@ export function ThemeEditor() {
 
 			<Show when={!loading() && !error()}>
 				<ThemeToggle
-					checked={applyOverrides()}
+					checked={applyTweaks()}
 					onChange={(checked) => {
-						setApplyOverrides(checked);
-						handleToggleOverrides();
+						setApplyTweaks(checked);
+						handleToggleTweaks();
 					}}
 				/>
 
 				<div class={styles.pickersContainer}>
-					<For each={CSS_VARIABLES}>
+					<For each={PROPERTIES}>
 						{(config) => (
 							<ColorPicker
 								label={config.label}
 								value={pickerValues()[config.propertyName] || ""}
-								inactive={!applyOverrides()}
+								inactive={!applyTweaks()}
 								onInput={(value) =>
 									handleColorChange(config.propertyName, value)
 								}
@@ -158,4 +133,37 @@ export function ThemeEditor() {
 			</Show>
 		</div>
 	);
+}
+
+/**
+ * Initialization helper: Get and validate active tab
+ * Returns tab ID
+ */
+async function initializeTab(): Promise<number> {
+	const tab = await ChromeUtils.getActiveTab();
+	if (!tab?.id) {
+		throw new Error("Please open a Pumble tab");
+	}
+	return tab.id;
+}
+
+/**
+ * Initialization helper: Get and validate theme
+ */
+async function initializeTheme(tabId: number) {
+	const theme = await SendMessage.getTheme(tabId);
+	if (!theme) {
+		throw new Error("Unable to detect Pumble theme");
+	}
+	return theme;
+}
+
+/**
+ * Initialization helper: Load theme data
+ */
+async function loadThemeData(tabId: number, themeName: string) {
+	return Promise.all([
+		ChromeUtils.getPickerValues(tabId, themeName),
+		Storage.getDisabled(themeName),
+	]);
 }

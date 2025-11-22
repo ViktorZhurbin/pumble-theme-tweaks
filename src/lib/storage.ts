@@ -1,13 +1,13 @@
 import { logger } from "@/lib/logger";
-import type { StorageData, ThemePresets } from "@/types";
+import type { StorageData, ThemeTweaks } from "@/types";
 
 /**
- * Gets all theme presets from storage
+ * Gets all theme tweaks from storage
  */
-const getAllPresets = async (): Promise<ThemePresets> => {
+const getAllTweaks = async (): Promise<ThemeTweaks> => {
 	try {
-		const result = await chrome.storage.sync.get<StorageData>("theme_presets");
-		return result.theme_presets ?? {};
+		const result = await chrome.storage.sync.get<StorageData>("theme_tweaks");
+		return result.theme_tweaks ?? {};
 	} catch (err) {
 		logger.error("Storage read error:", err);
 		return {};
@@ -15,48 +15,48 @@ const getAllPresets = async (): Promise<ThemePresets> => {
 };
 
 /**
- * Gets preset for a specific theme
+ * Gets tweaks for a specific theme
  */
-const getPreset = async (
+const getTweaks = async (
 	themeName: string,
-): Promise<ThemePresets[string] | undefined> => {
-	const presets = await getAllPresets();
+): Promise<ThemeTweaks[string] | undefined> => {
+	const tweaks = await getAllTweaks();
 
-	return presets[themeName];
+	return tweaks[themeName];
 };
 
 /**
- * Saves a single CSS variable for a theme
+ * Saves a single CSS property for a theme
  */
-const savePresetVar = async (
+const saveProperty = async (
 	themeName: string,
-	varName: string,
+	propertyName: string,
 	value: string,
 ) => {
-	const presets = await getAllPresets();
+	const tweaks = await getAllTweaks();
 
-	if (!presets[themeName]) {
-		presets[themeName] = { disabled: false, cssProperties: {} };
+	if (!tweaks[themeName]) {
+		tweaks[themeName] = { disabled: false, cssProperties: {} };
 	}
-	presets[themeName].cssProperties[varName] = value;
+	tweaks[themeName].cssProperties[propertyName] = value;
 
 	try {
-		await chrome.storage.sync.set({ theme_presets: presets });
+		await chrome.storage.sync.set({ theme_tweaks: tweaks });
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}
 };
 
 /**
- * Deletes all overrides for a specific theme
+ * Deletes all tweaks for a specific theme
  */
-const deletePreset = async (themeName: string) => {
-	const presets = await getAllPresets();
+const deleteTweaks = async (themeName: string) => {
+	const tweaks = await getAllTweaks();
 
-	if (presets[themeName]) {
-		delete presets[themeName];
+	if (tweaks[themeName]) {
+		delete tweaks[themeName];
 		try {
-			await chrome.storage.sync.set({ theme_presets: presets });
+			await chrome.storage.sync.set({ theme_tweaks: tweaks });
 		} catch (err) {
 			logger.error("Storage delete error:", err);
 			throw err;
@@ -65,37 +65,37 @@ const deletePreset = async (themeName: string) => {
 };
 
 /**
- * Gets whether overrides are disabled for a specific theme
- * Returns false (enabled) if preset doesn't exist
+ * Gets whether tweaks are disabled for a specific theme
+ * Returns false (enabled) if tweaks don't exist
  */
 const getDisabled = async (themeName: string): Promise<boolean> => {
-	const preset = await getPreset(themeName);
-	return preset?.disabled ?? false; // Default to enabled (not disabled)
+	const tweaks = await getTweaks(themeName);
+	return tweaks?.disabled ?? false; // Default to enabled (not disabled)
 };
 
 /**
  * Sets the disabled state for a specific theme
  */
 const setDisabled = async (themeName: string, disabled: boolean) => {
-	const presets = await getAllPresets();
+	const tweaks = await getAllTweaks();
 
-	if (!presets[themeName]) {
-		presets[themeName] = { disabled, cssProperties: {} };
+	if (!tweaks[themeName]) {
+		tweaks[themeName] = { disabled, cssProperties: {} };
 	} else {
-		presets[themeName].disabled = disabled;
+		tweaks[themeName].disabled = disabled;
 	}
 
 	try {
-		await chrome.storage.sync.set({ theme_presets: presets });
+		await chrome.storage.sync.set({ theme_tweaks: tweaks });
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}
 };
 
 export const Storage = {
-	getPreset,
-	savePresetVar,
-	deletePreset,
+	getTweaks,
+	saveProperty,
+	deleteTweaks,
 	getDisabled,
 	setDisabled,
 };

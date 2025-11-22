@@ -2,34 +2,34 @@ import { logger } from "@/lib/logger";
 import {
 	type GetThemeMessage,
 	MessageType,
-	type ReadVarsMessage,
-	type ResetVarsMessage,
+	type ReadPropertiesMessage,
+	type ResetPropertiesMessage,
 	type UpdateBadgeMessage,
-	type UpdateVarMessage,
+	type UpdatePropertyMessage,
 } from "@/types";
 
 /**
- * Sends a message to update a CSS variable in the active tab
+ * Sends a message to update a CSS property in the active tab
  */
-const updateVar = (tabId: number, varName: string, value: string) => {
-	chrome.tabs.sendMessage<UpdateVarMessage>(tabId, {
-		type: MessageType.UPDATE_VAR,
-		varName,
+const updateProperty = (tabId: number, propertyName: string, value: string) => {
+	chrome.tabs.sendMessage<UpdatePropertyMessage>(tabId, {
+		type: MessageType.UPDATE_PROPERTY,
+		propertyName,
 		value,
 	});
 };
 
 /**
- * Requests current CSS variable values from the page
+ * Requests current CSS property values from the page
  */
-const getVars = (tabId: number): Promise<Record<string, string>> => {
+const getProperties = (tabId: number): Promise<Record<string, string>> => {
 	return new Promise((resolve) => {
-		chrome.tabs.sendMessage<ReadVarsMessage>(
+		chrome.tabs.sendMessage<ReadPropertiesMessage>(
 			tabId,
-			{ type: MessageType.READ_VARS },
+			{ type: MessageType.READ_PROPERTIES },
 			(response) => {
 				if (chrome.runtime.lastError) {
-					logger.error("Failed to read variables:", chrome.runtime.lastError);
+					logger.error("Failed to read properties:", chrome.runtime.lastError);
 					resolve({});
 				} else {
 					resolve(response || {});
@@ -60,16 +60,16 @@ const getTheme = (tabId: number): Promise<string | null> => {
 };
 
 /**
- * Sends a reset command to clear CSS variable overrides
+ * Sends a reset command to clear CSS properties tweaks
  */
-const resetVars = (tabId: number): Promise<void> => {
+const resetProperties = (tabId: number): Promise<void> => {
 	return new Promise((resolve) => {
-		chrome.tabs.sendMessage<ResetVarsMessage>(
+		chrome.tabs.sendMessage<ResetPropertiesMessage>(
 			tabId,
-			{ type: MessageType.RESET_VARS },
+			{ type: MessageType.RESET_PROPERTIES },
 			() => {
 				if (chrome.runtime.lastError) {
-					logger.error("Failed to reset variables:", chrome.runtime.lastError);
+					logger.error("Failed to reset properties:", chrome.runtime.lastError);
 				}
 				resolve();
 			},
@@ -88,9 +88,9 @@ const updateBadge = (badgeOn: boolean) => {
 };
 
 export const SendMessage = {
-	updateVar,
-	getVars,
+	updateProperty,
+	getProperties,
+	resetProperties,
 	getTheme,
-	resetVars,
 	updateBadge,
 };

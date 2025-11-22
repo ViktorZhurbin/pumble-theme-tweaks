@@ -1,16 +1,16 @@
-import { PROPERTY_NAMES } from "@/constants/config";
+import { PROPERTY_NAMES } from "@/constants/properties";
 
 /**
- * Applies a CSS variable to the document root
+ * Applies a CSS property to the document root
  */
-const applyCSSVariable = (name: string, value: string) => {
+const applyCSSProperty = (name: string, value: string) => {
 	document.documentElement.style.setProperty(name, value);
 };
 
 /**
- * Removes only CSS variables that were applied by this extension
+ * Removes only CSS properties that were applied by this extension
  */
-const resetCSSOverrides = () => {
+const resetCSSTweaks = () => {
 	for (const propertyName of PROPERTY_NAMES) {
 		document.documentElement.style.removeProperty(propertyName);
 	}
@@ -32,9 +32,9 @@ const getCurrentTheme = (): string | null => {
 };
 
 /**
- * Reads current computed values of CSS variables
+ * Reads current computed values of CSS properties
  */
-const getCSSVariables = () => {
+const getCSSProperties = () => {
 	const computed = getComputedStyle(document.documentElement);
 
 	return PROPERTY_NAMES.reduce<Record<string, string>>((acc, propertyName) => {
@@ -45,8 +45,8 @@ const getCSSVariables = () => {
 };
 
 export const DomUtils = {
-	applyCSSVariable,
-	resetCSSOverrides,
+	applyCSSProperty,
+	getCSSProperties,
+	resetCSSTweaks,
 	getCurrentTheme,
-	getCSSVariables,
 };

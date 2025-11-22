@@ -4,28 +4,28 @@ import { SendMessage } from "@/lib/messaging";
 import { Storage } from "@/lib/storage";
 
 /**
- * Applies CSS variable overrides and updates badge accordingly
+ * Applies CSS property tweaks and updates badge accordingly
  * Respects the disabled flag - won't apply if disabled is true
  */
-const applyOverridesAndUpdateBadge = async (
+const applyTweaksAndUpdateBadge = async (
 	themeName: string,
 ): Promise<void> => {
-	const preset = await Storage.getPreset(themeName);
-	const hasTweaks = !!preset && Object.keys(preset.cssProperties).length > 0;
-	const shouldApply = hasTweaks && !preset.disabled;
+	const tweaks = await Storage.getTweaks(themeName);
+	const hasTweaks = !!tweaks && Object.keys(tweaks.cssProperties).length > 0;
+	const shouldApply = hasTweaks && !tweaks.disabled;
 
 	if (shouldApply) {
-		logger.debug("Applying theme overrides", {
+		logger.debug("Applying theme tweaks", {
 			theme: themeName,
-			count: Object.keys(preset.cssProperties).length,
+			count: Object.keys(tweaks.cssProperties).length,
 		});
-		for (const [key, value] of Object.entries(preset.cssProperties)) {
-			DomUtils.applyCSSVariable(key, value);
+		for (const [key, value] of Object.entries(tweaks.cssProperties)) {
+			DomUtils.applyCSSProperty(key, value);
 		}
-	} else if (hasTweaks && preset.disabled) {
-		logger.debug("Overrides exist but are disabled", { theme: themeName });
+	} else if (hasTweaks && tweaks.disabled) {
+		logger.debug("Tweaks exist but are disabled", { theme: themeName });
 	} else {
-		logger.debug("No overrides found for theme", { theme: themeName });
+		logger.debug("No tweaks found for theme", { theme: themeName });
 	}
 
 	SendMessage.updateBadge(shouldApply);
@@ -58,6 +58,6 @@ const watchThemeChanges = (
 };
 
 export const ThemeManager = {
-	applyOverridesAndUpdateBadge,
+	applyTweaksAndUpdateBadge,
 	watchThemeChanges,
 };

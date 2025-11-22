@@ -13,9 +13,9 @@ export function ThemeToggle(props: ThemeToggleProps) {
 
 	return (
 		<div class={styles.toggleContainer}>
-			<label for="toggle-overrides" class={styles.toggleLabel}>
+			<label for="toggle-tweaks" class={styles.toggleLabel}>
 				<input
-					id="toggle-overrides"
+					id="toggle-tweaks"
 					type="checkbox"
 					checked={props.checked}
 					onChange={handleChange}

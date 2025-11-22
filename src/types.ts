@@ -1,20 +1,20 @@
 /**
- * Configuration for a CSS variable that can be customized
+ * Configuration for a CSS property that can be customized
  */
-export interface CSSVariableConfig {
+export interface PropertyItem {
 	label: string;
 	propertyName: string;
 }
 
 /**
- * Theme presets stored in chrome.storage
- * Maps theme name to variable overrides
+ * Theme tweaks stored in chrome.storage
+ * Maps theme name to customized CSS properties
  */
-export interface ThemePresets {
+export interface ThemeTweaks {
 	[themeName: string]: {
 		disabled: boolean;
 		cssProperties: {
-			[varName: string]: string;
+			[propertyName: string]: string;
 		};
 	};
 }
@@ -23,39 +23,39 @@ export interface ThemePresets {
  * Storage data structure
  */
 export interface StorageData {
-	theme_presets?: ThemePresets;
+	theme_tweaks?: ThemeTweaks;
 }
 
 /**
  * Message types for communication between popup, content script, and background
  */
 export enum MessageType {
-	UPDATE_VAR = "UPDATE_VAR",
-	READ_VARS = "READ_VARS",
+	UPDATE_PROPERTY = "UPDATE_PROPERTY",
+	READ_PROPERTIES = "READ_PROPERTIES",
 	GET_THEME = "GET_THEME",
-	RESET_VARS = "RESET_VARS",
+	RESET_PROPERTIES = "RESET_PROPERTIES",
 	UPDATE_BADGE = "UPDATE_BADGE",
 }
 
 /**
  * Message payloads
  */
-export interface UpdateVarMessage {
-	type: MessageType.UPDATE_VAR;
-	varName: string;
+export interface UpdatePropertyMessage {
+	type: MessageType.UPDATE_PROPERTY;
+	propertyName: string;
 	value: string;
 }
 
-export interface ReadVarsMessage {
-	type: MessageType.READ_VARS;
+export interface ReadPropertiesMessage {
+	type: MessageType.READ_PROPERTIES;
 }
 
 export interface GetThemeMessage {
 	type: MessageType.GET_THEME;
 }
 
-export interface ResetVarsMessage {
-	type: MessageType.RESET_VARS;
+export interface ResetPropertiesMessage {
+	type: MessageType.RESET_PROPERTIES;
 }
 
 export interface UpdateBadgeMessage {
@@ -64,8 +64,8 @@ export interface UpdateBadgeMessage {
 }
 
 export type Message =
-	| UpdateVarMessage
-	| ReadVarsMessage
+	| UpdatePropertyMessage
+	| ReadPropertiesMessage
 	| GetThemeMessage
-	| ResetVarsMessage
+	| ResetPropertiesMessage
 	| UpdateBadgeMessage;
