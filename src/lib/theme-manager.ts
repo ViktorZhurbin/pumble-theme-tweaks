@@ -5,26 +5,30 @@ import { Storage } from "@/lib/storage";
 
 /**
  * Applies CSS variable overrides and updates badge accordingly
+ * Respects the disabled flag - won't apply if disabled is true
  */
 const applyOverridesAndUpdateBadge = async (
 	themeName: string,
 ): Promise<void> => {
-	const overrides = await Storage.getPreset(themeName);
-	const hasOverrides = !!overrides && Object.keys(overrides).length > 0;
+	const preset = await Storage.getPreset(themeName);
+	const hasTweaks = !!preset && Object.keys(preset.cssProperties).length > 0;
+	const shouldApply = hasTweaks && !preset.disabled;
 
-	if (hasOverrides) {
+	if (shouldApply) {
 		logger.debug("Applying theme overrides", {
 			theme: themeName,
-			count: Object.keys(overrides).length,
+			count: Object.keys(preset.cssProperties).length,
 		});
-		for (const [key, value] of Object.entries(overrides.cssProperties)) {
+		for (const [key, value] of Object.entries(preset.cssProperties)) {
 			DomUtils.applyCSSVariable(key, value);
 		}
+	} else if (hasTweaks && preset.disabled) {
+		logger.debug("Overrides exist but are disabled", { theme: themeName });
 	} else {
 		logger.debug("No overrides found for theme", { theme: themeName });
 	}
 
-	SendMessage.updateBadge(hasOverrides);
+	SendMessage.updateBadge(shouldApply);
 };
 
 /**
