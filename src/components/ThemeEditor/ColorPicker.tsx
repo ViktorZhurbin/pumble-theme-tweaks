@@ -1,4 +1,4 @@
-import "./ColorPicker.css";
+import styles from "./ColorPicker.module.css";
 
 interface ColorPickerProps {
 	label: string;
@@ -18,9 +18,13 @@ export function ColorPicker({
 		onInput(target.value);
 	};
 
+	const pickerClass = inactive
+		? `${styles.pickerGroup} ${styles.inactive}`
+		: styles.pickerGroup;
+
 	return (
-		<label class={`picker-group ${inactive ? "inactive" : ""}`}>
-			<span class="picker-label">{label}</span>
+		<label class={pickerClass}>
+			<span class={styles.pickerLabel}>{label}</span>
 			<input type="color" value={value} onInput={handleInput} />
 		</label>
 	);

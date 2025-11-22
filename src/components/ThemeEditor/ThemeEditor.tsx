@@ -1,5 +1,4 @@
-import { h } from "preact";
-import { useState, useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { CSS_VARIABLES } from "@/constants/config";
 import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
@@ -7,8 +6,8 @@ import { SendMessage } from "@/lib/messaging";
 import { Storage } from "@/lib/storage";
 import { Utils } from "@/lib/utils";
 import { ColorPicker } from "./ColorPicker";
+import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
-import "./ThemeEditor.css";
 
 export function ThemeEditor() {
 	const [themeName, setThemeName] = useState<string | null>(null);
@@ -125,12 +124,12 @@ export function ThemeEditor() {
 	}, []);
 
 	return (
-		<div class="container">
+		<div class={styles.container}>
 			<h3>Theme Tweaks</h3>
 
 			{loading && <p>Loading...</p>}
 
-			{error && <p class="error">{error}</p>}
+			{error && <p class={styles.error}>{error}</p>}
 
 			{!loading && !error && (
 				<>
@@ -142,7 +141,7 @@ export function ThemeEditor() {
 						}}
 					/>
 
-					<div class="pickers-container">
+					<div class={styles.pickersContainer}>
 						{CSS_VARIABLES.map((config) => (
 							<ColorPicker
 								key={config.propertyName}
@@ -156,7 +155,7 @@ export function ThemeEditor() {
 						))}
 					</div>
 
-					<button class="reset-btn" onClick={handleReset}>
+					<button type="button" class={styles.resetBtn} onClick={handleReset}>
 						Reset
 					</button>
 				</>
