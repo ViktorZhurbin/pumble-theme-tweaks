@@ -14,7 +14,10 @@ export function ColorPicker(props: ColorPickerProps) {
 	};
 
 	return (
-		<label class={styles.pickerGroup} classList={{ [styles.inactive]: props.inactive }}>
+		<label
+			class={styles.pickerGroup}
+			classList={{ [styles.inactive]: props.inactive }}
+		>
 			<span class={styles.pickerLabel}>{props.label}</span>
 			<input type="color" value={props.value} onInput={handleInput} />
 		</label>
