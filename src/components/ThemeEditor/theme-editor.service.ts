@@ -19,6 +19,7 @@ export const ThemeEditorService = {
 		logger.info("Resetting theme tweaks", { theme: themeName });
 		await Storage.deleteTweaks(themeName);
 		await SendMessage.resetProperties(tabId);
+		SendMessage.updateBadge(false, tabId);
 		const values = await ChromeUtils.getPickerValues(tabId, themeName);
 		logger.debug("Theme reset complete");
 		return values;
@@ -60,6 +61,6 @@ export const ThemeEditorService = {
 		}
 
 		// Update badge to reflect current state
-		SendMessage.updateBadge(enabled);
+		SendMessage.updateBadge(enabled, tabId);
 	},
 };

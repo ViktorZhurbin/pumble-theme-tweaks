@@ -14,9 +14,13 @@ const updateBadge = (tabId: number, isOn: boolean) => {
 	}
 };
 
-// Listen for badge update requests from content script
+// Listen for badge update requests from content script or popup
 chrome.runtime.onMessage.addListener((msg: Message, sender) => {
-	if (msg.type === MessageType.UPDATE_BADGE && sender.tab?.id) {
-		updateBadge(sender.tab.id, msg.badgeOn);
+	if (msg.type === MessageType.UPDATE_BADGE) {
+		// Use tabId from message (popup) or sender.tab (content script)
+		const tabId = msg.tabId ?? sender.tab?.id;
+		if (tabId) {
+			updateBadge(tabId, msg.badgeOn);
+		}
 	}
 });

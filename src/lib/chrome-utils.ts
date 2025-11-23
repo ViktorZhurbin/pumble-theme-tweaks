@@ -11,18 +11,22 @@ const getActiveTab = async () => {
 	return tab || null;
 };
 
-const getPickerValues = async (currentTabId: number, currentTheme: string) => {
+const getPickerValues = async (currentTabId: number, themeName: string) => {
 	try {
-		const [storedTweaks, currentThemeTweaks] = await Promise.all([
-			Storage.getTweaks(currentTheme),
+		const [storedTweaks, currentTheme] = await Promise.all([
+			Storage.getTweaks(themeName),
 			SendMessage.getProperties(currentTabId),
 		]);
 
 		return PROPERTY_NAMES.reduce<Record<string, string>>(
 			(acc, propertyName) => {
-				acc[propertyName] =
+				const value =
 					storedTweaks?.cssProperties[propertyName] ||
-					currentThemeTweaks[propertyName];
+					currentTheme[propertyName];
+
+				if (value) {
+					acc[propertyName] = value;
+				}
 
 				return acc;
 			},

@@ -61,6 +61,7 @@ export interface ResetPropertiesMessage {
 export interface UpdateBadgeMessage {
 	type: MessageType.UPDATE_BADGE;
 	badgeOn: boolean;
+	tabId?: number; // Required when called from popup, optional from content script
 }
 
 export type Message =

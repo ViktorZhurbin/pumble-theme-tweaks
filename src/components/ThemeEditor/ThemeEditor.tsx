@@ -4,6 +4,7 @@ import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
 import { SendMessage } from "@/lib/messaging";
 import { Storage } from "@/lib/storage";
+import { TweakUtils } from "@/lib/tweaks";
 import { Utils } from "@/lib/utils";
 import { ColorPicker } from "./ColorPicker";
 import styles from "./ThemeEditor.module.css";
@@ -18,7 +19,7 @@ export function ThemeEditor() {
 		{},
 	);
 	const [loading, setLoading] = createSignal(true);
-	const [tweaksOn, setTweaksOn] = createSignal(true);
+	const [tweaksOn, setTweaksOn] = createSignal(false);
 
 	const TWEAKS_SAVE_DEBOUNCE_MS = 500;
 	const savePropertyDebounced = Utils.debounce(
@@ -38,6 +39,7 @@ export function ThemeEditor() {
 			currentThemeName,
 		);
 		setPickerValues(values);
+		setTweaksOn(false); // Reset turns off tweaks
 	};
 
 	const handleColorChange = (propertyName: string, value: string) => {
@@ -76,9 +78,10 @@ export function ThemeEditor() {
 			const theme = await initializeTheme(currentTabId);
 			setThemeName(theme);
 
-			const [values, disabled] = await loadThemeData(currentTabId, theme);
-			setPickerValues(values);
-			setTweaksOn(!disabled);
+			const [pickerValues, tweaks] = await loadThemeData(currentTabId, theme);
+
+			setPickerValues(pickerValues);
+			setTweaksOn(TweakUtils.shouldApplyTweaks(tweaks));
 
 			logger.info("ThemeEditor initialized", {
 				theme,
@@ -162,6 +165,6 @@ async function initializeTheme(tabId: number) {
 async function loadThemeData(tabId: number, themeName: string) {
 	return Promise.all([
 		ChromeUtils.getPickerValues(tabId, themeName),
-		Storage.getDisabled(themeName),
+		Storage.getTweaks(themeName),
 	]);
 }
