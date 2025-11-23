@@ -35,6 +35,7 @@ export enum MessageType {
 	GET_THEME = "GET_THEME",
 	RESET_PROPERTIES = "RESET_PROPERTIES",
 	UPDATE_BADGE = "UPDATE_BADGE",
+	THEME_CHANGED = "THEME_CHANGED",
 }
 
 /**
@@ -64,9 +65,16 @@ export interface UpdateBadgeMessage {
 	tabId?: number; // Required when called from popup, optional from content script
 }
 
+export interface ThemeChangedMessage {
+	type: MessageType.THEME_CHANGED;
+	newTheme: string | null;
+	oldTheme: string | null;
+}
+
 export type Message =
 	| UpdatePropertyMessage
 	| ReadPropertiesMessage
 	| GetThemeMessage
 	| ResetPropertiesMessage
-	| UpdateBadgeMessage;
+	| UpdateBadgeMessage
+	| ThemeChangedMessage;

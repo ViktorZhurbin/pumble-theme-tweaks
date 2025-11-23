@@ -67,6 +67,13 @@ const themeObserver = ThemeManager.watchThemeChanges((newTheme, oldTheme) => {
 		// No theme detected - ensure badge is inactive
 		SendMessage.updateBadge(false);
 	}
+
+	// Notify popup about theme change
+	chrome.runtime.sendMessage({
+		type: MessageType.THEME_CHANGED,
+		newTheme,
+		oldTheme,
+	});
 });
 
 // Cleanup: disconnect observer when page hides (more reliable than unload)

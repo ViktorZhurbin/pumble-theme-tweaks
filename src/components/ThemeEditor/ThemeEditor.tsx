@@ -1,4 +1,4 @@
-import { createSignal, For, onMount, Show } from "solid-js";
+import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { PROPERTIES } from "@/constants/properties";
 import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
@@ -6,6 +6,7 @@ import { SendMessage } from "@/lib/messaging";
 import { Storage } from "@/lib/storage";
 import { TweakUtils } from "@/lib/tweaks";
 import { Utils } from "@/lib/utils";
+import { type Message, MessageType } from "@/types";
 import { ColorPicker } from "./ColorPicker";
 import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
@@ -87,6 +88,26 @@ export function ThemeEditor() {
 				theme,
 				tabId: currentTabId,
 			});
+
+			// Listen for theme changes from content script
+			const handleMessage = async (msg: Message) => {
+				if (msg.type === MessageType.THEME_CHANGED && msg.newTheme) {
+					logger.info("Theme changed, reloading data", {
+						from: msg.oldTheme,
+						to: msg.newTheme,
+					});
+					setThemeName(msg.newTheme);
+					const [newPickerValues, newTweaks] = await loadThemeData(
+						currentTabId,
+						msg.newTheme,
+					);
+					setPickerValues(newPickerValues);
+					setTweaksOn(TweakUtils.shouldApplyTweaks(newTweaks));
+				}
+			};
+
+			chrome.runtime.onMessage.addListener(handleMessage);
+			onCleanup(() => chrome.runtime.onMessage.removeListener(handleMessage));
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Unknown error");
 		} finally {

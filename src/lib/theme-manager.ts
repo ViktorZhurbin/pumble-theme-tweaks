@@ -15,16 +15,25 @@ const applyTweaksAndUpdateBadge = async (themeName: string): Promise<void> => {
 		logger.debug("Applying theme tweaks", {
 			theme: themeName,
 		});
+
 		for (const [key, value] of Object.entries(tweaks.cssProperties)) {
 			DomUtils.applyCSSProperty(key, value);
 		}
-	} else if (TweakUtils.hasTweaks(tweaks) && tweaks.disabled) {
-		logger.debug("Tweaks exist but are disabled", { theme: themeName });
-	} else {
-		logger.debug("No tweaks found for theme", { theme: themeName });
+
+		SendMessage.updateBadge(true);
+
+		return;
 	}
 
-	SendMessage.updateBadge(TweakUtils.shouldApplyTweaks(tweaks));
+	if (TweakUtils.hasTweaks(tweaks) && tweaks.disabled) {
+		logger.debug("Tweaks exist but are disabled", { theme: themeName });
+		SendMessage.updateBadge(false);
+
+		return;
+	}
+
+	logger.debug("No tweaks found for theme", { theme: themeName });
+	SendMessage.updateBadge(false);
 };
 
 /**
