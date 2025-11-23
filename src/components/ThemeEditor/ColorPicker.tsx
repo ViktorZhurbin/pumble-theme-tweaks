@@ -1,3 +1,4 @@
+import { ColorUtils } from "@/lib/color";
 import styles from "./ColorPicker.module.css";
 
 interface ColorPickerProps {
@@ -19,7 +20,11 @@ export function ColorPicker(props: ColorPickerProps) {
 			classList={{ [styles.inactive]: props.inactive }}
 		>
 			<span class={styles.pickerLabel}>{props.label}</span>
-			<input type="color" value={props.value} onInput={handleInput} />
+			<input
+				type="color"
+				value={ColorUtils.toHex(props.value)}
+				onInput={handleInput}
+			/>
 		</label>
 	);
 }

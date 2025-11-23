@@ -1,74 +1,73 @@
-import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import {
+	createSignal,
+	For,
+	onCleanup,
+	onMount,
+	Show,
+} from "solid-js";
+import { createStore } from "solid-js/store";
 import { PROPERTIES } from "@/constants/properties";
 import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
-import { SendMessage } from "@/lib/messaging";
-import { Storage } from "@/lib/storage";
-import { TweakUtils } from "@/lib/tweaks";
-import { Utils } from "@/lib/utils";
-import { type Message, MessageType } from "@/types";
+import { ToContentScript } from "@/lib/messages/to-content-script";
+import {
+	type Message,
+	MessageType,
+	type RuntimeState,
+} from "@/lib/messages/types";
 import { ColorPicker } from "./ColorPicker";
 import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
-import { ThemeEditorService } from "./theme-editor.service";
 
 export function ThemeEditor() {
-	const [themeName, setThemeName] = createSignal<string | null>(null);
+	// Use createStore for runtime state (reactive view of content script state)
+	const [store, setStore] = createStore<RuntimeState>({
+		themeName: null,
+		tweakModeOn: false,
+		pickerValues: {},
+		tweaks: undefined,
+	});
+
 	const [tabId, setTabId] = createSignal<number | null>(null);
 	const [error, setError] = createSignal<string | null>(null);
-	const [pickerValues, setPickerValues] = createSignal<Record<string, string>>(
-		{},
-	);
 	const [loading, setLoading] = createSignal(true);
-	const [tweaksOn, setTweaksOn] = createSignal(false);
 
-	const TWEAKS_SAVE_DEBOUNCE_MS = 500;
-	const savePropertyDebounced = Utils.debounce(
-		(theme: string, propertyName: string, value: string) => {
-			Storage.saveProperty(theme, propertyName, value);
-		},
-		TWEAKS_SAVE_DEBOUNCE_MS,
-	);
-
-	const handleReset = async () => {
+	const handleReset = () => {
 		const currentTabId = tabId();
-		const currentThemeName = themeName();
-		if (!currentTabId || !currentThemeName) return;
 
-		const values = await ThemeEditorService.resetTheme(
-			currentTabId,
-			currentThemeName,
-		);
-		setPickerValues(values);
-		setTweaksOn(false); // Reset turns off tweaks
+		if (!currentTabId) return;
+
+		ToContentScript.resetTweaks(currentTabId);
 	};
 
 	const handleColorChange = (propertyName: string, value: string) => {
 		const currentTabId = tabId();
-		const currentThemeName = themeName();
-		if (!currentTabId || !currentThemeName) return;
 
-		setPickerValues((prev) => ({ ...prev, [propertyName]: value }));
-		savePropertyDebounced(currentThemeName, propertyName, value);
-		ThemeEditorService.updateColor(
-			currentTabId,
-			currentThemeName,
-			propertyName,
-			value,
-		);
+		if (!currentTabId || !store.themeName) return;
+
+		// Optimistic update for responsive UI
+		setStore("pickerValues", propertyName, value);
+
+		// Send to content script (ThemeState handles storage and broadcasts updates)
+		ToContentScript.updateProperty(currentTabId, propertyName, value);
 	};
 
-	const handleToggleTweaks = async () => {
+	const handleToggleTweaks = (checked: boolean) => {
 		const currentTabId = tabId();
-		const currentThemeName = themeName();
-		if (!currentTabId || !currentThemeName) return;
+		if (!currentTabId) return;
 
-		await ThemeEditorService.toggleTweaks(
-			currentTabId,
-			currentThemeName,
-			tweaksOn(),
-			pickerValues(),
-		);
+		// State updates automatically via broadcast
+		ToContentScript.toggleTweaks(currentTabId, checked);
+	};
+
+	// Listen for state changes from content script
+	const handleMessage = (msg: Message) => {
+		if (msg.type === MessageType.STATE_CHANGED) {
+			logger.debug("State changed from content script", {
+				state: msg.state,
+			});
+			setStore(msg.state);
+		}
 	};
 
 	onMount(async () => {
@@ -76,43 +75,25 @@ export function ThemeEditor() {
 			const currentTabId = await initializeTab();
 			setTabId(currentTabId);
 
-			const theme = await initializeTheme(currentTabId);
-			setThemeName(theme);
-
-			const [pickerValues, tweaks] = await loadThemeData(currentTabId, theme);
-
-			setPickerValues(pickerValues);
-			setTweaksOn(TweakUtils.shouldApplyTweaks(tweaks));
+			// Get runtime state from content script (source of truth)
+			const runtimeState = await ToContentScript.getCurrentState(currentTabId);
+			setStore(runtimeState);
 
 			logger.info("ThemeEditor initialized", {
-				theme,
+				state: runtimeState,
 				tabId: currentTabId,
 			});
 
-			// Listen for theme changes from content script
-			const handleMessage = async (msg: Message) => {
-				if (msg.type === MessageType.THEME_CHANGED && msg.newTheme) {
-					logger.info("Theme changed, reloading data", {
-						from: msg.oldTheme,
-						to: msg.newTheme,
-					});
-					setThemeName(msg.newTheme);
-					const [newPickerValues, newTweaks] = await loadThemeData(
-						currentTabId,
-						msg.newTheme,
-					);
-					setPickerValues(newPickerValues);
-					setTweaksOn(TweakUtils.shouldApplyTweaks(newTweaks));
-				}
-			};
-
 			chrome.runtime.onMessage.addListener(handleMessage);
-			onCleanup(() => chrome.runtime.onMessage.removeListener(handleMessage));
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Unknown error");
 		} finally {
 			setLoading(false);
 		}
+	});
+
+	onCleanup(() => {
+		chrome.runtime.onMessage.removeListener(handleMessage);
 	});
 
 	return (
@@ -129,11 +110,8 @@ export function ThemeEditor() {
 
 			<Show when={!loading() && !error()}>
 				<ThemeToggle
-					checked={tweaksOn()}
-					onChange={(checked) => {
-						setTweaksOn(checked);
-						handleToggleTweaks();
-					}}
+					checked={store.tweakModeOn}
+					onChange={handleToggleTweaks}
 				/>
 
 				<div class={styles.pickersContainer}>
@@ -141,9 +119,11 @@ export function ThemeEditor() {
 						{({ label, propertyName }) => (
 							<ColorPicker
 								label={label}
-								value={pickerValues()[propertyName] || ""}
-								inactive={!tweaksOn()}
-								onInput={(value) => handleColorChange(propertyName, value)}
+								value={store.pickerValues[propertyName] || ""}
+								inactive={!store.tweakModeOn}
+								onInput={(value) => {
+									handleColorChange(propertyName, value);
+								}}
 							/>
 						)}
 					</For>
@@ -167,25 +147,4 @@ async function initializeTab(): Promise<number> {
 		throw new Error("Please open a Pumble tab");
 	}
 	return tab.id;
-}
-
-/**
- * Initialization helper: Get and validate theme
- */
-async function initializeTheme(tabId: number) {
-	const theme = await SendMessage.getTheme(tabId);
-	if (!theme) {
-		throw new Error("Unable to detect Pumble theme");
-	}
-	return theme;
-}
-
-/**
- * Initialization helper: Load theme data
- */
-async function loadThemeData(tabId: number, themeName: string) {
-	return Promise.all([
-		ChromeUtils.getPickerValues(tabId, themeName),
-		Storage.getTweaks(themeName),
-	]);
 }

@@ -1,40 +1,4 @@
 import { DomUtils } from "@/lib/dom-utils";
-import { logger } from "@/lib/logger";
-import { SendMessage } from "@/lib/messaging";
-import { Storage } from "@/lib/storage";
-import { TweakUtils } from "./tweaks";
-
-/**
- * Applies CSS property tweaks and updates badge accordingly
- * Respects the disabled flag - won't apply if disabled is true
- */
-const applyTweaksAndUpdateBadge = async (themeName: string): Promise<void> => {
-	const tweaks = await Storage.getTweaks(themeName);
-
-	if (TweakUtils.hasTweaks(tweaks) && !tweaks.disabled) {
-		logger.debug("Applying theme tweaks", {
-			theme: themeName,
-		});
-
-		for (const [key, value] of Object.entries(tweaks.cssProperties)) {
-			DomUtils.applyCSSProperty(key, value);
-		}
-
-		SendMessage.updateBadge(true);
-
-		return;
-	}
-
-	if (TweakUtils.hasTweaks(tweaks) && tweaks.disabled) {
-		logger.debug("Tweaks exist but are disabled", { theme: themeName });
-		SendMessage.updateBadge(false);
-
-		return;
-	}
-
-	logger.debug("No tweaks found for theme", { theme: themeName });
-	SendMessage.updateBadge(false);
-};
 
 /**
  * Watches for theme changes (class attribute changes on html element)
@@ -63,6 +27,5 @@ const watchThemeChanges = (
 };
 
 export const ThemeManager = {
-	applyTweaksAndUpdateBadge,
 	watchThemeChanges,
 };

@@ -1,5 +1,5 @@
 import { logger } from "@/lib/logger";
-import { type Message, MessageType } from "@/types";
+import { type Message, MessageType } from "@/lib/messages/types";
 
 /**
  * Updates the extension badge for a specific tab

@@ -1,10 +1,11 @@
 import { logger } from "@/lib/logger";
-import type { StorageData, ThemeTweaks } from "@/types";
+import type { StorageData, ThemeTweaks, ThemeTweaksRecord } from "@/types";
+import { Utils } from "./utils";
 
 /**
  * Gets all theme tweaks from storage
  */
-const getAllTweaks = async (): Promise<ThemeTweaks> => {
+const getAllTweaks = async (): Promise<ThemeTweaksRecord> => {
 	try {
 		const result = await chrome.storage.sync.get<StorageData>("theme_tweaks");
 		return result.theme_tweaks ?? {};
@@ -19,7 +20,7 @@ const getAllTweaks = async (): Promise<ThemeTweaks> => {
  */
 const getTweaks = async (
 	themeName: string,
-): Promise<ThemeTweaks[string] | undefined> => {
+): Promise<ThemeTweaks | undefined> => {
 	const tweaks = await getAllTweaks();
 
 	return tweaks[themeName];
@@ -45,6 +46,13 @@ const saveProperty = async (
 	}
 };
 
+const savePropertyDebounced = Utils.debounce(
+	(theme: string, propertyName: string, value: string) => {
+		Storage.saveProperty(theme, propertyName, value);
+	},
+	500,
+);
+
 /**
  * Deletes all tweaks for a specific theme
  */
@@ -60,15 +68,6 @@ const deleteTweaks = async (themeName: string) => {
 			throw err;
 		}
 	}
-};
-
-/**
- * Gets whether tweaks are disabled for a specific theme
- * Returns false (enabled) if tweaks don't exist
- */
-const getDisabled = async (themeName: string): Promise<boolean> => {
-	const tweaks = await getTweaks(themeName);
-	return tweaks?.disabled ?? false; // Default to enabled (not disabled)
 };
 
 /**
@@ -90,7 +89,7 @@ const setDisabled = async (themeName: string, disabled: boolean) => {
 export const Storage = {
 	getTweaks,
 	saveProperty,
+	savePropertyDebounced,
 	deleteTweaks,
-	getDisabled,
 	setDisabled,
 };

@@ -12,10 +12,10 @@ export const PROPERTIES: PropertyItem[] = [
 		label: "Create button",
 		propertyName: "--palette-primary-main",
 	},
-	{
-		label: "Search border",
-		propertyName: "--main-search-stroke",
-	},
+	// {
+	// 	label: "Search border",
+	// 	propertyName: "--main-search-stroke",
+	// },
 	{
 		label: "Main view bg",
 		propertyName: "--background",

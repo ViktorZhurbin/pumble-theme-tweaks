@@ -11,70 +11,17 @@ export interface PropertyItem {
  * Maps theme name to customized CSS properties
  */
 export interface ThemeTweaks {
-	[themeName: string]: {
-		disabled: boolean;
-		cssProperties: {
-			[propertyName: string]: string;
-		};
+	disabled: boolean;
+	cssProperties: {
+		[propertyName: string]: string;
 	};
 }
+
+export type ThemeTweaksRecord = Record<string, ThemeTweaks>;
 
 /**
  * Storage data structure
  */
 export interface StorageData {
-	theme_tweaks?: ThemeTweaks;
+	theme_tweaks?: ThemeTweaksRecord;
 }
-
-/**
- * Message types for communication between popup, content script, and background
- */
-export enum MessageType {
-	UPDATE_PROPERTY = "UPDATE_PROPERTY",
-	READ_PROPERTIES = "READ_PROPERTIES",
-	GET_THEME = "GET_THEME",
-	RESET_PROPERTIES = "RESET_PROPERTIES",
-	UPDATE_BADGE = "UPDATE_BADGE",
-	THEME_CHANGED = "THEME_CHANGED",
-}
-
-/**
- * Message payloads
- */
-export interface UpdatePropertyMessage {
-	type: MessageType.UPDATE_PROPERTY;
-	propertyName: string;
-	value: string;
-}
-
-export interface ReadPropertiesMessage {
-	type: MessageType.READ_PROPERTIES;
-}
-
-export interface GetThemeMessage {
-	type: MessageType.GET_THEME;
-}
-
-export interface ResetPropertiesMessage {
-	type: MessageType.RESET_PROPERTIES;
-}
-
-export interface UpdateBadgeMessage {
-	type: MessageType.UPDATE_BADGE;
-	badgeOn: boolean;
-	tabId?: number; // Required when called from popup, optional from content script
-}
-
-export interface ThemeChangedMessage {
-	type: MessageType.THEME_CHANGED;
-	newTheme: string | null;
-	oldTheme: string | null;
-}
-
-export type Message =
-	| UpdatePropertyMessage
-	| ReadPropertiesMessage
-	| GetThemeMessage
-	| ResetPropertiesMessage
-	| UpdateBadgeMessage
-	| ThemeChangedMessage;
