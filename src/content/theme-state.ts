@@ -38,11 +38,11 @@ class ThemeStateManager {
 				DomUtils.applyCSSProperty(key, value);
 			}
 
-			ToBackground.updateBadge(true);
+			ToBackground.updateBadge({ badgeOn: true });
 		} else {
 			logger.debug("ThemeState: Removing CSS tweaks");
 			DomUtils.resetCSSTweaks();
-			ToBackground.updateBadge(false);
+			ToBackground.updateBadge({ badgeOn: false });
 		}
 
 		// Update internal state - tweakModeOn represents whether tweaking mode is enabled
@@ -54,7 +54,7 @@ class ThemeStateManager {
 		};
 
 		// Broadcast state change to popup
-		ToBackground.notifyStateChanged(this.currentState);
+		ToBackground.stateChanged({ state: this.currentState });
 
 		logger.debug("ThemeState: State updated", this.currentState);
 	}
@@ -121,7 +121,7 @@ class ThemeStateManager {
 		}
 
 		// Broadcast updated state to popup immediately
-		ToBackground.notifyStateChanged(this.currentState);
+		ToBackground.stateChanged({ state: this.currentState });
 
 		// Save to storage in background (debounced)
 		Storage.savePropertyDebounced(themeName, propertyName, value);

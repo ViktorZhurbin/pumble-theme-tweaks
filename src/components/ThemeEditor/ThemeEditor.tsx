@@ -1,20 +1,11 @@
-import {
-	createSignal,
-	For,
-	onCleanup,
-	onMount,
-	Show,
-} from "solid-js";
+import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { PROPERTIES } from "@/constants/properties";
 import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
+import { ToBackground } from "@/lib/messages/to-background";
 import { ToContentScript } from "@/lib/messages/to-content-script";
-import {
-	type Message,
-	MessageType,
-	type RuntimeState,
-} from "@/lib/messages/types";
+import type { RuntimeState } from "@/lib/messages/types";
 import { ColorPicker } from "./ColorPicker";
 import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
@@ -34,22 +25,24 @@ export function ThemeEditor() {
 
 	const handleReset = () => {
 		const currentTabId = tabId();
-
 		if (!currentTabId) return;
 
-		ToContentScript.resetTweaks(currentTabId);
+		ToContentScript.resetTweaks({ tabId: currentTabId });
 	};
 
 	const handleColorChange = (propertyName: string, value: string) => {
 		const currentTabId = tabId();
-
 		if (!currentTabId || !store.themeName) return;
 
 		// Optimistic update for responsive UI
 		setStore("pickerValues", propertyName, value);
 
 		// Send to content script (ThemeState handles storage and broadcasts updates)
-		ToContentScript.updateProperty(currentTabId, propertyName, value);
+		ToContentScript.updateProperty({
+			tabId: currentTabId,
+			propertyName,
+			value,
+		});
 	};
 
 	const handleToggleTweaks = (checked: boolean) => {
@@ -57,16 +50,15 @@ export function ThemeEditor() {
 		if (!currentTabId) return;
 
 		// State updates automatically via broadcast
-		ToContentScript.toggleTweaks(currentTabId, checked);
+		ToContentScript.toggleTweaks({ tabId: currentTabId, enabled: checked });
 	};
 
 	// Listen for state changes from content script
-	const handleMessage = (msg: Message) => {
-		if (msg.type === MessageType.STATE_CHANGED) {
-			logger.debug("State changed from content script", {
-				state: msg.state,
-			});
-			setStore(msg.state);
+	const handleMessage = (msg: unknown) => {
+		if (ToBackground.stateChanged.match(msg)) {
+			const { state } = msg;
+			logger.debug("State changed from content script", { state });
+			setStore(state);
 		}
 	};
 
@@ -76,7 +68,9 @@ export function ThemeEditor() {
 			setTabId(currentTabId);
 
 			// Get runtime state from content script (source of truth)
-			const runtimeState = await ToContentScript.getCurrentState(currentTabId);
+			const runtimeState = await ToContentScript.getCurrentState({
+				tabId: currentTabId,
+			});
 			setStore(runtimeState);
 
 			logger.info("ThemeEditor initialized", {

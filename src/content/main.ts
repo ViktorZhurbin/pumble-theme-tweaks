@@ -1,7 +1,7 @@
 import { DomUtils } from "@/lib/dom-utils";
 import { logger } from "@/lib/logger";
 import { ToBackground } from "@/lib/messages/to-background";
-import { type Message, MessageType } from "@/lib/messages/types";
+import { ToContentScript } from "@/lib/messages/to-content-script";
 import { ThemeManager } from "@/lib/theme-manager";
 import { ThemeState } from "./theme-state";
 
@@ -26,9 +26,9 @@ if (document.readyState === "loading") {
 }
 
 // Listen for messages from popup
-chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg: unknown, _, sendResponse) => {
 	// Messages that need responses - return true
-	if (msg.type === MessageType.GET_STATE) {
+	if (ToContentScript.getCurrentState.match(msg)) {
 		const state = ThemeState.getCurrentState();
 		logger.debug("Getting current state", { state });
 		sendResponse(state);
@@ -36,7 +36,7 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 	}
 
 	// Fire-and-forget messages - no return needed
-	if (msg.type === MessageType.UPDATE_PROPERTY) {
+	if (ToContentScript.updateProperty.match(msg)) {
 		logger.debug("Updating CSS property via ThemeState", {
 			propertyName: msg.propertyName,
 			value: msg.value,
@@ -44,12 +44,12 @@ chrome.runtime.onMessage.addListener((msg: Message, _, sendResponse) => {
 		ThemeState.updateProperty(msg.propertyName, msg.value);
 	}
 
-	if (msg.type === MessageType.TOGGLE_TWEAKS) {
+	if (ToContentScript.toggleTweaks.match(msg)) {
 		logger.debug("Toggling tweaks", { enabled: msg.enabled });
 		ThemeState.toggle(msg.enabled);
 	}
 
-	if (msg.type === MessageType.RESET_TWEAKS) {
+	if (ToContentScript.resetTweaks.match(msg)) {
 		logger.debug("Resetting tweaks via ThemeState");
 		ThemeState.reset();
 	}
@@ -64,7 +64,7 @@ const themeObserver = ThemeManager.watchThemeChanges((newTheme, oldTheme) => {
 		ThemeState.applyForTheme(newTheme);
 	} else {
 		// No theme detected - ensure badge is inactive
-		ToBackground.updateBadge(false);
+		ToBackground.updateBadge({ badgeOn: false });
 	}
 });
 
