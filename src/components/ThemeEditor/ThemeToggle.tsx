@@ -2,6 +2,7 @@ import styles from "./ThemeToggle.module.css";
 
 interface ThemeToggleProps {
 	checked: boolean;
+	disabled: boolean;
 	onChange: (checked: boolean) => void;
 }
 
@@ -12,15 +13,14 @@ export function ThemeToggle(props: ThemeToggleProps) {
 	};
 
 	return (
-		<div>
-			<label class={styles.toggleLabel}>
-				<input
-					type="checkbox"
-					checked={props.checked}
-					onChange={handleChange}
-				/>
-				Toggle theme tweaks
-			</label>
-		</div>
+		<label class={styles.toggleLabel} aria-disabled={props.disabled}>
+			<input
+				type="checkbox"
+				disabled={props.disabled}
+				checked={props.checked}
+				onChange={handleChange}
+			/>
+			Toggle theme tweaks
+		</label>
 	);
 }

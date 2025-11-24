@@ -154,9 +154,12 @@ export function ThemeEditor() {
 							</For>
 						</div>
 
+						<div class={styles.separator} />
+
 						<div class={styles.actionsContainer}>
 							<ThemeToggle
 								checked={store.tweakModeOn}
+								disabled={store.globalDisabled}
 								onChange={handleToggleTweaks}
 							/>
 
