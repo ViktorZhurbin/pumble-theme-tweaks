@@ -1,9 +1,12 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: Needs to be this generic */
 /** biome-ignore-all lint/suspicious/noConfusingVoidType: Needs to be this generic */
 
+import type { Runtime } from "webextension-polyfill";
+import browser from "webextension-polyfill";
+
 /**
- * Lightweight type-safe messenger for Chrome extension communication
- * Inspired by @webext-core/messaging but simplified and dependency-free
+ * Lightweight type-safe messenger for cross-browser extension communication
+ * Uses webextension-polyfill for Firefox, Chrome, Safari, Edge compatibility
  */
 
 /**
@@ -24,7 +27,7 @@ type Handler<P, K extends keyof P> = (
 		data: P[K] extends ProtocolShape ? P[K]["data"] : any;
 		timestamp: number;
 	},
-	sender: chrome.runtime.MessageSender,
+	sender: Runtime.MessageSender,
 ) => P[K] extends ProtocolShape
 	? P[K]["response"] extends undefined
 		? void | Promise<void>
@@ -55,38 +58,37 @@ export function createMessenger<P>() {
 	// Store handlers for each message type
 	const handlers: Partial<Record<keyof P, Handler<P, any>>> = {};
 
-	// Single root listener (lazy initialized)
-	let rootListener:
-		| ((
-				msg: any,
-				sender: chrome.runtime.MessageSender,
-				sendResponse: (response: ResponseEnvelope) => void,
-		  ) => boolean | void)
-		| null = null;
-
 	/**
-	 * Sets up the single root Chrome listener that routes to registered handlers
+	 * Sets up the single root browser listener that routes to registered handlers
 	 */
 	function setupRootListener() {
-		if (rootListener) return;
+		// Only setup once
+		if (browser.runtime.onMessage.hasListener(handleMessage)) return;
 
-		rootListener = (msg, sender, sendResponse) => {
-			// Validate message format
-			if (!msg?.type || typeof msg.type !== "string") return;
+		browser.runtime.onMessage.addListener(handleMessage);
+	}
 
-			// Find handler for this message type
-			const handler = handlers[msg.type as keyof P];
-			if (!handler) return;
+	/**
+	 * Root message handler
+	 */
+	async function handleMessage(
+		msg: any,
+		sender: Runtime.MessageSender,
+	): Promise<ResponseEnvelope | undefined> {
+		// Validate message format
+		if (!msg?.type || typeof msg.type !== "string") return undefined;
 
-			// Execute handler and wrap result
-			Promise.resolve(handler(msg, sender))
-				.then((res) => sendResponse({ res }))
-				.catch((err) => sendResponse({ err: err.message }));
+		// Find handler for this message type
+		const handler = handlers[msg.type as keyof P];
+		if (!handler) return undefined;
 
-			return true; // Async response
-		};
-
-		chrome.runtime.onMessage.addListener(rootListener);
+		// Execute handler and wrap result
+		try {
+			const res = await handler(msg, sender);
+			return { res };
+		} catch (err) {
+			return { err: (err as Error).message };
+		}
 	}
 
 	/**
@@ -108,7 +110,7 @@ export function createMessenger<P>() {
 	/**
 	 * Sends a message to the background script or a specific tab
 	 */
-	function sendMessage<K extends keyof P>(
+	async function sendMessage<K extends keyof P>(
 		type: K,
 		data: P[K] extends ProtocolShape ? P[K]["data"] : any,
 		tabId?: number,
@@ -120,14 +122,12 @@ export function createMessenger<P>() {
 		};
 
 		// Send to specific tab or broadcast to background
-		const promise: Promise<ResponseEnvelope> = tabId
-			? chrome.tabs.sendMessage(tabId, message)
-			: chrome.runtime.sendMessage(message);
+		const response: ResponseEnvelope = tabId
+			? await browser.tabs.sendMessage(tabId, message)
+			: await browser.runtime.sendMessage(message);
 
-		return promise.then(({ res, err }) => {
-			if (err) throw new Error(err);
-			return res;
-		});
+		if (response.err) throw new Error(response.err);
+		return response.res;
 	}
 
 	return { onMessage, sendMessage };

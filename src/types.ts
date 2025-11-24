@@ -7,7 +7,7 @@ export interface PropertyItem {
 }
 
 /**
- * Theme tweaks stored in chrome.storage
+ * Theme tweaks stored in browser.storage
  * Maps theme name to customized CSS properties
  */
 export interface ThemeTweaks {

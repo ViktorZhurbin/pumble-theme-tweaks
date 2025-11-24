@@ -1,16 +1,17 @@
+import browser from "webextension-polyfill";
 import { logger } from "@/lib/logger";
 import { Background } from "@/lib/messages";
 
 /**
  * Updates the extension badge for a specific tab
  */
-const updateBadge = (tabId: number, isOn: boolean) => {
+const updateBadge = async (tabId: number, isOn: boolean) => {
 	logger.debug("Updating badge", { tabId, isOn });
 	if (isOn) {
-		chrome.action.setBadgeText({ text: "ON", tabId });
-		chrome.action.setBadgeBackgroundColor({ color: "#4CAF50", tabId });
+		await browser.action.setBadgeText({ text: "ON", tabId });
+		await browser.action.setBadgeBackgroundColor({ color: "#4CAF50", tabId });
 	} else {
-		chrome.action.setBadgeText({ text: "", tabId });
+		await browser.action.setBadgeText({ text: "", tabId });
 	}
 };
 

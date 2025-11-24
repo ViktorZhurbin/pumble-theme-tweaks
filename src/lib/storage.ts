@@ -1,3 +1,4 @@
+import browser from "webextension-polyfill";
 import { logger } from "@/lib/logger";
 import type { StorageData, ThemeTweaks, ThemeTweaksRecord } from "@/types";
 import { Utils } from "./utils";
@@ -7,7 +8,9 @@ import { Utils } from "./utils";
  */
 const getAllTweaks = async (): Promise<ThemeTweaksRecord> => {
 	try {
-		const result = await chrome.storage.sync.get<StorageData>("theme_tweaks");
+		const result = (await browser.storage.sync.get(
+			"theme_tweaks",
+		)) as StorageData;
 		return result.theme_tweaks ?? {};
 	} catch (err) {
 		logger.error("Storage read error:", err);
@@ -40,7 +43,7 @@ const saveProperty = async (
 	tweaks[themeName].cssProperties[propertyName] = value;
 
 	try {
-		await chrome.storage.sync.set({ theme_tweaks: tweaks });
+		await browser.storage.sync.set({ theme_tweaks: tweaks });
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}
@@ -62,7 +65,7 @@ const deleteTweaks = async (themeName: string) => {
 	if (tweaks[themeName]) {
 		delete tweaks[themeName];
 		try {
-			await chrome.storage.sync.set({ theme_tweaks: tweaks });
+			await browser.storage.sync.set({ theme_tweaks: tweaks });
 		} catch (err) {
 			logger.error("Storage delete error:", err);
 			throw err;
@@ -80,7 +83,7 @@ const setDisabled = async (themeName: string, disabled: boolean) => {
 	tweaks[themeName].disabled = disabled;
 
 	try {
-		await chrome.storage.sync.set({ theme_tweaks: tweaks });
+		await browser.storage.sync.set({ theme_tweaks: tweaks });
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}

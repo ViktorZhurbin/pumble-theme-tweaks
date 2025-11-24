@@ -1,5 +1,7 @@
+import browser from "webextension-polyfill";
+
 const getActiveTab = async () => {
-	const [tab] = await chrome.tabs.query({
+	const [tab] = await browser.tabs.query({
 		active: true,
 		currentWindow: true,
 	});

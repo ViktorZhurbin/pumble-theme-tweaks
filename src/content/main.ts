@@ -1,3 +1,4 @@
+import browser from "webextension-polyfill";
 import { DomUtils } from "@/lib/dom-utils";
 import { logger } from "@/lib/logger";
 import { ContentScript } from "@/lib/messages";
@@ -53,7 +54,7 @@ ContentScript.onMessage("resetTweaks", () => {
 const themeObserver = watchThemeChanges();
 
 // Listen for storage changes and re-apply tweaks
-chrome.storage.onChanged.addListener((changes, areaName) => {
+browser.storage.onChanged.addListener((changes, areaName) => {
 	if (areaName === "sync" && changes.theme_tweaks) {
 		logger.debug("Storage changed, re-applying tweaks");
 		const currentTheme = DomUtils.getCurrentTheme();
