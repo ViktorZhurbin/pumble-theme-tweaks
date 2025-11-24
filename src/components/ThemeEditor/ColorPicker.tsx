@@ -5,6 +5,7 @@ interface ColorPickerProps {
 	label: string;
 	value: string;
 	inactive?: boolean;
+	isModified?: boolean;
 	onInput: (value: string) => void;
 }
 
@@ -19,7 +20,12 @@ export function ColorPicker(props: ColorPickerProps) {
 			class={styles.pickerGroup}
 			classList={{ [styles.inactive]: props.inactive }}
 		>
-			<span class={styles.pickerLabel}>{props.label}</span>
+			<span class={styles.pickerLabel}>
+				{props.label}
+				{props.isModified && (
+					<span class={styles.badge} title="Modified from default" />
+				)}
+			</span>
 			<input
 				type="color"
 				value={ColorUtils.toHex(props.value)}

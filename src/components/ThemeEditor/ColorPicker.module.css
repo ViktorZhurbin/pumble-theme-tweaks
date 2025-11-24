@@ -28,19 +28,18 @@
 	font-weight: 600;
 	font-size: 0.875rem;
 	line-height: 1.4;
+	display: flex;
+	align-items: center;
+	gap: 6px;
 }
 
-@media (prefers-color-scheme: light) {
-	.pickerGroup {
-		background: #ffffff;
-		border-color: rgba(0, 0, 0, 0.1);
-	}
-
-	.pickerGroup:hover:not(.inactive) {
-		background: #f8f8f8;
-		border-color: rgba(0, 0, 0, 0.15);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	}
+.badge {
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background-color: #4caf50;
+	flex-shrink: 0;
 }
 
 .pickerGroup input[type="color"] {

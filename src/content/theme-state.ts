@@ -10,6 +10,7 @@ const initialState: RuntimeState = {
 	tweakModeOn: true,
 	pickerValues: {},
 	tweaks: undefined,
+	modifiedProperties: [],
 	globalDisabled: false,
 };
 /**
@@ -55,6 +56,7 @@ class ThemeStateManager {
 			tweakModeOn: !globalDisabled && !storedTweaks?.disabled,
 			pickerValues: this.buildPickerValues(storedTweaks),
 			tweaks: storedTweaks,
+			modifiedProperties: this.getModifiedProperties(),
 			globalDisabled,
 		};
 
@@ -136,6 +138,7 @@ class ThemeStateManager {
 		if (this.currentState.tweaks) {
 			this.currentState.tweaks.cssProperties[propertyName] = value;
 		}
+		this.currentState.modifiedProperties = this.getModifiedProperties();
 
 		// Broadcast updated state to popup immediately
 		Background.sendMessage("stateChanged", { state: this.currentState });
@@ -172,6 +175,15 @@ class ThemeStateManager {
 				return acc;
 			},
 			{},
+		);
+	}
+
+	/**
+	 * Gets list of properties that have been modified (exist as inline styles)
+	 */
+	private getModifiedProperties(): string[] {
+		return PROPERTY_NAMES.filter((propertyName) =>
+			DomUtils.isPropertyModified(propertyName),
 		);
 	}
 }

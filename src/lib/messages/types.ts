@@ -9,5 +9,6 @@ export interface RuntimeState {
 	tweakModeOn: boolean;
 	pickerValues: Record<string, string>;
 	tweaks: ThemeTweaks | undefined;
+	modifiedProperties: string[]; // Properties with inline styles (modified by extension)
 	globalDisabled: boolean; // Master switch for entire extension
 }

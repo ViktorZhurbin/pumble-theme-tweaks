@@ -44,9 +44,19 @@ const getCSSProperties = () => {
 	}, {});
 };
 
+/**
+ * Checks if a CSS property has been modified (exists as inline style)
+ * Returns true if the property exists in element.style (applied by extension)
+ * Returns false if the property only exists in computed styles (from stylesheet)
+ */
+const isPropertyModified = (propertyName: string): boolean => {
+	return document.documentElement.style.getPropertyValue(propertyName) !== "";
+};
+
 export const DomUtils = {
 	applyCSSProperty,
 	getCSSProperties,
 	resetCSSTweaks,
 	getCurrentTheme,
+	isPropertyModified,
 };

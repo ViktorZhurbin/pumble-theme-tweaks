@@ -16,6 +16,7 @@ export function ThemeEditor() {
 		tweakModeOn: true,
 		pickerValues: {},
 		tweaks: undefined,
+		modifiedProperties: [],
 		globalDisabled: false,
 	});
 
@@ -63,6 +64,13 @@ export function ThemeEditor() {
 
 		// State updates automatically via broadcast
 		ContentScript.sendMessage("toggleGlobal", { disabled }, currentTabId);
+	};
+
+	const hasStoredTweaks = () => {
+		return !!(
+			store.tweaks?.cssProperties &&
+			Object.keys(store.tweaks.cssProperties).length > 0
+		);
 	};
 
 	// Listen for state changes from content script
@@ -139,6 +147,7 @@ export function ThemeEditor() {
 										label={label}
 										value={store.pickerValues[propertyName] || ""}
 										inactive={!store.tweakModeOn}
+										isModified={store.modifiedProperties.includes(propertyName)}
 										onInput={(value) => {
 											handleColorChange(propertyName, value);
 										}}
