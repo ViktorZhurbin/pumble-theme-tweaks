@@ -126,8 +126,11 @@ export function createMessenger<P>() {
 			? await browser.tabs.sendMessage(tabId, message)
 			: await browser.runtime.sendMessage(message);
 
-		if (response.err) throw new Error(response.err);
-		return response.res;
+		if (response?.err) {
+			throw new Error(response.err);
+		}
+
+		return response?.res;
 	}
 
 	return { onMessage, sendMessage };

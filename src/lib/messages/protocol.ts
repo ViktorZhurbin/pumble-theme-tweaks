@@ -29,7 +29,7 @@ export interface ContentScriptProtocol {
  */
 export interface BackgroundProtocol {
 	updateBadge: {
-		data: { badgeOn: boolean; tabId?: number };
+		data: { badgeState: "ON" | "OFF" | "DEFAULT"; tabId?: number };
 	};
 	stateChanged: {
 		data: { state: RuntimeState };

@@ -24,7 +24,7 @@ export const watchThemeChanges = (): MutationObserver => {
 				ThemeState.applyForTheme(newTheme);
 			} else {
 				// No theme detected - ensure badge is inactive
-				Background.sendMessage("updateBadge", { badgeOn: false });
+				Background.sendMessage("updateBadge", { badgeState: "DEFAULT" });
 			}
 		}
 	});

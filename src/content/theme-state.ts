@@ -43,11 +43,14 @@ class ThemeStateManager {
 				DomUtils.applyCSSProperty(key, value);
 			}
 
-			Background.sendMessage("updateBadge", { badgeOn: true });
+			Background.sendMessage("updateBadge", { badgeState: "ON" });
 		} else {
 			logger.debug("ThemeState: Removing CSS tweaks", { globalDisabled });
 			DomUtils.resetCSSTweaks();
-			Background.sendMessage("updateBadge", { badgeOn: false });
+
+			// Show "OFF" badge when globally disabled, otherwise no badge
+			const badgeState = globalDisabled ? "OFF" : "DEFAULT";
+			Background.sendMessage("updateBadge", { badgeState });
 		}
 
 		// Update internal state - tweakModeOn represents whether tweaking mode is enabled
