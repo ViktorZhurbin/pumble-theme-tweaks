@@ -5,6 +5,7 @@ import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
 import { Background, ContentScript, type RuntimeState } from "@/lib/messages";
 import { ColorPicker } from "./ColorPicker";
+import { GlobalDisableToggle } from "./GlobalDisableToggle";
 import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -15,6 +16,7 @@ export function ThemeEditor() {
 		tweakModeOn: false,
 		pickerValues: {},
 		tweaks: undefined,
+		globalDisabled: false,
 	});
 
 	const [tabId, setTabId] = createSignal<number | null>(null);
@@ -55,6 +57,14 @@ export function ThemeEditor() {
 		);
 	};
 
+	const handleToggleGlobal = (disabled: boolean) => {
+		const currentTabId = tabId();
+		if (!currentTabId) return;
+
+		// State updates automatically via broadcast
+		ContentScript.sendMessage("toggleGlobal", { disabled }, currentTabId);
+	};
+
 	// Listen for state changes from content script
 	Background.onMessage("stateChanged", (msg) => {
 		logger.debug("State changed from content script", {
@@ -89,7 +99,15 @@ export function ThemeEditor() {
 
 	return (
 		<div class={styles.container}>
-			<h3>Theme Tweaks</h3>
+			<div class={styles.titleGroup}>
+				<h3>Theme Tweaks</h3>
+				<Show when={!loading() && !error()}>
+					<GlobalDisableToggle
+						disabled={store.globalDisabled}
+						onChange={handleToggleGlobal}
+					/>
+				</Show>
+			</div>
 
 			<Show when={loading()}>
 				<p>Loading...</p>
@@ -100,10 +118,11 @@ export function ThemeEditor() {
 			</Show>
 
 			<Show when={!loading() && !error()}>
-				<ThemeToggle
-					checked={store.tweakModeOn}
-					onChange={handleToggleTweaks}
+				<GlobalDisableToggle
+					disabled={store.globalDisabled}
+					onChange={handleToggleGlobal}
 				/>
+
 
 				<div class={styles.pickersContainer}>
 					<For each={PROPERTIES}>

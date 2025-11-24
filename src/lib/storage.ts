@@ -89,10 +89,38 @@ const setDisabled = async (themeName: string, disabled: boolean) => {
 	}
 };
 
+/**
+ * Gets the global disabled state
+ */
+const getGlobalDisabled = async (): Promise<boolean> => {
+	try {
+		const result = (await browser.storage.sync.get(
+			"global_disabled",
+		)) as StorageData;
+		return result.global_disabled ?? false;
+	} catch (err) {
+		logger.error("Storage read error:", err);
+		return false;
+	}
+};
+
+/**
+ * Sets the global disabled state
+ */
+const setGlobalDisabled = async (disabled: boolean) => {
+	try {
+		await browser.storage.sync.set({ global_disabled: disabled });
+	} catch (err) {
+		logger.warn("Storage write error:", err);
+	}
+};
+
 export const Storage = {
 	getTweaks,
 	saveProperty,
 	savePropertyDebounced,
 	deleteTweaks,
 	setDisabled,
+	getGlobalDisabled,
+	setGlobalDisabled,
 };

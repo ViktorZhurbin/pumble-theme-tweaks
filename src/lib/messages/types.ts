@@ -9,4 +9,5 @@ export interface RuntimeState {
 	tweakModeOn: boolean;
 	pickerValues: Record<string, string>;
 	tweaks: ThemeTweaks | undefined;
+	globalDisabled: boolean; // Master switch for entire extension
 }

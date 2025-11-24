@@ -11,6 +11,9 @@ export interface ContentScriptProtocol {
 	toggleTweaks: {
 		data: { enabled: boolean };
 	};
+	toggleGlobal: {
+		data: { disabled: boolean };
+	};
 	resetTweaks: {
 		data: Record<string, never>;
 	};

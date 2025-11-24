@@ -50,16 +50,23 @@ ContentScript.onMessage("resetTweaks", () => {
 	ThemeState.reset();
 });
 
+ContentScript.onMessage("toggleGlobal", (msg) => {
+	logger.debug("Toggling global disable", { disabled: msg.data.disabled });
+	ThemeState.toggleGlobal(msg.data.disabled);
+});
+
 // Watch for theme changes and handle accordingly
 const themeObserver = watchThemeChanges();
 
 // Listen for storage changes and re-apply tweaks
 browser.storage.onChanged.addListener((changes, areaName) => {
-	if (areaName === "sync" && changes.theme_tweaks) {
-		logger.debug("Storage changed, re-applying tweaks");
-		const currentTheme = DomUtils.getCurrentTheme();
-		if (currentTheme) {
-			ThemeState.applyForTheme(currentTheme);
+	if (areaName === "sync") {
+		if (changes.theme_tweaks || changes.global_disabled) {
+			logger.debug("Storage changed, re-applying tweaks");
+			const currentTheme = DomUtils.getCurrentTheme();
+			if (currentTheme) {
+				ThemeState.applyForTheme(currentTheme);
+			}
 		}
 	}
 });

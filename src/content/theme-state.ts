@@ -10,6 +10,7 @@ const initialState: RuntimeState = {
 	tweakModeOn: false,
 	pickerValues: {},
 	tweaks: undefined,
+	globalDisabled: false,
 };
 /**
  * ThemeState - Single source of truth for theme tweaks state
@@ -25,11 +26,14 @@ class ThemeStateManager {
 	async applyForTheme(themeName: string) {
 		logger.debug("ThemeState: Applying for theme", { themeName });
 
+		// Check global disable first
+		const globalDisabled = await Storage.getGlobalDisabled();
+
 		// Load tweaks from storage
 		const storedTweaks = await Storage.getTweaks(themeName);
 
-		// Apply or remove tweaks
-		if (storedTweaks && !storedTweaks.disabled) {
+		// Apply or remove tweaks based on global disable and per-theme settings
+		if (!globalDisabled && storedTweaks && !storedTweaks.disabled) {
 			logger.debug("ThemeState: Applying CSS tweaks", {
 				count: Object.keys(storedTweaks.cssProperties).length,
 			});
@@ -40,7 +44,7 @@ class ThemeStateManager {
 
 			Background.sendMessage("updateBadge", { badgeOn: true });
 		} else {
-			logger.debug("ThemeState: Removing CSS tweaks");
+			logger.debug("ThemeState: Removing CSS tweaks", { globalDisabled });
 			DomUtils.resetCSSTweaks();
 			Background.sendMessage("updateBadge", { badgeOn: false });
 		}
@@ -48,9 +52,10 @@ class ThemeStateManager {
 		// Update internal state - tweakModeOn represents whether tweaking mode is enabled
 		this.currentState = {
 			themeName,
-			tweakModeOn: !storedTweaks?.disabled,
+			tweakModeOn: !globalDisabled && !storedTweaks?.disabled,
 			pickerValues: this.buildPickerValues(storedTweaks),
 			tweaks: storedTweaks,
+			globalDisabled,
 		};
 
 		// Broadcast state change to popup
@@ -73,6 +78,18 @@ class ThemeStateManager {
 
 		// Update disabled flag (inverse of enabled)
 		await Storage.setDisabled(themeName, !enabled);
+
+		// Re-apply will be triggered by storage.onChanged listener
+	}
+
+	/**
+	 * Toggles global disable on/off (affects all themes)
+	 */
+	async toggleGlobal(disabled: boolean) {
+		logger.info("ThemeState: Toggling global disable", { disabled });
+
+		// Update global disabled state
+		await Storage.setGlobalDisabled(disabled);
 
 		// Re-apply will be triggered by storage.onChanged listener
 	}

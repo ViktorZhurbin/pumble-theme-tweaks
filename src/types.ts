@@ -24,4 +24,5 @@ export type ThemeTweaksRecord = Record<string, ThemeTweaks>;
  */
 export interface StorageData {
 	theme_tweaks?: ThemeTweaksRecord;
+	global_disabled?: boolean;
 }
