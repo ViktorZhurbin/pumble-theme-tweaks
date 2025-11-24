@@ -1,3 +1,4 @@
+import { createSignal } from "solid-js";
 import styles from "./ResetButton.module.css";
 
 interface ResetButtonProps {
@@ -6,15 +7,57 @@ interface ResetButtonProps {
 }
 
 export function ResetButton(props: ResetButtonProps) {
+	const [showConfirm, setShowConfirm] = createSignal(false);
+
+	const handleClick = () => {
+		if (props.disabled) return;
+		setShowConfirm(true);
+	};
+
+	const handleConfirm = () => {
+		setShowConfirm(false);
+		props.onClick();
+	};
+
+	const handleCancel = () => {
+		setShowConfirm(false);
+	};
+
 	return (
-		<button
-			type="button"
-			class={styles.resetBtn}
-			onClick={props.onClick}
-			disabled={props.disabled}
-			title={props.disabled ? "No tweaks to reset" : "Reset tweaks for this theme"}
-		>
-			Reset
-		</button>
+		<div class={styles.container}>
+			{!showConfirm() ? (
+				<button
+					type="button"
+					class={styles.resetBtn}
+					onClick={handleClick}
+					disabled={props.disabled}
+					title={
+						props.disabled ? "No tweaks to reset" : "Reset tweaks for this theme"
+					}
+				>
+					Reset
+				</button>
+			) : (
+				<div class={styles.confirmContainer}>
+					<span class={styles.confirmText}>You sure?</span>
+					<div class={styles.confirmButtons}>
+						<button
+							type="button"
+							class={styles.cancelBtn}
+							onClick={handleCancel}
+						>
+							Cancel
+						</button>
+						<button
+							type="button"
+							class={styles.confirmBtn}
+							onClick={handleConfirm}
+						>
+							Reset
+						</button>
+					</div>
+				</div>
+			)}
+		</div>
 	);
 }

@@ -1,3 +1,8 @@
+.container {
+	width: 100%;
+	overflow: hidden;
+}
+
 .resetBtn {
 	text-transform: uppercase;
 	width: 100%;
@@ -8,7 +13,11 @@
 	padding: 10px 12px;
 	border: 1px solid rgba(244, 67, 54, 0.2);
 	border-radius: 4px;
-	transition: all 0.15s ease-in-out;
+	transition:
+		background 0.15s ease-in-out,
+		border-color 0.15s ease-in-out,
+		color 0.15s ease-in-out;
+	animation: slideIn 0.2s ease-out;
 }
 
 .resetBtn:hover:not(:disabled) {
@@ -27,20 +36,72 @@
 	cursor: not-allowed;
 }
 
-@media (prefers-color-scheme: light) {
-	.resetBtn {
-		color: #d32f2f;
-		border-color: rgba(211, 47, 47, 0.25);
-	}
+.confirmContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 12px;
+	background: rgba(244, 67, 54, 0.08);
+	border: 1px solid rgba(244, 67, 54, 0.3);
+	border-radius: 6px;
+	animation: slideIn 0.2s ease-out;
+}
 
-	.resetBtn:hover:not(:disabled) {
-		background: rgba(211, 47, 47, 0.1);
-		border-color: rgba(211, 47, 47, 0.4);
-		color: #b71c1c;
-	}
+.confirmText {
+	font-size: 0.9375rem;
+	font-weight: 600;
+	color: var(--color-error);
+	text-align: center;
+}
 
-	.resetBtn:disabled {
-		color: rgba(211, 47, 47, 0.3);
-		border-color: rgba(211, 47, 47, 0.15);
+.confirmButtons {
+	display: flex;
+	gap: 8px;
+}
+
+.cancelBtn,
+.confirmBtn {
+	flex: 1;
+	padding: 8px 16px;
+	font-size: 0.875rem;
+	font-weight: 600;
+	border-radius: 4px;
+	transition:
+		background 0.15s ease-in-out,
+		border-color 0.15s ease-in-out,
+		color 0.15s ease-in-out;
+}
+
+.cancelBtn {
+	background: transparent;
+	color: rgba(255, 255, 255, 0.7);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cancelBtn:hover {
+	background: rgba(255, 255, 255, 0.05);
+	color: rgba(255, 255, 255, 0.9);
+	border-color: rgba(255, 255, 255, 0.3);
+}
+
+.confirmBtn {
+	background: var(--color-error);
+	color: white;
+	border: 1px solid var(--color-error);
+}
+
+.confirmBtn:hover {
+	background: #d32f2f;
+	border-color: #d32f2f;
+}
+
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
 	}
 }
