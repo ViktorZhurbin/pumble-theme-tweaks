@@ -45,9 +45,10 @@
 	margin: 0;
 }
 
-.controls {
+.controlsContainer {
 	display: flex;
 	flex-direction: column;
+	gap: 20px;
 	border-top: unset;
 	padding: 14px 18px;
 }
@@ -55,35 +56,11 @@
 .pickersContainer {
 	display: flex;
 	flex-direction: column;
-	margin-top: 12px;
 }
 
-.resetBtn {
-	text-transform: uppercase;
-	width: 100%;
-	background: transparent;
-	color: var(--color-error);
-	font-size: 0.875rem;
-	font-weight: 500;
-	padding: 10px 12px;
-	border: 1px solid rgba(244, 67, 54, 0.2);
-	border-radius: 4px;
-	margin-top: 20px;
-	transition: all 0.15s ease-in-out;
+.actionsContainer {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
 }
 
-.resetBtn:hover:not(:disabled) {
-	background: rgba(244, 67, 54, 0.08);
-	border-color: var(--color-error);
-	color: var(--color-error);
-}
-
-.resetBtn:active:not(:disabled) {
-	background: rgba(244, 67, 54, 0.12);
-}
-
-.resetBtn:disabled {
-	color: rgba(244, 67, 54, 0.3);
-	border-color: rgba(244, 67, 54, 0.1);
-	cursor: not-allowed;
-}

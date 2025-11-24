@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 import { Background, ContentScript, type RuntimeState } from "@/lib/messages";
 import { ColorPicker } from "./ColorPicker";
 import { GlobalDisableToggle } from "./GlobalDisableToggle";
+import { ResetButton } from "./ResetButton";
 import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -136,12 +137,7 @@ export function ThemeEditor() {
 							<p class={styles.themeName}>THEME: {themeName()}</p>
 						)}
 					</Show>
-					<div class={styles.controls}>
-						<ThemeToggle
-							checked={store.tweakModeOn}
-							onChange={handleToggleTweaks}
-						/>
-
+					<div class={styles.controlsContainer}>
 						<div class={styles.pickersContainer}>
 							<For each={PROPERTIES}>
 								{({ label, propertyName }) => (
@@ -158,19 +154,17 @@ export function ThemeEditor() {
 							</For>
 						</div>
 
-						<button
-							type="button"
-							class={styles.resetBtn}
-							onClick={handleReset}
-							disabled={!hasStoredTweaks() || !store.tweakModeOn}
-							title={
-								hasStoredTweaks()
-									? "Reset tweaks for this theme"
-									: "No tweaks to reset"
-							}
-						>
-							Reset
-						</button>
+						<div class={styles.actionsContainer}>
+							<ThemeToggle
+								checked={store.tweakModeOn}
+								onChange={handleToggleTweaks}
+							/>
+
+							<ResetButton
+								disabled={!hasStoredTweaks() || !store.tweakModeOn}
+								onClick={handleReset}
+							/>
+						</div>
 					</div>
 				</div>
 			</Show>
