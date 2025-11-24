@@ -7,7 +7,6 @@
 	user-select: none;
 
 	--bg-color: rgb(49, 110, 125);
-	--radius: 4px;
 }
 
 .toggle::before {

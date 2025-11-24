@@ -133,7 +133,7 @@ export function ThemeEditor() {
 				<div class={styles.tweaksContainer}>
 					<Show when={store.themeName}>
 						{(themeName) => (
-							<p class={styles.themeName}>Theme: {themeName()}</p>
+							<p class={styles.themeName}>THEME: {themeName()}</p>
 						)}
 					</Show>
 					<div class={styles.controls}>
