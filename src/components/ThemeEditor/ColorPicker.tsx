@@ -29,6 +29,7 @@ export function ColorPicker(props: ColorPickerProps) {
 			<input
 				type="color"
 				value={ColorUtils.toHex(props.value)}
+				disabled={props.inactive}
 				onInput={handleInput}
 			/>
 		</label>

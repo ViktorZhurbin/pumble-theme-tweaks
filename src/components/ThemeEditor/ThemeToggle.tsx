@@ -20,7 +20,7 @@ export function ThemeToggle(props: ThemeToggleProps) {
 					checked={props.checked}
 					onChange={handleChange}
 				/>
-				Turn tweaks {props.checked ? "OFF" : "ON"}
+				Toggle theme tweaks
 			</label>
 		</div>
 	);

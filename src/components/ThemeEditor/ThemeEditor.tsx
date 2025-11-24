@@ -1,4 +1,4 @@
-import { createSignal, For, onMount, Show } from "solid-js";
+import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { PROPERTIES } from "@/constants/properties";
 import { ChromeUtils } from "@/lib/chrome-utils";
@@ -27,6 +27,10 @@ export function ThemeEditor() {
 	const handleReset = () => {
 		const currentTabId = tabId();
 		if (!currentTabId) return;
+
+		// Optimistic update for responsive UI
+		setStore("tweaks", undefined);
+		setStore("modifiedProperties", []);
 
 		ContentScript.sendMessage("resetTweaks", {}, currentTabId);
 	};
@@ -66,12 +70,12 @@ export function ThemeEditor() {
 		ContentScript.sendMessage("toggleGlobal", { disabled }, currentTabId);
 	};
 
-	const hasStoredTweaks = () => {
+	const hasStoredTweaks = createMemo(() => {
 		return !!(
 			store.tweaks?.cssProperties &&
 			Object.keys(store.tweaks.cssProperties).length > 0
 		);
-	};
+	});
 
 	// Listen for state changes from content script
 	Background.onMessage("stateChanged", (msg) => {
@@ -108,7 +112,7 @@ export function ThemeEditor() {
 	return (
 		<div class={styles.container}>
 			<div class={styles.titleGroup}>
-				<h3>Theme Tweaks</h3>
+				<h3>Pumble Tweaks</h3>
 				<Show when={!loading() && !error()}>
 					<GlobalDisableToggle
 						disabled={store.globalDisabled}
@@ -133,12 +137,10 @@ export function ThemeEditor() {
 						)}
 					</Show>
 					<div class={styles.controls}>
-						<Show when={hasStoredTweaks()}>
-							<ThemeToggle
-								checked={store.tweakModeOn}
-								onChange={handleToggleTweaks}
-							/>
-						</Show>
+						<ThemeToggle
+							checked={store.tweakModeOn}
+							onChange={handleToggleTweaks}
+						/>
 
 						<div class={styles.pickersContainer}>
 							<For each={PROPERTIES}>
@@ -156,15 +158,19 @@ export function ThemeEditor() {
 							</For>
 						</div>
 
-						<Show when={hasStoredTweaks()}>
-							<button
-								type="button"
-								class={styles.resetBtn}
-								onClick={handleReset}
-							>
-								Reset
-							</button>
-						</Show>
+						<button
+							type="button"
+							class={styles.resetBtn}
+							onClick={handleReset}
+							disabled={!hasStoredTweaks() || !store.tweakModeOn}
+							title={
+								hasStoredTweaks()
+									? "Reset tweaks for this theme"
+									: "No tweaks to reset"
+							}
+						>
+							Reset
+						</button>
 					</div>
 				</div>
 			</Show>
