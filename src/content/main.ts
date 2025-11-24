@@ -1,9 +1,8 @@
 import { DomUtils } from "@/lib/dom-utils";
 import { logger } from "@/lib/logger";
-import { ToBackground } from "@/lib/messages/to-background";
 import { ToContentScript } from "@/lib/messages/to-content-script";
-import { ThemeManager } from "@/lib/theme-manager";
 import { ThemeState } from "./theme-state";
+import { watchThemeChanges } from "./theme-watcher";
 
 logger.info("Content script loaded", { timestamp: new Date().toISOString() });
 
@@ -56,17 +55,7 @@ chrome.runtime.onMessage.addListener((msg: unknown, _, sendResponse) => {
 });
 
 // Watch for theme changes and handle accordingly
-const themeObserver = ThemeManager.watchThemeChanges((newTheme, oldTheme) => {
-	logger.info("Theme changed", { from: oldTheme, to: newTheme });
-	DomUtils.resetCSSTweaks();
-
-	if (newTheme) {
-		ThemeState.applyForTheme(newTheme);
-	} else {
-		// No theme detected - ensure badge is inactive
-		ToBackground.updateBadge({ badgeOn: false });
-	}
-});
+const themeObserver = watchThemeChanges();
 
 // Listen for storage changes and re-apply tweaks
 chrome.storage.onChanged.addListener((changes, areaName) => {
