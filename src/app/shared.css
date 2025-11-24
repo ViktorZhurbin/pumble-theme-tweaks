@@ -6,9 +6,11 @@
 	font-weight: 400;
 	font-size: 16px;
 
+	--bg-color: #242424;
+
 	color-scheme: light dark;
 	color: rgba(255, 255, 255, 0.87);
-	background-color: #242424;
+	background-color: var(--bg-color);
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -49,6 +51,13 @@ h2 {
 
 h3 {
 	font-size: 1.7rem;
+	line-height: 1.2;
+	margin-top: 0;
+	margin-bottom: 0.5em;
+}
+
+h4 {
+	font-size: 1.3rem;
 	line-height: 1.2;
 	margin-top: 0;
 	margin-bottom: 0.5em;

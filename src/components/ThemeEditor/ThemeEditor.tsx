@@ -13,7 +13,7 @@ export function ThemeEditor() {
 	// Use createStore for runtime state (reactive view of content script state)
 	const [store, setStore] = createStore<RuntimeState>({
 		themeName: null,
-		tweakModeOn: false,
+		tweakModeOn: true,
 		pickerValues: {},
 		tweaks: undefined,
 		globalDisabled: false,
@@ -118,30 +118,46 @@ export function ThemeEditor() {
 			</Show>
 
 			<Show when={!loading() && !error()}>
-				<GlobalDisableToggle
-					disabled={store.globalDisabled}
-					onChange={handleToggleGlobal}
-				/>
-
-
-				<div class={styles.pickersContainer}>
-					<For each={PROPERTIES}>
-						{({ label, propertyName }) => (
-							<ColorPicker
-								label={label}
-								value={store.pickerValues[propertyName] || ""}
-								inactive={!store.tweakModeOn}
-								onInput={(value) => {
-									handleColorChange(propertyName, value);
-								}}
-							/>
+				<div class={styles.tweaksContainer}>
+					<Show when={store.themeName}>
+						{(themeName) => (
+							<p class={styles.themeName}>Theme: {themeName()}</p>
 						)}
-					</For>
-				</div>
+					</Show>
+					<div class={styles.controls}>
+						<Show when={hasStoredTweaks()}>
+							<ThemeToggle
+								checked={store.tweakModeOn}
+								onChange={handleToggleTweaks}
+							/>
+						</Show>
 
-				<button type="button" class={styles.resetBtn} onClick={handleReset}>
-					Reset
-				</button>
+						<div class={styles.pickersContainer}>
+							<For each={PROPERTIES}>
+								{({ label, propertyName }) => (
+									<ColorPicker
+										label={label}
+										value={store.pickerValues[propertyName] || ""}
+										inactive={!store.tweakModeOn}
+										onInput={(value) => {
+											handleColorChange(propertyName, value);
+										}}
+									/>
+								)}
+							</For>
+						</div>
+
+						<Show when={hasStoredTweaks()}>
+							<button
+								type="button"
+								class={styles.resetBtn}
+								onClick={handleReset}
+							>
+								Reset
+							</button>
+						</Show>
+					</div>
+				</div>
 			</Show>
 		</div>
 	);

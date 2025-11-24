@@ -7,7 +7,7 @@ import { Storage } from "@/lib/storage";
 
 const initialState: RuntimeState = {
 	themeName: null,
-	tweakModeOn: false,
+	tweakModeOn: true,
 	pickerValues: {},
 	tweaks: undefined,
 	globalDisabled: false,

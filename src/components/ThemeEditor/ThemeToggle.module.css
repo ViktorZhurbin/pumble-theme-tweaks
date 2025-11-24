@@ -6,8 +6,7 @@
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	font-size: 1.3rem;
-	line-height: 1.4;
+	font-size: 0.875rem;
 	cursor: pointer;
 	user-select: none;
 }
