@@ -1,11 +1,9 @@
-import { createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { createSignal, For, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { PROPERTIES } from "@/constants/properties";
 import { ChromeUtils } from "@/lib/chrome-utils";
 import { logger } from "@/lib/logger";
-import { ToBackground } from "@/lib/messages/to-background";
-import { ToContentScript } from "@/lib/messages/to-content-script";
-import type { RuntimeState } from "@/lib/messages/types";
+import { Background, ContentScript, type RuntimeState } from "@/lib/messages";
 import { ColorPicker } from "./ColorPicker";
 import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
@@ -27,7 +25,7 @@ export function ThemeEditor() {
 		const currentTabId = tabId();
 		if (!currentTabId) return;
 
-		ToContentScript.resetTweaks({ tabId: currentTabId });
+		ContentScript.sendMessage("resetTweaks", {}, currentTabId);
 	};
 
 	const handleColorChange = (propertyName: string, value: string) => {
@@ -38,11 +36,11 @@ export function ThemeEditor() {
 		setStore("pickerValues", propertyName, value);
 
 		// Send to content script (ThemeState handles storage and broadcasts updates)
-		ToContentScript.updateProperty({
-			tabId: currentTabId,
-			propertyName,
-			value,
-		});
+		ContentScript.sendMessage(
+			"updateProperty",
+			{ propertyName, value },
+			currentTabId,
+		);
 	};
 
 	const handleToggleTweaks = (checked: boolean) => {
@@ -50,17 +48,20 @@ export function ThemeEditor() {
 		if (!currentTabId) return;
 
 		// State updates automatically via broadcast
-		ToContentScript.toggleTweaks({ tabId: currentTabId, enabled: checked });
+		ContentScript.sendMessage(
+			"toggleTweaks",
+			{ enabled: checked },
+			currentTabId,
+		);
 	};
 
 	// Listen for state changes from content script
-	const handleMessage = (msg: unknown) => {
-		if (ToBackground.stateChanged.match(msg)) {
-			const { state } = msg;
-			logger.debug("State changed from content script", { state });
-			setStore(state);
-		}
-	};
+	Background.onMessage("stateChanged", (msg) => {
+		logger.debug("State changed from content script", {
+			state: msg.data.state,
+		});
+		setStore(msg.data.state);
+	});
 
 	onMount(async () => {
 		try {
@@ -68,26 +69,22 @@ export function ThemeEditor() {
 			setTabId(currentTabId);
 
 			// Get runtime state from content script (source of truth)
-			const runtimeState = await ToContentScript.getCurrentState({
-				tabId: currentTabId,
-			});
+			const runtimeState = await ContentScript.sendMessage(
+				"getCurrentState",
+				{},
+				currentTabId,
+			);
 			setStore(runtimeState);
 
 			logger.info("ThemeEditor initialized", {
 				state: runtimeState,
 				tabId: currentTabId,
 			});
-
-			chrome.runtime.onMessage.addListener(handleMessage);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Unknown error");
 		} finally {
 			setLoading(false);
 		}
-	});
-
-	onCleanup(() => {
-		chrome.runtime.onMessage.removeListener(handleMessage);
 	});
 
 	return (

@@ -1,7 +1,7 @@
 import { PROPERTY_NAMES } from "@/constants/properties";
 import { DomUtils } from "@/lib/dom-utils";
 import { logger } from "@/lib/logger";
-import { ToBackground } from "@/lib/messages/to-background";
+import { Background } from "@/lib/messages";
 import type { RuntimeState } from "@/lib/messages/types";
 import { Storage } from "@/lib/storage";
 
@@ -38,11 +38,11 @@ class ThemeStateManager {
 				DomUtils.applyCSSProperty(key, value);
 			}
 
-			ToBackground.updateBadge({ badgeOn: true });
+			Background.sendMessage("updateBadge", { badgeOn: true });
 		} else {
 			logger.debug("ThemeState: Removing CSS tweaks");
 			DomUtils.resetCSSTweaks();
-			ToBackground.updateBadge({ badgeOn: false });
+			Background.sendMessage("updateBadge", { badgeOn: false });
 		}
 
 		// Update internal state - tweakModeOn represents whether tweaking mode is enabled
@@ -54,7 +54,7 @@ class ThemeStateManager {
 		};
 
 		// Broadcast state change to popup
-		ToBackground.stateChanged({ state: this.currentState });
+		Background.sendMessage("stateChanged", { state: this.currentState });
 
 		logger.debug("ThemeState: State updated", this.currentState);
 	}
@@ -121,7 +121,7 @@ class ThemeStateManager {
 		}
 
 		// Broadcast updated state to popup immediately
-		ToBackground.stateChanged({ state: this.currentState });
+		Background.sendMessage("stateChanged", { state: this.currentState });
 
 		// Save to storage in background (debounced)
 		Storage.savePropertyDebounced(themeName, propertyName, value);

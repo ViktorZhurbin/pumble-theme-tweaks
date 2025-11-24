@@ -1,6 +1,6 @@
 import { DomUtils } from "@/lib/dom-utils";
 import { logger } from "@/lib/logger";
-import { ToContentScript } from "@/lib/messages/to-content-script";
+import { ContentScript } from "@/lib/messages";
 import { ThemeState } from "./theme-state";
 import { watchThemeChanges } from "./theme-watcher";
 
@@ -25,33 +25,28 @@ if (document.readyState === "loading") {
 }
 
 // Listen for messages from popup
-chrome.runtime.onMessage.addListener((msg: unknown, _, sendResponse) => {
-	// Messages that need responses - return true
-	if (ToContentScript.getCurrentState.match(msg)) {
-		const state = ThemeState.getCurrentState();
-		logger.debug("Getting current state", { state });
-		sendResponse(state);
-		return true;
-	}
+ContentScript.onMessage("getCurrentState", () => {
+	const state = ThemeState.getCurrentState();
+	logger.debug("Getting current state", { state });
+	return state;
+});
 
-	// Fire-and-forget messages - no return needed
-	if (ToContentScript.updateProperty.match(msg)) {
-		logger.debug("Updating CSS property via ThemeState", {
-			propertyName: msg.propertyName,
-			value: msg.value,
-		});
-		ThemeState.updateProperty(msg.propertyName, msg.value);
-	}
+ContentScript.onMessage("updateProperty", (msg) => {
+	logger.debug("Updating CSS property via ThemeState", {
+		propertyName: msg.data.propertyName,
+		value: msg.data.value,
+	});
+	ThemeState.updateProperty(msg.data.propertyName, msg.data.value);
+});
 
-	if (ToContentScript.toggleTweaks.match(msg)) {
-		logger.debug("Toggling tweaks", { enabled: msg.enabled });
-		ThemeState.toggle(msg.enabled);
-	}
+ContentScript.onMessage("toggleTweaks", (msg) => {
+	logger.debug("Toggling tweaks", { enabled: msg.data.enabled });
+	ThemeState.toggle(msg.data.enabled);
+});
 
-	if (ToContentScript.resetTweaks.match(msg)) {
-		logger.debug("Resetting tweaks via ThemeState");
-		ThemeState.reset();
-	}
+ContentScript.onMessage("resetTweaks", () => {
+	logger.debug("Resetting tweaks via ThemeState");
+	ThemeState.reset();
 });
 
 // Watch for theme changes and handle accordingly

@@ -1,5 +1,5 @@
 import { logger } from "@/lib/logger";
-import { ToBackground } from "@/lib/messages/to-background";
+import { Background } from "@/lib/messages";
 
 /**
  * Updates the extension badge for a specific tab
@@ -15,12 +15,10 @@ const updateBadge = (tabId: number, isOn: boolean) => {
 };
 
 // Listen for badge update requests from content script or popup
-chrome.runtime.onMessage.addListener((msg: unknown, sender) => {
-	if (ToBackground.updateBadge.match(msg)) {
-		// Use tabId from message (popup) or sender.tab (content script)
-		const tabId = msg.tabId ?? sender.tab?.id;
-		if (tabId !== undefined) {
-			updateBadge(tabId, msg.badgeOn);
-		}
+Background.onMessage("updateBadge", (msg, sender) => {
+	// Use tabId from message (popup) or sender.tab (content script)
+	const tabId = msg.data.tabId ?? sender.tab?.id;
+	if (tabId !== undefined) {
+		updateBadge(tabId, msg.data.badgeOn);
 	}
 });

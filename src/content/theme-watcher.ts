@@ -1,6 +1,6 @@
 import { DomUtils } from "@/lib/dom-utils";
 import { logger } from "@/lib/logger";
-import { ToBackground } from "@/lib/messages/to-background";
+import { Background } from "@/lib/messages";
 import { ThemeState } from "./theme-state";
 
 /**
@@ -24,7 +24,7 @@ export const watchThemeChanges = (): MutationObserver => {
 				ThemeState.applyForTheme(newTheme);
 			} else {
 				// No theme detected - ensure badge is inactive
-				ToBackground.updateBadge({ badgeOn: false });
+				Background.sendMessage("updateBadge", { badgeOn: false });
 			}
 		}
 	});
