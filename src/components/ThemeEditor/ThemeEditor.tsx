@@ -1,9 +1,11 @@
 import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { PROPERTIES } from "@/constants/properties";
-import { ChromeUtils } from "@/lib/chrome-utils";
+import { Background } from "@/entrypoints/background/messenger";
+import { ContentScript } from "@/entrypoints/content/messenger";
+import { BrowserUtils } from "@/lib/browser-utils";
 import { logger } from "@/lib/logger";
-import { Background, ContentScript, type RuntimeState } from "@/lib/messages";
+import type { RuntimeState } from "@/types/runtime";
 import { ColorPicker } from "./ColorPicker";
 import { GlobalDisableToggle } from "./GlobalDisableToggle";
 import { ResetButton } from "./ResetButton";
@@ -33,7 +35,7 @@ export function ThemeEditor() {
 		setStore("tweaks", undefined);
 		setStore("modifiedProperties", []);
 
-		ContentScript.sendMessage("resetTweaks", {}, currentTabId);
+		ContentScript.sendMessage("resetTweaks", undefined, currentTabId);
 	};
 
 	const handleColorChange = (propertyName: string, value: string) => {
@@ -82,7 +84,9 @@ export function ThemeEditor() {
 		const messageTabId = msg.data.tabId;
 		const currentTabId = tabId();
 
-		logger.debug("State changed from content script", { willUpdate: messageTabId === currentTabId });
+		logger.debug("State changed from content script", {
+			willUpdate: messageTabId === currentTabId,
+		});
 
 		// Filter: only apply state changes from our own tab
 		if (messageTabId !== undefined && messageTabId === currentTabId) {
@@ -98,7 +102,7 @@ export function ThemeEditor() {
 			// Get runtime state from content script (source of truth)
 			const runtimeState = await ContentScript.sendMessage(
 				"getCurrentState",
-				{},
+				undefined,
 				currentTabId,
 			);
 			setStore(runtimeState);
@@ -184,7 +188,7 @@ export function ThemeEditor() {
  * Returns tab ID
  */
 async function initializeTab(): Promise<number> {
-	const tab = await ChromeUtils.getActiveTab();
+	const tab = await BrowserUtils.getActiveTab();
 	if (!tab?.id) {
 		throw new Error("Please open a Pumble tab");
 	}

@@ -1,4 +1,4 @@
-import browser from "webextension-polyfill";
+import { browser } from "wxt/browser";
 
 const getActiveTab = async () => {
 	const [tab] = await browser.tabs.query({
@@ -8,6 +8,6 @@ const getActiveTab = async () => {
 	return tab || null;
 };
 
-export const ChromeUtils = {
+export const BrowserUtils = {
 	getActiveTab,
 };

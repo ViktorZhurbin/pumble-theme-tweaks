@@ -1,0 +1,1 @@
+- Do not rebuild (`npm run build`)  the project with new changes - dev server should be running with hot reload, and will do it anyway.

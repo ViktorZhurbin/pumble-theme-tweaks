@@ -1,38 +1,38 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: Needs to be this generic */
 /** biome-ignore-all lint/suspicious/noConfusingVoidType: Needs to be this generic */
 
-import type { Runtime } from "webextension-polyfill";
-import browser from "webextension-polyfill";
+import { type Browser, browser } from "wxt/browser";
 
 /**
  * Lightweight type-safe messenger for cross-browser extension communication
- * Uses webextension-polyfill for Firefox, Chrome, Safari, Edge compatibility
+ * Uses WXT's browser API for Firefox, Chrome, Safari, Edge compatibility
  */
 
 /**
- * Protocol definition format
- * Keys are message types, values define data and optional response types
+ * Extract data type from protocol definition
+ * Supports both function syntax: `methodName(data: T): R` and value syntax: `methodName: T`
  */
-type ProtocolShape = {
-	data: any;
-	response?: any;
-};
+type GetDataType<T> = T extends (...args: infer Args) => any
+	? Args["length"] extends 0 | 1
+		? Args[0]
+		: never
+	: T;
+
+/**
+ * Extract return type from protocol definition
+ * Supports both function syntax and value syntax (returns void for values)
+ */
+type GetReturnType<T> = T extends (...args: any[]) => infer R ? R : void;
 
 /**
  * Handler function for a specific message type
- * Receives the message data and sender info, returns response (sync or async)
+ * Receives a message object with data, timestamp, and sender info
  */
-type Handler<P, K extends keyof P> = (
-	message: {
-		data: P[K] extends ProtocolShape ? P[K]["data"] : any;
-		timestamp: number;
-	},
-	sender: Runtime.MessageSender,
-) => P[K] extends ProtocolShape
-	? P[K]["response"] extends undefined
-		? void | Promise<void>
-		: P[K]["response"] | Promise<P[K]["response"]>
-	: void | Promise<any>;
+type Handler<P, K extends keyof P> = (message: {
+	data: GetDataType<P[K]>;
+	timestamp: number;
+	sender: Browser.runtime.MessageSender;
+}) => void | Promise<void> | GetReturnType<P[K]> | Promise<GetReturnType<P[K]>>;
 
 /**
  * Internal message envelope format
@@ -70,25 +70,36 @@ export function createMessenger<P>() {
 
 	/**
 	 * Root message handler
+	 * Returns true to indicate async response via sendResponse callback
 	 */
-	async function handleMessage(
+	function handleMessage(
 		msg: any,
-		sender: Runtime.MessageSender,
-	): Promise<ResponseEnvelope | undefined> {
+		sender: Browser.runtime.MessageSender,
+		sendResponse: (response?: any) => void,
+	): true | void {
 		// Validate message format
-		if (!msg?.type || typeof msg.type !== "string") return undefined;
+		if (!msg?.type || typeof msg.type !== "string") return;
 
 		// Find handler for this message type
 		const handler = handlers[msg.type as keyof P];
-		if (!handler) return undefined;
+		if (!handler) return;
 
-		// Execute handler and wrap result
-		try {
-			const res = await handler(msg, sender);
-			return { res };
-		} catch (err) {
-			return { err: (err as Error).message };
-		}
+		// Execute handler asynchronously and send response via callback
+		(async () => {
+			try {
+				const res = await handler({
+					data: msg.data,
+					timestamp: msg.timestamp,
+					sender,
+				});
+				sendResponse({ res });
+			} catch (err) {
+				sendResponse({ err: (err as Error).message });
+			}
+		})();
+
+		// Return true to indicate we will send a response asynchronously
+		return true;
 	}
 
 	/**
@@ -112,9 +123,13 @@ export function createMessenger<P>() {
 	 */
 	async function sendMessage<K extends keyof P>(
 		type: K,
-		data: P[K] extends ProtocolShape ? P[K]["data"] : any,
-		tabId?: number,
-	): Promise<P[K] extends ProtocolShape ? P[K]["response"] : any> {
+		...args: GetDataType<P[K]> extends undefined
+			? [data?: undefined, tabId?: number]
+			: [data: GetDataType<P[K]>, tabId?: number]
+	): Promise<GetReturnType<P[K]>> {
+		const data = args[0];
+		const tabId = args[1];
+
 		const message: MessageEnvelope = {
 			type: type as string,
 			data,

@@ -32,7 +32,9 @@ export function ResetButton(props: ResetButtonProps) {
 					onClick={handleClick}
 					disabled={props.disabled}
 					title={
-						props.disabled ? "No tweaks to reset" : "Reset tweaks for this theme"
+						props.disabled
+							? "No tweaks to reset"
+							: "Reset tweaks for this theme"
 					}
 				>
 					Reset

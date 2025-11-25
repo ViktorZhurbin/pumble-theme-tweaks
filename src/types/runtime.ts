@@ -1,4 +1,4 @@
-import type { ThemeTweaks } from "@/types";
+import type { ThemeTweaks } from "./tweaks";
 
 /**
  * Runtime state structure maintained by content script

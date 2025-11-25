@@ -1,7 +1,11 @@
-import browser from "webextension-polyfill";
 import { logger } from "@/lib/logger";
-import type { StorageData, ThemeTweaks, ThemeTweaksRecord } from "@/types";
+import type {
+	StorageData,
+	ThemeTweaks,
+	ThemeTweaksRecord,
+} from "@/types/tweaks";
 import { Utils } from "./utils";
+import { browser } from "wxt/browser";
 
 /**
  * Gets all theme tweaks from storage

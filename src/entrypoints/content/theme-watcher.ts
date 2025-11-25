@@ -1,7 +1,7 @@
-import { DomUtils } from "@/lib/dom-utils";
+import { DomUtils } from "./dom-utils";
 import { logger } from "@/lib/logger";
-import { Background } from "@/lib/messages";
 import { ThemeState } from "./theme-state";
+import { Background } from "../background/messenger";
 
 /**
  * Watches for theme changes and handles theme tweak application

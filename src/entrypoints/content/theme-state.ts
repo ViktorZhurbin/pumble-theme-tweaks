@@ -1,9 +1,9 @@
 import { PROPERTY_NAMES } from "@/constants/properties";
-import { DomUtils } from "@/lib/dom-utils";
+import { DomUtils } from "./dom-utils";
 import { logger } from "@/lib/logger";
-import { Background } from "@/lib/messages";
-import type { RuntimeState } from "@/lib/messages/types";
+import type { RuntimeState } from "@/types/runtime";
 import { Storage } from "@/lib/storage";
+import { Background } from "../background/messenger";
 
 const initialState: RuntimeState = {
 	themeName: null,
@@ -26,7 +26,7 @@ class ThemeStateManager {
 	 */
 	async initialize() {
 		if (this.tabId === undefined) {
-			this.tabId = await Background.sendMessage("getTabId", {});
+			this.tabId = await Background.sendMessage("getTabId", undefined);
 
 			logger.debug("ThemeState: Initialized with tab ID", {
 				tabId: this.tabId,
@@ -85,7 +85,10 @@ class ThemeStateManager {
 		};
 
 		// Broadcast state change to popup
-		Background.sendMessage("stateChanged", { state: this.currentState, tabId: this.tabId });
+		Background.sendMessage("stateChanged", {
+			state: this.currentState,
+			tabId: this.tabId,
+		});
 
 		logger.debug("ThemeState: State updated", this.currentState);
 	}
@@ -168,7 +171,10 @@ class ThemeStateManager {
 		Background.sendMessage("updateBadge", { badgeState: "ON" });
 
 		// Broadcast updated state to popup immediately
-		Background.sendMessage("stateChanged", { state: this.currentState, tabId: this.tabId });
+		Background.sendMessage("stateChanged", {
+			state: this.currentState,
+			tabId: this.tabId,
+		});
 
 		// Save to storage in background (debounced)
 		Storage.savePropertyDebounced(themeName, propertyName, value, this.tabId);
