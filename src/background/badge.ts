@@ -30,3 +30,8 @@ Background.onMessage("updateBadge", (msg, sender) => {
 		updateBadge(tabId, msg.data.badgeState);
 	}
 });
+
+// Listen for tab ID requests from content scripts
+Background.onMessage("getTabId", (_msg, sender) => {
+	return sender.tab?.id;
+});

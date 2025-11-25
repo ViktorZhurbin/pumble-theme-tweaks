@@ -36,6 +36,7 @@ const saveProperty = async (
 	themeName: string,
 	propertyName: string,
 	value: string,
+	tabId?: number,
 ) => {
 	const tweaks = await getAllTweaks();
 
@@ -43,15 +44,21 @@ const saveProperty = async (
 	tweaks[themeName].cssProperties[propertyName] = value;
 
 	try {
-		await browser.storage.sync.set({ theme_tweaks: tweaks });
+		const dataToSave: StorageData = { theme_tweaks: tweaks };
+
+		if (tabId !== undefined) {
+			dataToSave.last_update_tab_id = tabId;
+		}
+
+		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}
 };
 
 const savePropertyDebounced = Utils.debounce(
-	(theme: string, propertyName: string, value: string) => {
-		Storage.saveProperty(theme, propertyName, value);
+	(theme: string, propertyName: string, value: string, tabId?: number) => {
+		Storage.saveProperty(theme, propertyName, value, tabId);
 	},
 	500,
 );
@@ -59,13 +66,17 @@ const savePropertyDebounced = Utils.debounce(
 /**
  * Deletes all tweaks for a specific theme
  */
-const deleteTweaks = async (themeName: string) => {
+const deleteTweaks = async (themeName: string, tabId?: number) => {
 	const tweaks = await getAllTweaks();
 
 	if (tweaks[themeName]) {
 		delete tweaks[themeName];
 		try {
-			await browser.storage.sync.set({ theme_tweaks: tweaks });
+			const dataToSave: StorageData = { theme_tweaks: tweaks };
+			if (tabId !== undefined) {
+				dataToSave.last_update_tab_id = tabId;
+			}
+			await browser.storage.sync.set(dataToSave as Record<string, unknown>);
 		} catch (err) {
 			logger.error("Storage delete error:", err);
 			throw err;
@@ -76,14 +87,24 @@ const deleteTweaks = async (themeName: string) => {
 /**
  * Sets the disabled state for a specific theme
  */
-const setDisabled = async (themeName: string, disabled: boolean) => {
+const setDisabled = async (
+	themeName: string,
+	disabled: boolean,
+	tabId?: number,
+) => {
 	const tweaks = await getAllTweaks();
 
 	tweaks[themeName] ??= { disabled: false, cssProperties: {} };
 	tweaks[themeName].disabled = disabled;
 
 	try {
-		await browser.storage.sync.set({ theme_tweaks: tweaks });
+		const dataToSave: StorageData = { theme_tweaks: tweaks };
+
+		if (tabId !== undefined) {
+			dataToSave.last_update_tab_id = tabId;
+		}
+
+		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}
@@ -107,9 +128,15 @@ const getGlobalDisabled = async (): Promise<boolean> => {
 /**
  * Sets the global disabled state
  */
-const setGlobalDisabled = async (disabled: boolean) => {
+const setGlobalDisabled = async (disabled: boolean, tabId?: number) => {
 	try {
-		await browser.storage.sync.set({ global_disabled: disabled });
+		const dataToSave: StorageData = { global_disabled: disabled };
+
+		if (tabId !== undefined) {
+			dataToSave.last_update_tab_id = tabId;
+		}
+
+		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}

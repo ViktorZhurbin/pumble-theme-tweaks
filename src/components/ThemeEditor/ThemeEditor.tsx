@@ -71,19 +71,23 @@ export function ThemeEditor() {
 		ContentScript.sendMessage("toggleGlobal", { disabled }, currentTabId);
 	};
 
-	const hasStoredTweaks = createMemo(() => {
-		return !!(
-			store.tweaks?.cssProperties &&
-			Object.keys(store.tweaks.cssProperties).length > 0
-		);
+	const hasModifications = createMemo(() => {
+		// Check if there are any modified properties (applied to DOM)
+		return store.modifiedProperties && store.modifiedProperties.length > 0;
 	});
 
 	// Listen for state changes from content script
 	Background.onMessage("stateChanged", (msg) => {
-		logger.debug("State changed from content script", {
-			state: msg.data.state,
-		});
-		setStore(msg.data.state);
+		// Only update if the state change is from the current tab
+		const messageTabId = msg.data.tabId;
+		const currentTabId = tabId();
+
+		logger.debug("State changed from content script", { willUpdate: messageTabId === currentTabId });
+
+		// Filter: only apply state changes from our own tab
+		if (messageTabId !== undefined && messageTabId === currentTabId) {
+			setStore(msg.data.state);
+		}
 	});
 
 	onMount(async () => {
@@ -164,7 +168,7 @@ export function ThemeEditor() {
 							/>
 
 							<ResetButton
-								disabled={!hasStoredTweaks() || !store.tweakModeOn}
+								disabled={!hasModifications() || !store.tweakModeOn}
 								onClick={handleReset}
 							/>
 						</div>

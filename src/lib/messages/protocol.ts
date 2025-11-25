@@ -32,6 +32,10 @@ export interface BackgroundProtocol {
 		data: { badgeState: "ON" | "OFF" | "DEFAULT"; tabId?: number };
 	};
 	stateChanged: {
-		data: { state: RuntimeState };
+		data: { state: RuntimeState; tabId?: number };
+	};
+	getTabId: {
+		data: Record<string, never>;
+		response: number | undefined;
 	};
 }

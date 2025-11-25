@@ -22,7 +22,11 @@ export default defineManifest({
 	content_scripts: [
 		{
 			js: ["src/content/main.ts"],
-			matches: ["https://app.pumble.com/*"],
+			matches: [
+				"https://app.pumble.com/*",
+				"https://app.stage.ops.pumble.com/*",
+				"https://*.fe.pumble-dev.com/*",
+			],
 		},
 	],
 	permissions: ["storage", "sidePanel"],

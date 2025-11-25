@@ -19,6 +19,27 @@ const initialState: RuntimeState = {
  */
 class ThemeStateManager {
 	private currentState: RuntimeState = initialState;
+	private tabId: number | undefined = undefined;
+
+	/**
+	 * Initializes the tab ID by requesting it from the background script
+	 */
+	async initialize() {
+		if (this.tabId === undefined) {
+			this.tabId = await Background.sendMessage("getTabId", {});
+
+			logger.debug("ThemeState: Initialized with tab ID", {
+				tabId: this.tabId,
+			});
+		}
+	}
+
+	/**
+	 * Returns the current tab ID
+	 */
+	getTabId(): number | undefined {
+		return this.tabId;
+	}
 
 	/**
 	 * Applies tweaks for a theme and broadcasts state changes
@@ -64,7 +85,7 @@ class ThemeStateManager {
 		};
 
 		// Broadcast state change to popup
-		Background.sendMessage("stateChanged", { state: this.currentState });
+		Background.sendMessage("stateChanged", { state: this.currentState, tabId: this.tabId });
 
 		logger.debug("ThemeState: State updated", this.currentState);
 	}
@@ -82,7 +103,7 @@ class ThemeStateManager {
 		logger.info("ThemeState: Toggling tweaks", { enabled, themeName });
 
 		// Update disabled flag (inverse of enabled)
-		await Storage.setDisabled(themeName, !enabled);
+		await Storage.setDisabled(themeName, !enabled, this.tabId);
 
 		// Re-apply will be triggered by storage.onChanged listener
 	}
@@ -94,7 +115,7 @@ class ThemeStateManager {
 		logger.info("ThemeState: Toggling global disable", { disabled });
 
 		// Update global disabled state
-		await Storage.setGlobalDisabled(disabled);
+		await Storage.setGlobalDisabled(disabled, this.tabId);
 
 		// Re-apply will be triggered by storage.onChanged listener
 	}
@@ -112,7 +133,7 @@ class ThemeStateManager {
 		logger.info("ThemeState: Resetting tweaks", { themeName });
 
 		// Delete tweaks from storage
-		await Storage.deleteTweaks(themeName);
+		await Storage.deleteTweaks(themeName, this.tabId);
 
 		// Re-apply will be triggered by storage.onChanged listener
 	}
@@ -143,11 +164,14 @@ class ThemeStateManager {
 		}
 		this.currentState.modifiedProperties = this.getModifiedProperties();
 
+		// Update badge to show tweaks are active
+		Background.sendMessage("updateBadge", { badgeState: "ON" });
+
 		// Broadcast updated state to popup immediately
-		Background.sendMessage("stateChanged", { state: this.currentState });
+		Background.sendMessage("stateChanged", { state: this.currentState, tabId: this.tabId });
 
 		// Save to storage in background (debounced)
-		Storage.savePropertyDebounced(themeName, propertyName, value);
+		Storage.savePropertyDebounced(themeName, propertyName, value, this.tabId);
 	}
 
 	/**

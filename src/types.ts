@@ -25,4 +25,5 @@ export type ThemeTweaksRecord = Record<string, ThemeTweaks>;
 export interface StorageData {
 	theme_tweaks?: ThemeTweaksRecord;
 	global_disabled?: boolean;
+	last_update_tab_id?: number;
 }

@@ -8,7 +8,10 @@ import { watchThemeChanges } from "./theme-watcher";
 logger.info("Content script loaded", { timestamp: new Date().toISOString() });
 
 // Initialize: Apply saved tweaks for current theme on page load
-const initializeTheme = () => {
+const initializeTheme = async () => {
+	// Initialize tab ID first
+	await ThemeState.initialize();
+
 	const initialTheme = DomUtils.getCurrentTheme();
 	if (initialTheme) {
 		logger.debug("Checking for saved tweaks for initial theme", {
@@ -60,13 +63,13 @@ const themeObserver = watchThemeChanges();
 
 // Listen for storage changes and re-apply tweaks
 browser.storage.onChanged.addListener((changes, areaName) => {
-	if (areaName === "sync") {
-		if (changes.theme_tweaks || changes.global_disabled) {
-			logger.debug("Storage changed, re-applying tweaks");
-			const currentTheme = DomUtils.getCurrentTheme();
-			if (currentTheme) {
-				ThemeState.applyForTheme(currentTheme);
-			}
+	if (areaName !== "sync") return;
+
+	if (changes.theme_tweaks || changes.global_disabled) {
+		logger.debug("Storage changed, re-applying tweaks");
+		const currentTheme = DomUtils.getCurrentTheme();
+		if (currentTheme) {
+			ThemeState.applyForTheme(currentTheme);
 		}
 	}
 });

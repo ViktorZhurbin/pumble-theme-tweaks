@@ -4,7 +4,7 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "DEBUG=true vite",
+		"dev": "vite",
 		"build": "tsc -b && vite build",
 		"preview": "vite preview",
 		"format": "biome format --write"
