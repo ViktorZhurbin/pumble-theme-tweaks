@@ -1,4 +1,5 @@
 import { defineConfig } from "wxt";
+import { PUMBLE_URL_PATTERNS } from "./src/constants/pumble-urls";
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -11,11 +12,7 @@ export default defineConfig({
 		version: "1.0.0",
 		description: "Change Pumble colors in web browser.",
 		permissions: ["storage", "scripting"],
-		host_permissions: [
-			"https://app.pumble.com/*",
-			"https://app.stage.ops.pumble.com/*",
-			"https://*.fe.pumble-dev.com/*",
-		],
+		host_permissions: [...PUMBLE_URL_PATTERNS],
 		action: {
 			default_title: "Change Pumble theme colors",
 		},

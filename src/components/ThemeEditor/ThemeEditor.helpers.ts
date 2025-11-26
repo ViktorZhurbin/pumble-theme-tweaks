@@ -2,6 +2,7 @@ import { browser } from "#imports";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { BrowserUtils } from "@/lib/browser-utils";
 import { logger } from "@/lib/logger";
+import { UrlUtils } from "@/lib/url";
 import type { RuntimeState } from "@/types/runtime";
 
 /**
@@ -31,8 +32,13 @@ export const isConnectionError = (err: unknown): boolean => {
 export const initializeTab = async (): Promise<number> => {
 	const tab = await BrowserUtils.getActiveTab();
 	if (!tab?.id) {
-		throw new Error("Please open a Pumble tab");
+		throw new Error("No active tab found");
 	}
+
+	if (!UrlUtils.isPumbleUrl(tab.url)) {
+		throw new Error("Please open this extension on a Pumble tab");
+	}
+
 	return tab.id;
 };
 
