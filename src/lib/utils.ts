@@ -8,6 +8,14 @@ const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
 	};
 };
 
+/**
+ * Helper to wait for specified milliseconds
+ */
+const wait = (ms: number): Promise<void> => {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
 export const Utils = {
 	debounce,
+	wait,
 };

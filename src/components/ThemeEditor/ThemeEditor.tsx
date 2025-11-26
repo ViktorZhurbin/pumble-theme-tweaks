@@ -3,25 +3,25 @@ import { createStore } from "solid-js/store";
 import { PROPERTIES } from "@/constants/properties";
 import { Background } from "@/entrypoints/background/messenger";
 import { ContentScript } from "@/entrypoints/content/messenger";
-import { BrowserUtils } from "@/lib/browser-utils";
+import { initialState } from "@/entrypoints/content/theme-state";
 import { logger } from "@/lib/logger";
+import { Utils } from "@/lib/utils";
 import type { RuntimeState } from "@/types/runtime";
 import { ColorPicker } from "./ColorPicker";
 import { GlobalDisableToggle } from "./GlobalDisableToggle";
 import { ResetButton } from "./ResetButton";
+import {
+	getContentScriptState,
+	initializeTab,
+	injectContentScript,
+	isConnectionError,
+} from "./ThemeEditor.helpers";
 import styles from "./ThemeEditor.module.css";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function ThemeEditor() {
 	// Use createStore for runtime state (reactive view of content script state)
-	const [store, setStore] = createStore<RuntimeState>({
-		themeName: null,
-		tweakModeOn: true,
-		pickerValues: {},
-		tweaks: undefined,
-		modifiedProperties: [],
-		globalDisabled: false,
-	});
+	const [store, setStore] = createStore<RuntimeState>(initialState);
 
 	const [tabId, setTabId] = createSignal<number | null>(null);
 	const [error, setError] = createSignal<string | null>(null);
@@ -99,12 +99,25 @@ export function ThemeEditor() {
 			const currentTabId = await initializeTab();
 			setTabId(currentTabId);
 
-			// Get runtime state from content script (source of truth)
-			const runtimeState = await ContentScript.sendMessage(
-				"getCurrentState",
-				undefined,
-				currentTabId,
-			);
+			// Try to get runtime state from content script
+			let runtimeState: RuntimeState;
+			try {
+				runtimeState = await getContentScriptState(currentTabId);
+			} catch (err) {
+				// If content script is not injected, inject it programmatically
+				if (isConnectionError(err)) {
+					logger.info("Content script not found, injecting programmatically");
+
+					await injectContentScript(currentTabId);
+					await Utils.wait(100);
+
+					// Retry getting the state
+					runtimeState = await getContentScriptState(currentTabId);
+				} else {
+					throw err;
+				}
+			}
+
 			setStore(runtimeState);
 
 			logger.info("ThemeEditor initialized", {
@@ -113,6 +126,7 @@ export function ThemeEditor() {
 			});
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Unknown error");
+			logger.error("ThemeEditor initialization failed", { error: err });
 		} finally {
 			setLoading(false);
 		}
@@ -181,16 +195,4 @@ export function ThemeEditor() {
 			</Show>
 		</div>
 	);
-}
-
-/**
- * Initialization helper: Get and validate active tab
- * Returns tab ID
- */
-async function initializeTab(): Promise<number> {
-	const tab = await BrowserUtils.getActiveTab();
-	if (!tab?.id) {
-		throw new Error("Please open a Pumble tab");
-	}
-	return tab.id;
 }

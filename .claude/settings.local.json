@@ -1,20 +1,21 @@
 {
-	"permissions": {
-		"allow": [
-			"WebSearch",
-			"Bash(npm run build:*)",
-			"Bash(git add:*)",
-			"Bash(git commit:*)",
-			"Bash(git checkout:*)",
-			"Bash(cp:*)",
-			"Bash(rm:*)",
-			"Bash(cat:*)",
-			"Bash(tree:*)",
-			"Bash(npm install:*)",
-			"Bash(find:*)",
-			"Bash(npm run compile:*)"
-		],
-		"deny": [],
-		"ask": []
-	}
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "Bash(cat:*)",
+      "Bash(tree:*)",
+      "Bash(npm install:*)",
+      "Bash(find:*)",
+      "Bash(npm run compile:*)",
+      "mcp__ide__getDiagnostics"
+    ],
+    "deny": [],
+    "ask": []
+  }
 }
