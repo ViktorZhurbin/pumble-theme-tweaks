@@ -1,11 +1,11 @@
-import { DomUtils } from "./dom-utils";
+import { type Browser, browser } from "wxt/browser";
+import type { ContentScriptContext } from "wxt/utils/content-script-context";
+import { defineContentScript } from "wxt/utils/define-content-script";
 import { logger } from "@/lib/logger";
+import { DomUtils } from "./dom-utils";
 import { ContentScript } from "./messenger";
 import { ThemeState } from "./theme-state";
 import { watchThemeChanges } from "./theme-watcher";
-import { defineContentScript } from "wxt/utils/define-content-script";
-import type { ContentScriptContext } from "wxt/utils/content-script-context";
-import { Browser, browser } from "wxt/browser";
 
 export default defineContentScript({
 	matches: [
@@ -61,6 +61,13 @@ export default defineContentScript({
 		ContentScript.onMessage("resetTweaks", () => {
 			logger.debug("Resetting tweaks via ThemeState");
 			ThemeState.reset();
+		});
+
+		ContentScript.onMessage("resetProperty", (message) => {
+			logger.debug("Resetting property via ThemeState", {
+				propertyName: message.data.propertyName,
+			});
+			ThemeState.resetProperty(message.data.propertyName);
 		});
 
 		ContentScript.onMessage("toggleGlobal", (message) => {

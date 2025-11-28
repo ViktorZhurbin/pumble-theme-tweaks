@@ -9,5 +9,6 @@ export interface ContentScriptProtocol {
 	toggleTweaks(data: { enabled: boolean }): void;
 	toggleGlobal(data: { disabled: boolean }): void;
 	resetTweaks(): void;
+	resetProperty(data: { propertyName: string }): void;
 	getCurrentState(): RuntimeState;
 }

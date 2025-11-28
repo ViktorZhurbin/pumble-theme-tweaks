@@ -1,3 +1,4 @@
+import { browser } from "wxt/browser";
 import { logger } from "@/lib/logger";
 import type {
 	StorageData,
@@ -5,7 +6,6 @@ import type {
 	ThemeTweaksRecord,
 } from "@/types/tweaks";
 import { Utils } from "./utils";
-import { browser } from "wxt/browser";
 
 /**
  * Gets all theme tweaks from storage
@@ -66,6 +66,44 @@ const savePropertyDebounced = Utils.debounce(
 	},
 	500,
 );
+
+/**
+ * Deletes a single CSS property for a theme
+ */
+const deleteProperty = async (
+	themeName: string,
+	propertyName: string,
+	tabId?: number,
+) => {
+	const tweaks = await getAllTweaks();
+
+	if (!tweaks[themeName]?.cssProperties[propertyName]) {
+		logger.warn(
+			"Storage delete property failed. No property found in stored tweaks:",
+			{ themeName, propertyName },
+		);
+		return;
+	}
+
+	logger.info("Storage deleting property:", { themeName, propertyName });
+	delete tweaks[themeName].cssProperties[propertyName];
+
+	// If no more properties, remove the theme entry entirely
+	if (Object.keys(tweaks[themeName].cssProperties).length === 0) {
+		delete tweaks[themeName];
+	}
+
+	try {
+		const dataToSave: StorageData = { theme_tweaks: tweaks };
+		if (tabId !== undefined) {
+			dataToSave.last_update_tab_id = tabId;
+		}
+		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+	} catch (err) {
+		logger.error("Storage delete property error:", err);
+		throw err;
+	}
+};
 
 /**
  * Deletes all tweaks for a specific theme
@@ -150,6 +188,7 @@ export const Storage = {
 	getTweaks,
 	saveProperty,
 	savePropertyDebounced,
+	deleteProperty,
 	deleteTweaks,
 	setDisabled,
 	getGlobalDisabled,

@@ -38,6 +38,18 @@ export function ThemeEditor() {
 		ContentScript.sendMessage("resetTweaks", undefined, currentTabId);
 	};
 
+	const handleResetProperty = (propertyName: string) => {
+		const currentTabId = tabId();
+		if (!currentTabId) return;
+
+		// Send message to reset this specific property
+		ContentScript.sendMessage(
+			"resetProperty",
+			{ propertyName },
+			currentTabId,
+		);
+	};
+
 	const handleColorChange = (propertyName: string, value: string) => {
 		const currentTabId = tabId();
 		if (!currentTabId || !store.themeName) return;
@@ -171,6 +183,7 @@ export function ThemeEditor() {
 										onInput={(value) => {
 											handleColorChange(propertyName, value);
 										}}
+										onReset={() => handleResetProperty(propertyName)}
 									/>
 								)}
 							</For>

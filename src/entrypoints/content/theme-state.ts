@@ -54,20 +54,23 @@ class ThemeStateManager {
 		// Load tweaks from storage
 		const storedTweaks = await Storage.getTweaks(themeName);
 
+		// Always start fresh - clear all tweaks to ensure DOM matches storage exactly
+		DomUtils.resetCSSTweaks();
+
 		// Apply or remove tweaks based on global disable and per-theme settings
 		if (!globalDisabled && storedTweaks && !storedTweaks.disabled) {
 			logger.debug("ThemeState: Applying CSS tweaks", {
 				count: Object.keys(storedTweaks.cssProperties).length,
 			});
 
+			// Apply only properties from storage
 			for (const [key, value] of Object.entries(storedTweaks.cssProperties)) {
 				DomUtils.applyCSSProperty(key, value);
 			}
 
 			Background.sendMessage("updateBadge", { badgeState: "ON" });
 		} else {
-			logger.debug("ThemeState: Removing CSS tweaks", { globalDisabled });
-			DomUtils.resetCSSTweaks();
+			logger.debug("ThemeState: No tweaks to apply", { globalDisabled });
 
 			// Show "OFF" badge when globally disabled, otherwise no badge
 			const badgeState = globalDisabled ? "OFF" : "DEFAULT";
@@ -137,6 +140,24 @@ class ThemeStateManager {
 
 		// Delete tweaks from storage
 		await Storage.deleteTweaks(themeName, this.tabId);
+
+		// Re-apply will be triggered by storage.onChanged listener
+	}
+
+	/**
+	 * Resets a single CSS property for current theme
+	 */
+	async resetProperty(propertyName: string) {
+		const themeName = this.currentState.themeName;
+		if (!themeName) {
+			logger.warn("ThemeState: Cannot reset property, no theme set");
+			return;
+		}
+
+		logger.info("ThemeState: Resetting property", { themeName, propertyName });
+
+		// Delete property from storage
+		await Storage.deleteProperty(themeName, propertyName, this.tabId);
 
 		// Re-apply will be triggered by storage.onChanged listener
 	}
