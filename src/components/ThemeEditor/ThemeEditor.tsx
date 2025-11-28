@@ -1,11 +1,4 @@
-import {
-	createEffect,
-	createMemo,
-	createSignal,
-	For,
-	onMount,
-	Show,
-} from "solid-js";
+import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { PROPERTIES } from "@/constants/properties";
 import { Background } from "@/entrypoints/background/messenger";
@@ -31,10 +24,6 @@ export function ThemeEditor() {
 	// Use createStore for runtime state (reactive view of content script state)
 	const [store, setStore] = createStore<RuntimeState>(initialState);
 
-	createEffect(() => {
-		console.log("store.pickerValues", store.pickerValues);
-	});
-
 	const [tabId, setTabId] = createSignal<number | null>(null);
 	const [error, setError] = createSignal<string | null>(null);
 	const [loading, setLoading] = createSignal(true);
@@ -44,8 +33,7 @@ export function ThemeEditor() {
 		if (!currentTabId) return;
 
 		// Optimistic update for responsive UI
-		setStore("tweaks", undefined);
-		setStore("modifiedProperties", []);
+		setStore("themeTweaks", undefined);
 
 		ContentScript.sendMessage("resetTweaks", undefined, currentTabId);
 	};
@@ -61,9 +49,6 @@ export function ThemeEditor() {
 	const handleColorChange = (propertyName: string, value: string) => {
 		const currentTabId = tabId();
 		if (!currentTabId || !store.themeName) return;
-
-		// Optimistic update for responsive UI
-		setStore("pickerValues", propertyName, value);
 
 		// Send to content script (ThemeState handles storage and broadcasts updates)
 		ContentScript.sendMessage(
@@ -93,9 +78,24 @@ export function ThemeEditor() {
 		ContentScript.sendMessage("toggleGlobal", { disabled }, currentTabId);
 	};
 
+	const handleToggleProperty = (propertyName: string, enabled: boolean) => {
+		const currentTabId = tabId();
+		if (!currentTabId) return;
+
+		// State updates automatically via broadcast
+		ContentScript.sendMessage(
+			"toggleProperty",
+			{ propertyName, enabled },
+			currentTabId,
+		);
+	};
+
 	const hasModifications = createMemo(() => {
-		// Check if there are any modified properties (applied to DOM)
-		return store.modifiedProperties && store.modifiedProperties.length > 0;
+		// Check if there are any stored tweaks
+		return (
+			store.themeTweaks?.cssProperties &&
+			Object.keys(store.themeTweaks.cssProperties).length > 0
+		);
 	});
 
 	// Listen for state changes from content script
@@ -158,7 +158,7 @@ export function ThemeEditor() {
 				<h3>Pumble Tweaks</h3>
 				<Show when={!loading() && !error()}>
 					<GlobalDisableToggle
-						disabled={store.globalDisabled}
+						disabled={store.isExtensionOff}
 						onChange={handleToggleGlobal}
 					/>
 				</Show>
@@ -181,17 +181,24 @@ export function ThemeEditor() {
 					</Show>
 					<div class={styles.controlsContainer}>
 						<div class={styles.pickersContainer}>
+							<ThemeToggle
+								checked={store.themeTweaksOn}
+								disabled={store.isExtensionOff}
+								onChange={handleToggleTweaks}
+							/>
 							<For each={PROPERTIES}>
 								{({ label, propertyName }) => (
 									<ColorPicker
 										label={label}
-										value={store.pickerValues[propertyName] || ""}
-										inactive={!store.tweakModeOn}
-										isModified={store.modifiedProperties.includes(propertyName)}
+										tweakEntry={store.themeTweaks?.cssProperties[propertyName]}
+										inactive={!store.themeTweaksOn}
 										onInput={(value) => {
 											handleColorChange(propertyName, value);
 										}}
 										onReset={() => handleResetProperty(propertyName)}
+										onToggle={(enabled) =>
+											handleToggleProperty(propertyName, enabled)
+										}
 									/>
 								)}
 							</For>
@@ -201,18 +208,12 @@ export function ThemeEditor() {
 
 						<div class={styles.actionsContainer}>
 							<CopyButton
-								values={store.pickerValues}
-								disabled={!store.tweakModeOn}
-							/>
-
-							<ThemeToggle
-								checked={store.tweakModeOn}
-								disabled={store.globalDisabled}
-								onChange={handleToggleTweaks}
+								themeTweaks={store.themeTweaks}
+								disabled={!store.themeTweaksOn}
 							/>
 
 							<ResetButton
-								disabled={!hasModifications() || !store.tweakModeOn}
+								disabled={!hasModifications() || !store.themeTweaksOn}
 								onClick={handleReset}
 							/>
 						</div>

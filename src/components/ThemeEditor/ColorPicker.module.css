@@ -2,10 +2,10 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background: rgba(255, 255, 255, 0.03);
-	padding: 10px 12px;
+	background: var(--picker-background);
+	padding: 8px var(--picker-padding-inline);
 	border: none;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+	border-bottom: var(--picker-border);
 	transition: background 0.2s ease-in-out;
 	cursor: pointer;
 
@@ -33,19 +33,22 @@
 	gap: 6px;
 }
 
-.badge {
-	display: inline-block;
-	width: 6px;
-	height: 6px;
-	border-radius: 50%;
-	background-color: #4caf50;
-	flex-shrink: 0;
-}
-
 .pickerControls {
 	display: flex;
 	align-items: center;
 	gap: 8px;
+}
+
+.toggleCheckbox {
+	width: 18px;
+	height: 18px;
+	flex-shrink: 0;
+	cursor: pointer;
+}
+
+.toggleCheckbox:disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
 }
 
 .resetButton {

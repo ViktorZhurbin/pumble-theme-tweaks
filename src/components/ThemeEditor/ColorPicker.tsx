@@ -1,19 +1,25 @@
 import { ColorUtils } from "@/lib/color";
+import type { TweakEntry } from "@/types/tweaks";
 import styles from "./ColorPicker.module.css";
 
 interface ColorPickerProps {
 	label: string;
-	value: string;
+	tweakEntry?: TweakEntry;
 	inactive?: boolean;
-	isModified?: boolean;
 	onInput: (value: string) => void;
-	onReset?: () => void;
+	onReset: () => void;
+	onToggle?: (checked: boolean) => void;
 }
 
 export function ColorPicker(props: ColorPickerProps) {
 	const handleInput = (e: Event) => {
 		const target = e.target as HTMLInputElement;
 		props.onInput(target.value);
+	};
+
+	const handleToggle = (e: Event) => {
+		const target = e.target as HTMLInputElement;
+		props.onToggle?.(target.checked);
 	};
 
 	const resetTitle = "Reset to default";
@@ -23,14 +29,9 @@ export function ColorPicker(props: ColorPickerProps) {
 			class={styles.pickerGroup}
 			classList={{ [styles.inactive]: props.inactive }}
 		>
-			<span class={styles.pickerLabel}>
-				{props.label}
-				{props.isModified && (
-					<span class={styles.badge} title="Modified from default" />
-				)}
-			</span>
+			<span class={styles.pickerLabel}>{props.label}</span>
 			<div class={styles.pickerControls}>
-				{props.isModified && props.onReset && (
+				{isPropertyModified(props.tweakEntry) && (
 					<button
 						type="button"
 						class={styles.resetButton}
@@ -61,11 +62,40 @@ export function ColorPicker(props: ColorPickerProps) {
 				)}
 				<input
 					type="color"
-					value={ColorUtils.toHex(props.value)}
+					value={ColorUtils.toHex(getDisplayValue(props.tweakEntry))}
 					disabled={props.inactive}
 					onInput={handleInput}
+				/>
+				<input
+					type="checkbox"
+					class={styles.toggleCheckbox}
+					checked={props.tweakEntry?.enabled ?? true}
+					disabled={props.inactive}
+					onChange={handleToggle}
+					title="Enable this color tweak"
 				/>
 			</div>
 		</label>
 	);
+}
+
+/**
+ * Gets the display value for a color picker
+ * Returns the user's custom value if enabled and set, otherwise the initial DOM value
+ */
+function getDisplayValue(entry: TweakEntry | undefined): string {
+	if (!entry) return "";
+
+	return entry.enabled && entry.value !== null
+		? entry.value
+		: entry.initialValue;
+}
+
+/**
+ * Checks if a property has been modified from its initial value
+ */
+function isPropertyModified(entry: TweakEntry | undefined): boolean {
+	if (!entry) return false;
+
+	return entry.value !== null && entry.value !== entry.initialValue;
 }

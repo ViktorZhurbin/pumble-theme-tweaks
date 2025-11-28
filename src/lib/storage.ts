@@ -2,15 +2,16 @@ import { browser } from "wxt/browser";
 import { logger } from "@/lib/logger";
 import type {
 	StorageData,
-	ThemeTweaks,
-	ThemeTweaksRecord,
+	StoredThemeTweaks,
+	StoredThemeTweaksRecord,
+	StoredTweakEntry,
 } from "@/types/tweaks";
 import { Utils } from "./utils";
 
 /**
  * Gets all theme tweaks from storage
  */
-const getAllTweaks = async (): Promise<ThemeTweaksRecord> => {
+const getAllTweaks = async (): Promise<StoredThemeTweaksRecord> => {
 	try {
 		const result = (await browser.storage.sync.get(
 			"theme_tweaks",
@@ -23,14 +24,56 @@ const getAllTweaks = async (): Promise<ThemeTweaksRecord> => {
 };
 
 /**
+ * Migrates old storage format to new format
+ * Old: cssProperties[key] = string, separate enabledProperties array
+ * New: cssProperties[key] = { value, enabled }
+ */
+
+// biome-ignore lint/suspicious/noExplicitAny: no need for explanation :D
+const migrateTweaksFormat = (themeTweaks: any): StoredThemeTweaks => {
+	// If already in new format, return as-is
+	const firstPropValue = Object.values(themeTweaks.cssProperties || {})[0];
+	if (
+		firstPropValue &&
+		typeof firstPropValue === "object" &&
+		"value" in firstPropValue
+	) {
+		return themeTweaks as StoredThemeTweaks;
+	}
+
+	// Migrate from old format
+	const oldEnabledProps =
+		themeTweaks.enabledProperties ||
+		Object.keys(themeTweaks.cssProperties || {});
+
+	const newCssProperties: Record<string, StoredTweakEntry> = {};
+
+	for (const [key, value] of Object.entries(themeTweaks.cssProperties || {})) {
+		newCssProperties[key] = {
+			value: value as string,
+			enabled: oldEnabledProps.includes(key),
+		};
+	}
+
+	return {
+		disabled: themeTweaks.disabled ?? false,
+		cssProperties: newCssProperties,
+	};
+};
+
+/**
  * Gets tweaks for a specific theme
  */
 const getTweaks = async (
 	themeName: string,
-): Promise<ThemeTweaks | undefined> => {
-	const tweaks = await getAllTweaks();
+): Promise<StoredThemeTweaks | undefined> => {
+	const allTweaks = await getAllTweaks();
+	const themeTweaks = allTweaks[themeName];
 
-	return tweaks[themeName];
+	if (!themeTweaks) return undefined;
+
+	// Migrate if needed
+	return migrateTweaksFormat(themeTweaks);
 };
 
 /**
@@ -42,13 +85,19 @@ const saveProperty = async (
 	value: string,
 	tabId?: number,
 ) => {
-	const tweaks = await getAllTweaks();
+	const allTweaks = await getAllTweaks();
 
-	tweaks[themeName] ??= { disabled: false, cssProperties: {} };
-	tweaks[themeName].cssProperties[propertyName] = value;
+	allTweaks[themeName] ??= { disabled: false, cssProperties: {} };
+
+	// New format: store as object with value and enabled
+	// Preserve existing enabled state, default to true
+	allTweaks[themeName].cssProperties[propertyName] = {
+		value,
+		enabled: allTweaks[themeName].cssProperties[propertyName]?.enabled ?? true,
+	};
 
 	try {
-		const dataToSave: StorageData = { theme_tweaks: tweaks };
+		const dataToSave: StorageData = { theme_tweaks: allTweaks };
 
 		if (tabId !== undefined) {
 			dataToSave.last_update_tab_id = tabId;
@@ -75,9 +124,9 @@ const deleteProperty = async (
 	propertyName: string,
 	tabId?: number,
 ) => {
-	const tweaks = await getAllTweaks();
+	const allTweaks = await getAllTweaks();
 
-	if (!tweaks[themeName]?.cssProperties[propertyName]) {
+	if (!allTweaks[themeName]?.cssProperties[propertyName]) {
 		logger.warn(
 			"Storage delete property failed. No property found in stored tweaks:",
 			{ themeName, propertyName },
@@ -86,15 +135,15 @@ const deleteProperty = async (
 	}
 
 	logger.info("Storage deleting property:", { themeName, propertyName });
-	delete tweaks[themeName].cssProperties[propertyName];
+	delete allTweaks[themeName].cssProperties[propertyName];
 
 	// If no more properties, remove the theme entry entirely
-	if (Object.keys(tweaks[themeName].cssProperties).length === 0) {
-		delete tweaks[themeName];
+	if (Object.keys(allTweaks[themeName].cssProperties).length === 0) {
+		delete allTweaks[themeName];
 	}
 
 	try {
-		const dataToSave: StorageData = { theme_tweaks: tweaks };
+		const dataToSave: StorageData = { theme_tweaks: allTweaks };
 		if (tabId !== undefined) {
 			dataToSave.last_update_tab_id = tabId;
 		}
@@ -109,12 +158,12 @@ const deleteProperty = async (
  * Deletes all tweaks for a specific theme
  */
 const deleteTweaks = async (themeName: string, tabId?: number) => {
-	const tweaks = await getAllTweaks();
+	const allTweaks = await getAllTweaks();
 
-	if (tweaks[themeName]) {
-		delete tweaks[themeName];
+	if (allTweaks[themeName]) {
+		delete allTweaks[themeName];
 		try {
-			const dataToSave: StorageData = { theme_tweaks: tweaks };
+			const dataToSave: StorageData = { theme_tweaks: allTweaks };
 			if (tabId !== undefined) {
 				dataToSave.last_update_tab_id = tabId;
 			}
@@ -134,14 +183,48 @@ const setDisabled = async (
 	disabled: boolean,
 	tabId?: number,
 ) => {
-	const tweaks = await getAllTweaks();
+	const allTweaks = await getAllTweaks();
 
-	tweaks[themeName] ??= { disabled: false, cssProperties: {} };
-	tweaks[themeName].disabled = disabled;
+	allTweaks[themeName] ??= { disabled: false, cssProperties: {} };
+	allTweaks[themeName].disabled = disabled;
 
 	try {
-		const dataToSave: StorageData = { theme_tweaks: tweaks };
+		const dataToSave: StorageData = { theme_tweaks: allTweaks };
 
+		if (tabId !== undefined) {
+			dataToSave.last_update_tab_id = tabId;
+		}
+
+		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+	} catch (err) {
+		logger.warn("Storage write error:", err);
+	}
+};
+
+/**
+ * Sets whether a specific property is enabled or disabled
+ */
+const setPropertyEnabled = async (
+	themeName: string,
+	propertyName: string,
+	enabled: boolean,
+	tabId?: number,
+) => {
+	const allTweaks = await getAllTweaks();
+
+	if (!allTweaks[themeName]?.cssProperties[propertyName]) {
+		logger.warn("Cannot toggle non-existent property", {
+			themeName,
+			propertyName,
+		});
+		return;
+	}
+
+	// Simply update the enabled flag
+	allTweaks[themeName].cssProperties[propertyName].enabled = enabled;
+
+	try {
+		const dataToSave: StorageData = { theme_tweaks: allTweaks };
 		if (tabId !== undefined) {
 			dataToSave.last_update_tab_id = tabId;
 		}
@@ -191,6 +274,7 @@ export const Storage = {
 	deleteProperty,
 	deleteTweaks,
 	setDisabled,
+	setPropertyEnabled,
 	getGlobalDisabled,
 	setGlobalDisabled,
 };

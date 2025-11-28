@@ -6,9 +6,7 @@ import type { ThemeTweaks } from "./tweaks";
  */
 export interface RuntimeState {
 	themeName: string | null;
-	tweakModeOn: boolean;
-	pickerValues: Record<string, string>;
-	tweaks: ThemeTweaks | undefined;
-	modifiedProperties: string[]; // Properties with inline styles (modified by extension)
-	globalDisabled: boolean; // Master switch for entire extension
+	themeTweaksOn: boolean;
+	themeTweaks: ThemeTweaks | undefined;
+	isExtensionOff: boolean; // Master switch for entire extension
 }

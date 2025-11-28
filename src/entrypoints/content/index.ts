@@ -77,6 +77,17 @@ export default defineContentScript({
 			ThemeState.toggleGlobal(message.data.disabled);
 		});
 
+		ContentScript.onMessage("toggleProperty", (message) => {
+			logger.debug("Toggling property", {
+				propertyName: message.data.propertyName,
+				enabled: message.data.enabled,
+			});
+			ThemeState.toggleProperty(
+				message.data.propertyName,
+				message.data.enabled,
+			);
+		});
+
 		// Watch for theme changes and handle accordingly
 		const themeObserver = watchThemeChanges();
 

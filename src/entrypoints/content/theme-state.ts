@@ -1,17 +1,20 @@
 import { PROPERTY_NAMES } from "@/constants/properties";
-import { DomUtils } from "./dom-utils";
 import { logger } from "@/lib/logger";
-import type { RuntimeState } from "@/types/runtime";
 import { Storage } from "@/lib/storage";
+import type { RuntimeState } from "@/types/runtime";
+import type {
+	StoredThemeTweaks,
+	ThemeTweaks,
+	TweakEntry,
+} from "@/types/tweaks";
 import { Background } from "../background/messenger";
+import { DomUtils } from "./dom-utils";
 
 const initialState: RuntimeState = {
 	themeName: null,
-	tweakModeOn: true,
-	pickerValues: {},
-	tweaks: undefined,
-	modifiedProperties: [],
-	globalDisabled: false,
+	themeTweaksOn: true,
+	themeTweaks: undefined,
+	isExtensionOff: false,
 };
 /**
  * ThemeState - Single source of truth for theme tweaks state
@@ -49,42 +52,45 @@ class ThemeStateManager {
 		logger.debug("ThemeState: Applying for theme", { themeName });
 
 		// Check global disable first
-		const globalDisabled = await Storage.getGlobalDisabled();
+		const isExtensionOff = await Storage.getGlobalDisabled();
 
 		// Load tweaks from storage
-		const storedTweaks = await Storage.getTweaks(themeName);
+		const storedThemeTweaks = await Storage.getTweaks(themeName);
 
 		// Always start fresh - clear all tweaks to ensure DOM matches storage exactly
 		DomUtils.resetCSSTweaks();
 
+		// Build full tweaks structure with initial values from DOM
+		const themeTweaks = this.buildTweaksWithInitialValues(storedThemeTweaks);
+
 		// Apply or remove tweaks based on global disable and per-theme settings
-		if (!globalDisabled && storedTweaks && !storedTweaks.disabled) {
+		if (!isExtensionOff && storedThemeTweaks && !storedThemeTweaks.disabled) {
 			logger.debug("ThemeState: Applying CSS tweaks", {
-				count: Object.keys(storedTweaks.cssProperties).length,
+				count: Object.keys(storedThemeTweaks.cssProperties).length,
 			});
 
-			// Apply only properties from storage
-			for (const [key, value] of Object.entries(storedTweaks.cssProperties)) {
-				DomUtils.applyCSSProperty(key, value);
+			// Apply only enabled properties with user-set values
+			for (const [key, prop] of Object.entries(themeTweaks.cssProperties)) {
+				if (prop.enabled && prop.value !== null) {
+					DomUtils.applyCSSProperty(key, prop.value);
+				}
 			}
 
 			Background.sendMessage("updateBadge", { badgeState: "ON" });
 		} else {
-			logger.debug("ThemeState: No tweaks to apply", { globalDisabled });
+			logger.debug("ThemeState: No tweaks to apply", { isExtensionOff });
 
 			// Show "OFF" badge when globally disabled, otherwise no badge
-			const badgeState = globalDisabled ? "OFF" : "DEFAULT";
+			const badgeState = isExtensionOff ? "OFF" : "DEFAULT";
 			Background.sendMessage("updateBadge", { badgeState });
 		}
 
-		// Update internal state - tweakModeOn represents whether tweaking mode is enabled
+		// Update internal state - themeTweaksOn represents whether tweaking mode is enabled
 		this.currentState = {
 			themeName,
-			tweakModeOn: !globalDisabled && !storedTweaks?.disabled,
-			pickerValues: this.buildPickerValues(storedTweaks),
-			tweaks: storedTweaks,
-			modifiedProperties: this.getModifiedProperties(),
-			globalDisabled,
+			themeTweaksOn: !isExtensionOff && !storedThemeTweaks?.disabled,
+			themeTweaks,
+			isExtensionOff,
 		};
 
 		// Broadcast state change to popup
@@ -122,6 +128,33 @@ class ThemeStateManager {
 
 		// Update global disabled state
 		await Storage.setGlobalDisabled(disabled, this.tabId);
+
+		// Re-apply will be triggered by storage.onChanged listener
+	}
+
+	/**
+	 * Toggles a specific property on/off
+	 */
+	async toggleProperty(propertyName: string, enabled: boolean) {
+		const themeName = this.currentState.themeName;
+		if (!themeName) {
+			logger.warn("ThemeState: Cannot toggle property, no theme set");
+			return;
+		}
+
+		logger.info("ThemeState: Toggling property", {
+			themeName,
+			propertyName,
+			enabled,
+		});
+
+		// Update storage
+		await Storage.setPropertyEnabled(
+			themeName,
+			propertyName,
+			enabled,
+			this.tabId,
+		);
 
 		// Re-apply will be triggered by storage.onChanged listener
 	}
@@ -182,11 +215,16 @@ class ThemeStateManager {
 		DomUtils.applyCSSProperty(propertyName, value);
 
 		// Update internal state immediately
-		this.currentState.pickerValues[propertyName] = value;
-		if (this.currentState.tweaks) {
-			this.currentState.tweaks.cssProperties[propertyName] = value;
+		if (this.currentState.themeTweaks) {
+			// Update value while preserving enabled state and initialValue
+			const existing =
+				this.currentState.themeTweaks.cssProperties[propertyName];
+			this.currentState.themeTweaks.cssProperties[propertyName] = {
+				value,
+				initialValue: existing?.initialValue ?? "",
+				enabled: existing?.enabled ?? true,
+			};
 		}
-		this.currentState.modifiedProperties = this.getModifiedProperties();
 
 		// Update badge to show tweaks are active
 		Background.sendMessage("updateBadge", { badgeState: "ON" });
@@ -209,36 +247,30 @@ class ThemeStateManager {
 	}
 
 	/**
-	 * Builds picker values from tweaks and current DOM state
+	 * Builds tweaks with initial values from DOM
 	 */
-	private buildPickerValues(
-		tweaks: RuntimeState["tweaks"],
-	): Record<string, string> {
-		const currentValues = DomUtils.getCSSProperties();
+	private buildTweaksWithInitialValues(
+		storedTweaks: StoredThemeTweaks | undefined,
+	): ThemeTweaks {
+		const currentDOMValues = DomUtils.getCSSProperties();
 
-		return PROPERTY_NAMES.reduce<Record<string, string>>(
-			(acc, propertyName) => {
-				// Prefer saved tweaks, fall back to current DOM values
-				const value =
-					tweaks?.cssProperties[propertyName] || currentValues[propertyName];
+		const cssProperties: Record<string, TweakEntry> = {};
 
-				if (value) {
-					acc[propertyName] = value;
-				}
+		for (const propertyName of PROPERTY_NAMES) {
+			const initialValue = currentDOMValues[propertyName] || "";
+			const stored = storedTweaks?.cssProperties[propertyName];
 
-				return acc;
-			},
-			{},
-		);
-	}
+			cssProperties[propertyName] = {
+				value: stored?.value ?? null,
+				initialValue,
+				enabled: stored?.enabled ?? true,
+			};
+		}
 
-	/**
-	 * Gets list of properties that have been modified (exist as inline styles)
-	 */
-	private getModifiedProperties(): string[] {
-		return PROPERTY_NAMES.filter((propertyName) =>
-			DomUtils.isPropertyModified(propertyName),
-		);
+		return {
+			disabled: storedTweaks?.disabled ?? false,
+			cssProperties,
+		};
 	}
 }
 

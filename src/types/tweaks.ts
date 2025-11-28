@@ -7,23 +7,50 @@ export interface PropertyItem {
 }
 
 /**
- * Theme tweaks stored in browser.storage
- * Maps theme name to customized CSS properties
+ * Runtime tweak entry (includes computed initialValue from DOM)
+ */
+export interface TweakEntry {
+	value: string | null; // User's custom value (null = not tweaked)
+	initialValue: string; // Fresh from DOM on init (NOT stored)
+	enabled: boolean;
+}
+
+/**
+ * Runtime theme tweaks (includes computed initialValues)
  */
 export interface ThemeTweaks {
 	disabled: boolean;
 	cssProperties: {
-		[propertyName: string]: string;
+		[propertyName: string]: TweakEntry;
 	};
 }
 
-export type ThemeTweaksRecord = Record<string, ThemeTweaks>;
+/**
+ * Stored tweak entry (persisted to browser.storage)
+ * Does not include initialValue, which is computed from DOM at runtime
+ */
+export interface StoredTweakEntry {
+	value: string;
+	enabled: boolean;
+}
+
+/**
+ * Stored theme tweaks (persisted to browser.storage)
+ */
+export interface StoredThemeTweaks {
+	disabled: boolean;
+	cssProperties: {
+		[propertyName: string]: StoredTweakEntry;
+	};
+}
+
+export type StoredThemeTweaksRecord = Record<string, StoredThemeTweaks>;
 
 /**
  * Storage data structure
  */
 export interface StorageData {
-	theme_tweaks?: ThemeTweaksRecord;
+	theme_tweaks?: StoredThemeTweaksRecord;
 	global_disabled?: boolean;
 	last_update_tab_id?: number;
 }

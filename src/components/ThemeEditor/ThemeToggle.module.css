@@ -1,26 +1,13 @@
-.toggleLabel {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	font-size: 0.875rem;
-	font-weight: 500;
-	user-select: none;
-	padding: 8px 4px;
-	opacity: 0.6;
-	transition: opacity 0.2s ease-in-out;
-
-	&:has(:not(input[type="checkbox"]:disabled)) {
-		opacity: 0.8;
-		cursor: pointer;
-
-		&:hover {
-			opacity: 1;
-		}
-	}
+.wrapper {
+	align-self: flex-end;
+	background: var(--picker-background);
+	padding: 4px var(--picker-padding-inline);
+	border-bottom: var(--picker-border);
 }
 
-.toggleLabel input[type="checkbox"] {
+.wrapper input[type="checkbox"] {
 	width: 18px;
 	height: 18px;
 	flex-shrink: 0;
+	cursor: pointer;
 }

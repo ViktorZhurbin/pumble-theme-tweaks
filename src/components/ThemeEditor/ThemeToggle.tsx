@@ -13,14 +13,14 @@ export function ThemeToggle(props: ThemeToggleProps) {
 	};
 
 	return (
-		<label class={styles.toggleLabel} aria-disabled={props.disabled}>
+		<div class={styles.wrapper}>
 			<input
+				title="Toggle all"
 				type="checkbox"
 				disabled={props.disabled}
 				checked={props.checked}
 				onChange={handleChange}
 			/>
-			Toggle theme tweaks
-		</label>
+		</div>
 	);
 }
