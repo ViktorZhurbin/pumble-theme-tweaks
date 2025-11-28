@@ -1,4 +1,11 @@
-import { createMemo, createSignal, For, onMount, Show } from "solid-js";
+import {
+	createEffect,
+	createMemo,
+	createSignal,
+	For,
+	onMount,
+	Show,
+} from "solid-js";
 import { createStore } from "solid-js/store";
 import { PROPERTIES } from "@/constants/properties";
 import { Background } from "@/entrypoints/background/messenger";
@@ -8,6 +15,7 @@ import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
 import type { RuntimeState } from "@/types/runtime";
 import { ColorPicker } from "./ColorPicker";
+import { CopyButton } from "./CopyButton";
 import { GlobalDisableToggle } from "./GlobalDisableToggle";
 import { ResetButton } from "./ResetButton";
 import {
@@ -22,6 +30,10 @@ import { ThemeToggle } from "./ThemeToggle";
 export function ThemeEditor() {
 	// Use createStore for runtime state (reactive view of content script state)
 	const [store, setStore] = createStore<RuntimeState>(initialState);
+
+	createEffect(() => {
+		console.log("store.pickerValues", store.pickerValues);
+	});
 
 	const [tabId, setTabId] = createSignal<number | null>(null);
 	const [error, setError] = createSignal<string | null>(null);
@@ -43,11 +55,7 @@ export function ThemeEditor() {
 		if (!currentTabId) return;
 
 		// Send message to reset this specific property
-		ContentScript.sendMessage(
-			"resetProperty",
-			{ propertyName },
-			currentTabId,
-		);
+		ContentScript.sendMessage("resetProperty", { propertyName }, currentTabId);
 	};
 
 	const handleColorChange = (propertyName: string, value: string) => {
@@ -192,6 +200,11 @@ export function ThemeEditor() {
 						<div class={styles.separator} />
 
 						<div class={styles.actionsContainer}>
+							<CopyButton
+								values={store.pickerValues}
+								disabled={!store.tweakModeOn}
+							/>
+
 							<ThemeToggle
 								checked={store.tweakModeOn}
 								disabled={store.globalDisabled}

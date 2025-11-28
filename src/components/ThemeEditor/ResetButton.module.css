@@ -4,19 +4,10 @@
 }
 
 .resetBtn {
-	text-transform: uppercase;
 	width: 100%;
 	background: transparent;
 	color: var(--color-error);
-	font-size: 0.875rem;
-	font-weight: 500;
-	padding: 10px 12px;
 	border: 1px solid rgba(244, 67, 54, 0.2);
-	border-radius: 4px;
-	transition:
-		background 0.15s ease-in-out,
-		border-color 0.15s ease-in-out,
-		color 0.15s ease-in-out;
 	animation: slideIn 0.2s ease-out;
 }
 
