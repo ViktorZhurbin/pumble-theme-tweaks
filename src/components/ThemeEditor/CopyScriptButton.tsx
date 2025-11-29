@@ -1,3 +1,4 @@
+import { colord } from "colord";
 import { PROPERTIES } from "@/constants/properties";
 import type { ThemeTweaks } from "@/types/tweaks";
 import { CopyButton } from "../CopyButton/CopyButton";
@@ -31,7 +32,7 @@ export const CopyScriptButton = () => {
 function getThemeValues(themeTweaks: ThemeTweaks | undefined) {
 	if (!themeTweaks) return [];
 
-	return PROPERTIES.flatMap((item) => {
+	const properties = PROPERTIES.flatMap((item) => {
 		const entry = themeTweaks.cssProperties[item.propertyName];
 
 		if (!entry) return [];
@@ -41,4 +42,18 @@ function getThemeValues(themeTweaks: ThemeTweaks | undefined) {
 
 		return { name: item.propertyName, value };
 	});
+
+	// Inject title-bar-bg for desktop, which is not available on the web
+	const main = properties.find(
+		(item) => item.name === "--palette-secondary-main",
+	);
+
+	if (main) {
+		properties.push({
+			name: "--title-bar-bg",
+			value: colord(main.value).darken(0.06).toRgbString(),
+		});
+	}
+
+	return properties;
 }
