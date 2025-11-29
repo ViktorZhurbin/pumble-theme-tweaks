@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
+import { ContentScript } from "@/entrypoints/content/messenger";
 import styles from "./ResetButton.module.css";
 import { useThemeEditorContext } from "./ThemeEditorContext";
-import { ContentScript } from "@/entrypoints/content/messenger";
 
 export function ResetButton() {
 	const ctx = useThemeEditorContext();
@@ -44,9 +44,7 @@ export function ResetButton() {
 					onClick={handleClick}
 					disabled={disabled() || !ctx.isReady()}
 					title={
-						disabled()
-							? "No tweaks to reset"
-							: "Reset tweaks for this theme"
+						disabled() ? "No tweaks to reset" : "Reset tweaks for this theme"
 					}
 				>
 					Reset
