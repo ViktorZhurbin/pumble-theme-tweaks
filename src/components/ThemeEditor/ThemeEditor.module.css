@@ -75,3 +75,9 @@
 	gap: 18px;
 	padding-inline: var(--padding-inline);
 }
+
+.copyButtonsWrapper {
+	display: grid;
+	gap: 10px;
+	grid-template-columns: 1fr 1fr;
+}

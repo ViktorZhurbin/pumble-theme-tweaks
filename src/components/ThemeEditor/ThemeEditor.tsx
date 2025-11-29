@@ -7,7 +7,8 @@ import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
 import type { RuntimeState } from "@/types/runtime";
 import { ColorPicker } from "./ColorPicker";
-import { CopyButton } from "./CopyButton";
+import { CopyScriptButton } from "./CopyScriptButton";
+import { CopyTweaksButton } from "./CopyTweaksButton";
 import { GlobalDisableToggle } from "./GlobalDisableToggle";
 import { ImportButton } from "./ImportButton";
 import { ResetButton } from "./ResetButton";
@@ -131,7 +132,10 @@ export function ThemeEditor() {
 
 							<div class={styles.actionsContainer}>
 								<ImportButton />
-								<CopyButton />
+								<div class={styles.copyButtonsWrapper}>
+									<CopyTweaksButton />
+									<CopyScriptButton />
+								</div>
 								<ResetButton />
 							</div>
 						</div>
