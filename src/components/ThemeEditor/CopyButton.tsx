@@ -15,8 +15,8 @@ export function CopyButton() {
 		if (disabled()) return;
 
 		try {
-			const copyValues = getCopyValues(ctx.store.themeTweaks);
-			const copyString = copyValues.join(", ");
+			const copyObject = getCopyObject(ctx.store.themeTweaks);
+			const copyString = JSON.stringify(copyObject, null, 2);
 
 			// Copy to clipboard
 			await navigator.clipboard.writeText(copyString);
@@ -43,17 +43,25 @@ export function CopyButton() {
 }
 
 /**
- * Gets all property values for copying to clipboard
- * Returns current values (custom or initial) for all properties
+ * Gets all property values as an object for copying to clipboard
+ * Returns object with property names as keys and current values (custom or initial)
  */
-function getCopyValues(tweaks: ThemeTweaks | undefined): Array<string> {
-	return PROPERTIES.map(({ propertyName }) => {
+function getCopyObject(
+	tweaks: ThemeTweaks | undefined,
+): Record<string, string> {
+	const result: Record<string, string> = {};
+
+	for (const { propertyName } of PROPERTIES) {
 		const entry = tweaks?.cssProperties[propertyName];
 
-		if (!entry) return "";
+		if (entry) {
+			// Include current value (custom or initial)
+			result[propertyName] =
+				entry.enabled && entry.value !== null
+					? entry.value
+					: entry.initialValue;
+		}
+	}
 
-		return entry.enabled && entry.value !== null
-			? entry.value
-			: entry.initialValue;
-	});
+	return result;
 }

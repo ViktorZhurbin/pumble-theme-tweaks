@@ -1,8 +1,8 @@
-import { ColorUtils } from "@/lib/color";
+import { colord } from "colord";
+import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
 import styles from "./ColorPicker.module.css";
 import { useThemeEditorContext } from "./ThemeEditorContext";
-import { ContentScript } from "@/entrypoints/content/messenger";
 
 interface ColorPickerProps {
 	label: string;
@@ -13,7 +13,8 @@ export function ColorPicker(props: ColorPickerProps) {
 	const ctx = useThemeEditorContext();
 
 	// Derive from context instead of props
-	const tweakEntry = () => ctx.store.themeTweaks?.cssProperties[props.propertyName];
+	const tweakEntry = () =>
+		ctx.store.themeTweaks?.cssProperties[props.propertyName];
 	const inactive = () => !ctx.store.themeTweaksOn;
 
 	const handleInput = (e: Event) => {
@@ -93,7 +94,7 @@ export function ColorPicker(props: ColorPickerProps) {
 				)}
 				<input
 					type="color"
-					value={ColorUtils.toHex(getDisplayValue(tweakEntry()))}
+					value={colord(getDisplayValue(tweakEntry())).toHex()}
 					disabled={inactive() || !ctx.isReady() || !ctx.store.themeName}
 					onInput={handleInput}
 				/>

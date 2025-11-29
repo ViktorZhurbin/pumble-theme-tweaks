@@ -11,5 +11,6 @@ export interface ContentScriptProtocol {
 	toggleProperty(data: { propertyName: string; enabled: boolean }): void;
 	resetTweaks(): void;
 	resetProperty(data: { propertyName: string }): void;
+	importTweaks(data: { properties: Record<string, string> }): void;
 	getCurrentState(): RuntimeState;
 }

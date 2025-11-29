@@ -196,6 +196,39 @@ class ThemeStateManager {
 	}
 
 	/**
+	 * Imports theme tweaks from a properties object (property name → hex color)
+	 */
+	async importTweaks(properties: Record<string, string>) {
+		const themeName = this.currentState.themeName;
+		if (!themeName) {
+			logger.warn("ThemeState: Cannot import, no theme set");
+			return;
+		}
+
+		logger.info("ThemeState: Importing tweaks", {
+			themeName,
+			count: Object.keys(properties).length,
+		});
+
+		// Clear all existing tweaks
+		await Storage.deleteTweaks(themeName, this.tabId);
+
+		// Import new values (iterate over object keys)
+		for (const [propertyName, value] of Object.entries(properties)) {
+			// Validate property exists in PROPERTY_NAMES
+			if (!PROPERTY_NAMES.includes(propertyName)) {
+				logger.warn("ThemeState: Skipping unknown property", { propertyName });
+				continue;
+			}
+
+			// saveProperty defaults enabled to true
+			await Storage.saveProperty(themeName, propertyName, value, this.tabId);
+		}
+
+		// Re-apply triggered by storage.onChanged listener
+	}
+
+	/**
 	 * Updates a single CSS property for current theme
 	 */
 	updateProperty(propertyName: string, value: string) {

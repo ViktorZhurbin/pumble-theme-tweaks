@@ -9,6 +9,7 @@ import type { RuntimeState } from "@/types/runtime";
 import { ColorPicker } from "./ColorPicker";
 import { CopyButton } from "./CopyButton";
 import { GlobalDisableToggle } from "./GlobalDisableToggle";
+import { ImportButton } from "./ImportButton";
 import { ResetButton } from "./ResetButton";
 import {
 	getContentScriptState,
@@ -129,6 +130,7 @@ export function ThemeEditor() {
 							<div class={styles.separator} />
 
 							<div class={styles.actionsContainer}>
+								<ImportButton />
 								<CopyButton />
 								<ResetButton />
 							</div>

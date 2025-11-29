@@ -72,6 +72,6 @@
 .actionsContainer {
 	display: flex;
 	flex-direction: column;
-	gap: 24px;
+	gap: 18px;
 	padding-inline: var(--padding-inline);
 }

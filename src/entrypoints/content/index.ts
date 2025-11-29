@@ -88,6 +88,11 @@ export default defineContentScript({
 			);
 		});
 
+		ContentScript.onMessage("importTweaks", (message) => {
+			logger.debug("Importing tweaks", { properties: message.data.properties });
+			ThemeState.importTweaks(message.data.properties);
+		});
+
 		// Watch for theme changes and handle accordingly
 		const themeObserver = watchThemeChanges();
 
