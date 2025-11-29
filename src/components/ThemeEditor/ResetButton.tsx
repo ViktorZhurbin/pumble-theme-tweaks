@@ -1,22 +1,34 @@
 import { createSignal } from "solid-js";
 import styles from "./ResetButton.module.css";
+import { useThemeEditorContext } from "./ThemeEditorContext";
+import { ContentScript } from "@/entrypoints/content/messenger";
 
-interface ResetButtonProps {
-	disabled: boolean;
-	onClick: () => void;
-}
-
-export function ResetButton(props: ResetButtonProps) {
+export function ResetButton() {
+	const ctx = useThemeEditorContext();
 	const [showConfirm, setShowConfirm] = createSignal(false);
 
+	// Derive from context - disabled if no modifications or tweaks are off
+	const hasModifications = () =>
+		ctx.store.themeTweaks?.cssProperties &&
+		Object.keys(ctx.store.themeTweaks.cssProperties).length > 0;
+
+	const disabled = () => !hasModifications() || !ctx.store.themeTweaksOn;
+
 	const handleClick = () => {
-		if (props.disabled) return;
+		if (disabled()) return;
 		setShowConfirm(true);
 	};
 
 	const handleConfirm = () => {
+		const currentTabId = ctx.tabId();
+		if (!currentTabId) return;
+
 		setShowConfirm(false);
-		props.onClick();
+
+		// Optimistic update for responsive UI
+		ctx.setStore("themeTweaks", undefined);
+
+		ContentScript.sendMessage("resetTweaks", undefined, currentTabId);
 	};
 
 	const handleCancel = () => {
@@ -30,9 +42,9 @@ export function ResetButton(props: ResetButtonProps) {
 					type="button"
 					class={styles.resetBtn}
 					onClick={handleClick}
-					disabled={props.disabled}
+					disabled={disabled() || !ctx.isReady()}
 					title={
-						props.disabled
+						disabled()
 							? "No tweaks to reset"
 							: "Reset tweaks for this theme"
 					}

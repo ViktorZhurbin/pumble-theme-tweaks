@@ -1,15 +1,20 @@
+import { ContentScript } from "@/entrypoints/content/messenger";
+import { useThemeEditorContext } from "./ThemeEditorContext";
 import styles from "./ThemeToggle.module.css";
 
-interface ThemeToggleProps {
-	checked: boolean;
-	disabled: boolean;
-	onChange: (checked: boolean) => void;
-}
+export function ThemeToggle() {
+	const ctx = useThemeEditorContext();
 
-export function ThemeToggle(props: ThemeToggleProps) {
 	const handleChange = (e: Event) => {
-		const target = e.target as HTMLInputElement;
-		props.onChange(target.checked);
+		const checked = (e.target as HTMLInputElement).checked;
+		const currentTabId = ctx.tabId();
+		if (!currentTabId) return;
+
+		ContentScript.sendMessage(
+			"toggleTweaks",
+			{ enabled: checked },
+			currentTabId,
+		);
 	};
 
 	return (
@@ -17,8 +22,8 @@ export function ThemeToggle(props: ThemeToggleProps) {
 			<input
 				title="Toggle all"
 				type="checkbox"
-				disabled={props.disabled}
-				checked={props.checked}
+				disabled={ctx.store.isExtensionOff || !ctx.isReady()}
+				checked={ctx.store.themeTweaksOn}
 				onChange={handleChange}
 			/>
 		</div>

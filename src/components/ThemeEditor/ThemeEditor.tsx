@@ -2,7 +2,6 @@ import { createMemo, createSignal, For, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { PROPERTIES } from "@/constants/properties";
 import { Background } from "@/entrypoints/background/messenger";
-import { ContentScript } from "@/entrypoints/content/messenger";
 import { initialState } from "@/entrypoints/content/theme-state";
 import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
@@ -18,6 +17,7 @@ import {
 	isConnectionError,
 } from "./ThemeEditor.helpers";
 import styles from "./ThemeEditor.module.css";
+import { ThemeEditorContext } from "./ThemeEditorContext";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function ThemeEditor() {
@@ -28,75 +28,7 @@ export function ThemeEditor() {
 	const [error, setError] = createSignal<string | null>(null);
 	const [loading, setLoading] = createSignal(true);
 
-	const handleReset = () => {
-		const currentTabId = tabId();
-		if (!currentTabId) return;
-
-		// Optimistic update for responsive UI
-		setStore("themeTweaks", undefined);
-
-		ContentScript.sendMessage("resetTweaks", undefined, currentTabId);
-	};
-
-	const handleResetProperty = (propertyName: string) => {
-		const currentTabId = tabId();
-		if (!currentTabId) return;
-
-		// Send message to reset this specific property
-		ContentScript.sendMessage("resetProperty", { propertyName }, currentTabId);
-	};
-
-	const handleColorChange = (propertyName: string, value: string) => {
-		const currentTabId = tabId();
-		if (!currentTabId || !store.themeName) return;
-
-		// Send to content script (ThemeState handles storage and broadcasts updates)
-		ContentScript.sendMessage(
-			"updateProperty",
-			{ propertyName, value },
-			currentTabId,
-		);
-	};
-
-	const handleToggleTweaks = (checked: boolean) => {
-		const currentTabId = tabId();
-		if (!currentTabId) return;
-
-		// State updates automatically via broadcast
-		ContentScript.sendMessage(
-			"toggleTweaks",
-			{ enabled: checked },
-			currentTabId,
-		);
-	};
-
-	const handleToggleGlobal = (disabled: boolean) => {
-		const currentTabId = tabId();
-		if (!currentTabId) return;
-
-		// State updates automatically via broadcast
-		ContentScript.sendMessage("toggleGlobal", { disabled }, currentTabId);
-	};
-
-	const handleToggleProperty = (propertyName: string, enabled: boolean) => {
-		const currentTabId = tabId();
-		if (!currentTabId) return;
-
-		// State updates automatically via broadcast
-		ContentScript.sendMessage(
-			"toggleProperty",
-			{ propertyName, enabled },
-			currentTabId,
-		);
-	};
-
-	const hasModifications = createMemo(() => {
-		// Check if there are any stored tweaks
-		return (
-			store.themeTweaks?.cssProperties &&
-			Object.keys(store.themeTweaks.cssProperties).length > 0
-		);
-	});
+	const isReady = createMemo(() => tabId() !== null && !loading());
 
 	// Listen for state changes from content script
 	Background.onMessage("stateChanged", (msg) => {
@@ -152,74 +84,58 @@ export function ThemeEditor() {
 		}
 	});
 
+	const contextValue = {
+		tabId,
+		store,
+		setStore,
+		isReady,
+	};
+
 	return (
-		<div class={styles.container}>
-			<div class={styles.titleGroup}>
-				<h3>Pumble Tweaks</h3>
-				<Show when={!loading() && !error()}>
-					<GlobalDisableToggle
-						disabled={store.isExtensionOff}
-						onChange={handleToggleGlobal}
-					/>
-				</Show>
-			</div>
-
-			<Show when={loading()}>
-				<p>Loading...</p>
-			</Show>
-
-			<Show when={error()}>
-				<p class={styles.error}>{error()}</p>
-			</Show>
-
-			<Show when={!loading() && !error()}>
-				<div class={styles.tweaksContainer}>
-					<Show when={store.themeName}>
-						{(themeName) => (
-							<p class={styles.themeName}>THEME: {themeName()}</p>
-						)}
+		<ThemeEditorContext.Provider value={contextValue}>
+			<div class={styles.container}>
+				<div class={styles.titleGroup}>
+					<h3>Pumble Tweaks</h3>
+					<Show when={!loading() && !error()}>
+						<GlobalDisableToggle />
 					</Show>
-					<div class={styles.controlsContainer}>
-						<div class={styles.pickersContainer}>
-							<ThemeToggle
-								checked={store.themeTweaksOn}
-								disabled={store.isExtensionOff}
-								onChange={handleToggleTweaks}
-							/>
-							<For each={PROPERTIES}>
-								{({ label, propertyName }) => (
-									<ColorPicker
-										label={label}
-										tweakEntry={store.themeTweaks?.cssProperties[propertyName]}
-										inactive={!store.themeTweaksOn}
-										onInput={(value) => {
-											handleColorChange(propertyName, value);
-										}}
-										onReset={() => handleResetProperty(propertyName)}
-										onToggle={(enabled) =>
-											handleToggleProperty(propertyName, enabled)
-										}
-									/>
-								)}
-							</For>
-						</div>
+				</div>
 
-						<div class={styles.separator} />
+				<Show when={loading()}>
+					<p>Loading...</p>
+				</Show>
 
-						<div class={styles.actionsContainer}>
-							<CopyButton
-								themeTweaks={store.themeTweaks}
-								disabled={!store.themeTweaksOn}
-							/>
+				<Show when={error()}>
+					<p class={styles.error}>{error()}</p>
+				</Show>
 
-							<ResetButton
-								disabled={!hasModifications() || !store.themeTweaksOn}
-								onClick={handleReset}
-							/>
+				<Show when={!loading() && !error()}>
+					<div class={styles.tweaksContainer}>
+						<Show when={store.themeName}>
+							{(themeName) => (
+								<p class={styles.themeName}>THEME: {themeName()}</p>
+							)}
+						</Show>
+						<div class={styles.controlsContainer}>
+							<div class={styles.pickersContainer}>
+								<ThemeToggle />
+								<For each={PROPERTIES}>
+									{({ label, propertyName }) => (
+										<ColorPicker label={label} propertyName={propertyName} />
+									)}
+								</For>
+							</div>
+
+							<div class={styles.separator} />
+
+							<div class={styles.actionsContainer}>
+								<CopyButton />
+								<ResetButton />
+							</div>
 						</div>
 					</div>
-				</div>
-			</Show>
-		</div>
+				</Show>
+			</div>
+		</ThemeEditorContext.Provider>
 	);
 }

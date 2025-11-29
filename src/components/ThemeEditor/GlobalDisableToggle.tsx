@@ -1,13 +1,19 @@
+import { ContentScript } from "@/entrypoints/content/messenger";
 import styles from "./GlobalDisableToggle.module.css";
+import { useThemeEditorContext } from "./ThemeEditorContext";
 
-interface GlobalDisableToggleProps {
-	disabled: boolean;
-	onChange: (disabled: boolean) => void;
-}
+export function GlobalDisableToggle() {
+	const ctx = useThemeEditorContext();
 
-export function GlobalDisableToggle(props: GlobalDisableToggleProps) {
 	const handleToggle = (newDisabled: boolean) => {
-		props.onChange(newDisabled);
+		const currentTabId = ctx.tabId();
+		if (!currentTabId) return;
+
+		ContentScript.sendMessage(
+			"toggleGlobal",
+			{ disabled: newDisabled },
+			currentTabId,
+		);
 	};
 
 	return (
@@ -15,7 +21,8 @@ export function GlobalDisableToggle(props: GlobalDisableToggleProps) {
 			<button
 				type="button"
 				class={styles.toggleBtn}
-				classList={{ [styles.toggleBtnActive]: !props.disabled }}
+				classList={{ [styles.toggleBtnActive]: !ctx.store.isExtensionOff }}
+				disabled={!ctx.isReady()}
 				onClick={() => handleToggle(false)}
 			>
 				On
@@ -23,7 +30,8 @@ export function GlobalDisableToggle(props: GlobalDisableToggleProps) {
 			<button
 				type="button"
 				class={styles.toggleBtn}
-				classList={{ [styles.toggleBtnActive]: props.disabled }}
+				classList={{ [styles.toggleBtnActive]: ctx.store.isExtensionOff }}
+				disabled={!ctx.isReady()}
 				onClick={() => handleToggle(true)}
 			>
 				Off

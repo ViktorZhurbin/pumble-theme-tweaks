@@ -2,20 +2,20 @@ import { createSignal } from "solid-js";
 import { PROPERTIES } from "@/constants/properties";
 import type { ThemeTweaks } from "@/types/tweaks";
 import styles from "./CopyButton.module.css";
+import { useThemeEditorContext } from "./ThemeEditorContext";
 
-interface CopyButtonProps {
-	disabled: boolean;
-	themeTweaks?: ThemeTweaks;
-}
-
-export function CopyButton(props: CopyButtonProps) {
+export function CopyButton() {
+	const ctx = useThemeEditorContext();
 	const [copied, setCopied] = createSignal(false);
 
+	// Derive from context
+	const disabled = () => !ctx.store.themeTweaksOn;
+
 	const handleCopy = async () => {
-		if (props.disabled) return;
+		if (disabled()) return;
 
 		try {
-			const copyValues = getCopyValues(props.themeTweaks);
+			const copyValues = getCopyValues(ctx.store.themeTweaks);
 			const copyString = copyValues.join(", ");
 
 			// Copy to clipboard
@@ -34,8 +34,8 @@ export function CopyButton(props: CopyButtonProps) {
 			type="button"
 			class={styles.copyBtn}
 			onClick={handleCopy}
-			disabled={props.disabled}
-			title={props.disabled ? "Enable tweaks to copy" : "Copy all values"}
+			disabled={disabled()}
+			title={disabled() ? "Enable tweaks to copy" : "Copy all values"}
 		>
 			{copied() ? "Copied!" : "Copy"}
 		</button>

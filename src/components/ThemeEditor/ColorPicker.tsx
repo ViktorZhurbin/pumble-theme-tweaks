@@ -1,25 +1,55 @@
 import { ColorUtils } from "@/lib/color";
 import type { TweakEntry } from "@/types/tweaks";
 import styles from "./ColorPicker.module.css";
+import { useThemeEditorContext } from "./ThemeEditorContext";
+import { ContentScript } from "@/entrypoints/content/messenger";
 
 interface ColorPickerProps {
 	label: string;
-	tweakEntry?: TweakEntry;
-	inactive?: boolean;
-	onInput: (value: string) => void;
-	onReset: () => void;
-	onToggle?: (checked: boolean) => void;
+	propertyName: string;
 }
 
 export function ColorPicker(props: ColorPickerProps) {
+	const ctx = useThemeEditorContext();
+
+	// Derive from context instead of props
+	const tweakEntry = () => ctx.store.themeTweaks?.cssProperties[props.propertyName];
+	const inactive = () => !ctx.store.themeTweaksOn;
+
 	const handleInput = (e: Event) => {
-		const target = e.target as HTMLInputElement;
-		props.onInput(target.value);
+		const value = (e.target as HTMLInputElement).value;
+		const currentTabId = ctx.tabId();
+
+		if (!currentTabId || !ctx.store.themeName) return;
+
+		ContentScript.sendMessage(
+			"updateProperty",
+			{ propertyName: props.propertyName, value },
+			currentTabId,
+		);
+	};
+
+	const handleReset = () => {
+		const currentTabId = ctx.tabId();
+		if (!currentTabId) return;
+
+		ContentScript.sendMessage(
+			"resetProperty",
+			{ propertyName: props.propertyName },
+			currentTabId,
+		);
 	};
 
 	const handleToggle = (e: Event) => {
-		const target = e.target as HTMLInputElement;
-		props.onToggle?.(target.checked);
+		const enabled = (e.target as HTMLInputElement).checked;
+		const currentTabId = ctx.tabId();
+		if (!currentTabId) return;
+
+		ContentScript.sendMessage(
+			"toggleProperty",
+			{ propertyName: props.propertyName, enabled },
+			currentTabId,
+		);
 	};
 
 	const resetTitle = "Reset to default";
@@ -27,18 +57,19 @@ export function ColorPicker(props: ColorPickerProps) {
 	return (
 		<label
 			class={styles.pickerGroup}
-			classList={{ [styles.inactive]: props.inactive }}
+			classList={{ [styles.inactive]: inactive() }}
 		>
 			<span class={styles.pickerLabel}>{props.label}</span>
 			<div class={styles.pickerControls}>
-				{isPropertyModified(props.tweakEntry) && (
+				{isPropertyModified(tweakEntry()) && (
 					<button
 						type="button"
 						class={styles.resetButton}
 						onClick={(e) => {
 							e.preventDefault();
-							props.onReset?.();
+							handleReset();
 						}}
+						disabled={!ctx.isReady() || !ctx.store.themeName}
 						title={resetTitle}
 					>
 						<svg
@@ -62,15 +93,15 @@ export function ColorPicker(props: ColorPickerProps) {
 				)}
 				<input
 					type="color"
-					value={ColorUtils.toHex(getDisplayValue(props.tweakEntry))}
-					disabled={props.inactive}
+					value={ColorUtils.toHex(getDisplayValue(tweakEntry()))}
+					disabled={inactive() || !ctx.isReady() || !ctx.store.themeName}
 					onInput={handleInput}
 				/>
 				<input
 					type="checkbox"
 					class={styles.toggleCheckbox}
-					checked={props.tweakEntry?.enabled ?? true}
-					disabled={props.inactive}
+					checked={tweakEntry()?.enabled ?? true}
+					disabled={inactive() || !ctx.isReady() || !ctx.store.themeName}
 					onChange={handleToggle}
 					title="Enable this color tweak"
 				/>
