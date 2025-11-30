@@ -53,10 +53,36 @@ const isPropertyModified = (propertyName: string): boolean => {
 	return document.documentElement.style.getPropertyValue(propertyName) !== "";
 };
 
+/**
+ * Efficiently applies a set of CSS properties by comparing with current state
+ * Only touches the DOM for properties that actually changed
+ */
+const applyTweaksDiff = (desiredProperties: Record<string, string>) => {
+	for (const propertyName of PROPERTY_NAMES) {
+		const desiredValue = desiredProperties[propertyName];
+		const isCurrentlyModified = isPropertyModified(propertyName);
+		const currentValue =
+			document.documentElement.style.getPropertyValue(propertyName);
+
+		if (desiredValue) {
+			// We want this property set
+			if (currentValue !== desiredValue) {
+				applyCSSProperty(propertyName, desiredValue);
+			}
+		} else {
+			// We want this property unset
+			if (isCurrentlyModified) {
+				document.documentElement.style.removeProperty(propertyName);
+			}
+		}
+	}
+};
+
 export const DomUtils = {
 	applyCSSProperty,
 	getCSSProperties,
 	resetCSSTweaks,
 	getCurrentTheme,
 	isPropertyModified,
+	applyTweaksDiff,
 };

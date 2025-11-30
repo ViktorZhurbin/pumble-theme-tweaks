@@ -1,7 +1,7 @@
-import { DomUtils } from "./dom-utils";
 import { logger } from "@/lib/logger";
-import { ThemeState } from "./theme-state";
 import { Background } from "../background/messenger";
+import { DomUtils } from "./dom-utils";
+import { ThemeState } from "./theme-state";
 
 /**
  * Watches for theme changes and handles theme tweak application
@@ -18,7 +18,7 @@ export const watchThemeChanges = (): MutationObserver => {
 			currentTheme = newTheme;
 
 			logger.info("Theme changed", { from: oldTheme, to: newTheme });
-			DomUtils.resetCSSTweaks();
+			// DomUtils.resetCSSTweaks(); // Not needed with diff-based application
 
 			if (newTheme) {
 				ThemeState.applyForTheme(newTheme);
