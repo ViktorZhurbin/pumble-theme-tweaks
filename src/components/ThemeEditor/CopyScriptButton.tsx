@@ -50,8 +50,12 @@ function getThemeValues(themeTweaks: ThemeTweaks | undefined) {
 
 	if (main) {
 		properties.push({
-			name: "--title-bar-bg",
+			name: "--palette-secondary-dark",
 			value: colord(main.value).darken(0.06).toRgbString(),
+		});
+		properties.push({
+			name: "--palette-secondary-light",
+			value: colord(main.value).lighten(0.02).toRgbString(),
 		});
 	}
 
