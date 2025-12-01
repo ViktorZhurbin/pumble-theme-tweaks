@@ -1,17 +1,15 @@
-import { createMemo, createSignal, For, onMount, Show } from "solid-js";
+import { createMemo, createSignal, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { PROPERTIES } from "@/constants/properties";
 import { Background } from "@/entrypoints/background/messenger";
 import { initialState } from "@/entrypoints/content/theme-state";
 import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
 import type { RuntimeState } from "@/types/runtime";
-import { ColorPicker } from "./ColorPicker";
 import { CopyScriptButton } from "./CopyScriptButton";
 import { CopyTweaksButton } from "./CopyTweaksButton";
 import { GlobalDisableToggle } from "./GlobalDisableToggle";
 import { ImportButton } from "./ImportButton";
-import { ResetButton } from "./ResetButton";
+import { PickersContainer } from "./PickersContainer";
 import {
 	getContentScriptState,
 	initializeTab,
@@ -20,7 +18,6 @@ import {
 } from "./ThemeEditor.helpers";
 import styles from "./ThemeEditor.module.css";
 import { ThemeEditorContext } from "./ThemeEditorContext";
-import { ThemeToggle } from "./ThemeToggle";
 
 export function ThemeEditor() {
 	// Use createStore for runtime state (reactive view of content script state)
@@ -119,24 +116,7 @@ export function ThemeEditor() {
 							)}
 						</Show>
 						<div class={styles.controlsContainer}>
-							<div class={styles.pickersContainer}>
-								{/* Header row */}
-								<div class={styles.headerCell} />
-								<div class={styles.headerCell}>
-									<ResetButton />
-								</div>
-								<div class={styles.headerCell} />
-								<div class={styles.headerCell}>
-									<ThemeToggle />
-								</div>
-
-								{/* Picker rows */}
-								<For each={PROPERTIES}>
-									{({ label, propertyName }) => (
-										<ColorPicker label={label} propertyName={propertyName} />
-									)}
-								</For>
-							</div>
+							<PickersContainer />
 
 							<div class={styles.separator} />
 

@@ -1,0 +1,12 @@
+.container {
+	display: grid;
+	grid-template-columns: 1fr auto auto auto;
+	padding-inline: var(--padding-inline);
+}
+
+.headerCell {
+	display: flex;
+	background: rgba(255, 255, 255, 0.04);
+	padding: 4px var(--picker-padding-inline);
+	border-bottom: var(--picker-border);
+}
