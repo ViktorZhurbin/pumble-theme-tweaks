@@ -2,11 +2,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
-
-	/* Picker component shared values */
-	--picker-padding-inline: 10px;
-	--picker-background: rgba(255, 255, 255, 0.03);
-	--picker-border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .titleGroup {

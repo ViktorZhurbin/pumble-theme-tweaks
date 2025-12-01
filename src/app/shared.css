@@ -6,9 +6,10 @@
 	font-weight: 400;
 	font-size: 16px;
 
-	--bg-color: #242424;
 	--radius: 6px;
 
+	--color-bg: rgb(36, 36, 36);
+	--color-white: rgb(255, 255, 255);
 	--color-error: rgb(244, 67, 54);
 
 	/* Typography scale */
@@ -29,7 +30,7 @@
 
 	color-scheme: light dark;
 	color: rgba(255, 255, 255, 0.87);
-	background-color: var(--bg-color);
+	background-color: var(--color-bg);
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;

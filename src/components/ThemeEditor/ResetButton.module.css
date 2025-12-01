@@ -39,7 +39,7 @@
 	flex-direction: column;
 	gap: 12px;
 	padding: 12px;
-	background: var(--bg-color);
+	background: var(--color-bg);
 	border-radius: var(--radius);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 	min-width: 200px;

@@ -2,11 +2,16 @@
 	display: grid;
 	grid-template-columns: 1fr auto auto auto;
 	padding-inline: var(--padding-inline);
+
+	/* Picker component shared values */
+	--picker-padding-inline: 10px;
+	--picker-background: rgba(255, 255, 255, 0.03);
+	--picker-border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .headerCell {
 	display: flex;
-	background: rgba(255, 255, 255, 0.04);
+	background: rgba(255, 255, 255, 0.07);
 	padding: 4px var(--picker-padding-inline);
 	border-bottom: var(--picker-border);
 }
