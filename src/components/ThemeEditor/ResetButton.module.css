@@ -2,29 +2,6 @@
 	position: relative;
 }
 
-.resetBtn {
-	background: transparent;
-	color: var(--color-error);
-	border: 1px solid rgba(244, 67, 54, 0.3);
-	animation: slideIn 0.2s ease-out;
-
-	&:hover:not(:disabled) {
-		color: var(--color-error);
-		background: rgba(244, 67, 54, 0.08);
-		border-color: var(--color-error);
-	}
-
-	&:active:not(:disabled) {
-		background: rgba(244, 67, 54, 0.15);
-	}
-
-	&:disabled {
-		color: rgba(244, 67, 54, 0.3);
-		border-color: rgba(244, 67, 54, 0.15);
-		opacity: 0.5;
-	}
-}
-
 .popover {
 	position: absolute;
 	top: calc(100% + 8px);

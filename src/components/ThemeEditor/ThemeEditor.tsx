@@ -98,7 +98,7 @@ export function ThemeEditor() {
 					<Typography as="h3" variant="title">
 						Pumble Tweaks
 					</Typography>
-					<Show when={!loading() && !error()}>
+					<Show when={isReady() && !error()}>
 						<GlobalDisableToggle />
 					</Show>
 				</div>
@@ -113,7 +113,7 @@ export function ThemeEditor() {
 					</Typography>
 				</Show>
 
-				<Show when={!loading() && !error()}>
+				<Show when={isReady() && !error()}>
 					<div class={styles.tweaksContainer}>
 						<Show when={store.themeName}>
 							{(themeName) => (

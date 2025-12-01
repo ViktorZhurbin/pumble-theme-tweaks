@@ -23,7 +23,6 @@ export function GlobalDisableToggle() {
 				type="button"
 				class={styles.toggleBtn}
 				classList={{ [styles.toggleBtnActive]: !ctx.store.isExtensionOff }}
-				disabled={!ctx.isReady()}
 				onClick={() => handleToggle(false)}
 			>
 				<Typography>On</Typography>
@@ -32,7 +31,6 @@ export function GlobalDisableToggle() {
 				type="button"
 				class={styles.toggleBtn}
 				classList={{ [styles.toggleBtnActive]: ctx.store.isExtensionOff }}
-				disabled={!ctx.isReady()}
 				onClick={() => handleToggle(true)}
 			>
 				<Typography>Off</Typography>

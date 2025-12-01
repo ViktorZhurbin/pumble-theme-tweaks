@@ -1,8 +1,8 @@
 import { colord } from "colord";
+import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
 import { Checkbox } from "../Checkbox/Checkbox";
-import { Typography } from "@/components/Typography/Typography";
 import styles from "./ColorPicker.module.css";
 import { ResetIconButton } from "./ResetIconButton";
 import { useThemeEditorContext } from "./ThemeEditorContext";
@@ -18,7 +18,8 @@ export function ColorPicker(props: ColorPickerProps) {
 	// Derive from context instead of props
 	const tweakEntry = () =>
 		ctx.store.themeTweaks?.cssProperties[props.propertyName];
-	const inactive = () => !ctx.store.themeTweaksOn;
+
+	const disabled = () => !ctx.store.themeTweaksOn;
 
 	const handleInput = (e: Event) => {
 		const value = (e.target as HTMLInputElement).value;
@@ -62,7 +63,7 @@ export function ColorPicker(props: ColorPickerProps) {
 			{/* Label cell */}
 			<Typography
 				class={styles.labelCell}
-				classList={{ [styles.inactive]: inactive() }}
+				classList={{ [styles.inactive]: disabled() }}
 			>
 				{props.label}
 			</Typography>
@@ -70,13 +71,13 @@ export function ColorPicker(props: ColorPickerProps) {
 			{/* Reset button cell */}
 			<div
 				class={styles.resetCell}
-				classList={{ [styles.inactive]: inactive() }}
+				classList={{ [styles.inactive]: disabled() }}
 			>
 				{isPropertyModified(tweakEntry()) && (
 					<ResetIconButton
 						class={styles.resetButton}
 						onClick={handleReset}
-						disabled={!ctx.isReady() || !ctx.store.themeName}
+						disabled={disabled()}
 					/>
 				)}
 			</div>
@@ -84,12 +85,12 @@ export function ColorPicker(props: ColorPickerProps) {
 			{/* Color input cell */}
 			<div
 				class={styles.colorCell}
-				classList={{ [styles.inactive]: inactive() }}
+				classList={{ [styles.inactive]: disabled() }}
 			>
 				<input
 					type="color"
 					value={colord(getDisplayValue(tweakEntry())).toHex()}
-					disabled={inactive() || !ctx.isReady() || !ctx.store.themeName}
+					disabled={disabled()}
 					onInput={handleInput}
 				/>
 			</div>
@@ -97,11 +98,11 @@ export function ColorPicker(props: ColorPickerProps) {
 			{/* Toggle checkbox cell */}
 			<div
 				class={styles.toggleCell}
-				classList={{ [styles.inactive]: inactive() }}
+				classList={{ [styles.inactive]: disabled() }}
 			>
 				<Checkbox
 					checked={tweakEntry()?.enabled ?? true}
-					disabled={inactive() || !ctx.isReady() || !ctx.store.themeName}
+					disabled={disabled()}
 					onChange={handleToggle}
 					title="Enable this color tweak"
 				/>

@@ -97,7 +97,7 @@ export function ImportButton() {
 					variant="secondary"
 					class={styles.importBtn}
 					onClick={handleClick}
-					disabled={disabled() || !ctx.isReady()}
+					disabled={disabled()}
 					title={disabled() ? "Enable tweaks to import" : "Import theme colors"}
 				>
 					Import

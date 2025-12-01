@@ -7,6 +7,8 @@ import { useThemeEditorContext } from "./ThemeEditorContext";
 export const CopyScriptButton = () => {
 	const ctx = useThemeEditorContext();
 
+	const disabled = () => !ctx.store.themeTweaksOn;
+
 	const handleCopy = async () => {
 		const values = getThemeValues(ctx.store.themeTweaks);
 
@@ -15,9 +17,9 @@ export const CopyScriptButton = () => {
 
 	return (
 		<CopyButton
-			disabled={!ctx.store.themeTweaksOn}
+			disabled={disabled()}
 			title={
-				!ctx.store.themeTweaksOn
+				disabled()
 					? "Enable tweaks to copy"
 					: "Run this in DevTools console of the desktop app"
 			}

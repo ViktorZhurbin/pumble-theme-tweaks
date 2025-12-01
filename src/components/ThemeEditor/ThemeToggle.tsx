@@ -22,7 +22,7 @@ export function ThemeToggle() {
 		<div class={styles.wrapper}>
 			<Checkbox
 				title="Toggle all"
-				disabled={ctx.store.isExtensionOff || !ctx.isReady()}
+				disabled={ctx.store.isExtensionOff}
 				checked={ctx.store.themeTweaksOn}
 				onChange={handleChange}
 			/>

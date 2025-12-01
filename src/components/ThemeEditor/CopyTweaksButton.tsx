@@ -6,6 +6,8 @@ import { useThemeEditorContext } from "./ThemeEditorContext";
 export const CopyTweaksButton = () => {
 	const ctx = useThemeEditorContext();
 
+	const disabled = () => !ctx.store.themeTweaksOn;
+
 	const handleCopy = async () => {
 		const copyObject = getCopyObject(ctx.store.themeTweaks);
 
@@ -14,12 +16,8 @@ export const CopyTweaksButton = () => {
 
 	return (
 		<CopyButton
-			disabled={!ctx.store.themeTweaksOn}
-			title={
-				!ctx.store.themeTweaksOn
-					? "Enable tweaks to copy"
-					: "Copy theme to share"
-			}
+			disabled={disabled()}
+			title={disabled() ? "Enable tweaks to copy" : "Copy theme to share"}
 			label="Share"
 			onCopy={handleCopy}
 		/>

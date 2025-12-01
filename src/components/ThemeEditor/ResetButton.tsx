@@ -10,16 +10,20 @@ export function ResetButton() {
 	const ctx = useThemeEditorContext();
 	const [showConfirm, setShowConfirm] = createSignal(false);
 
-	// Derive from context - disabled if no modifications or tweaks are off
-	const hasModifications = () =>
-		ctx.store.themeTweaks?.cssProperties &&
-		Object.keys(ctx.store.themeTweaks.cssProperties).length > 0;
+	const hasModifications = () => {
+		const properties = Object.values(
+			ctx.store.themeTweaks?.cssProperties ?? {},
+		);
 
-	const disabled = () => !hasModifications() || !ctx.store.themeTweaksOn;
+		return properties.some(
+			(prop) => !!prop.value && prop.value !== prop.initialValue,
+		);
+	};
+
+	const disabled = () => !ctx.store.themeTweaksOn;
 
 	const handleClick = (e: MouseEvent) => {
 		e.preventDefault();
-		if (disabled()) return;
 		setShowConfirm(true);
 	};
 
@@ -61,34 +65,33 @@ export function ResetButton() {
 		});
 	});
 
-	return (
-		<div class={styles.container}>
-			<ResetIconButton
-				class={styles.resetBtn}
-				onClick={handleClick}
-				disabled={disabled() || !ctx.isReady()}
-				title={
-					disabled() ? "No tweaks to reset" : "Reset tweaks for this theme"
-				}
-			/>
+	const title = "Reset theme to defaults";
 
-			<Show when={showConfirm()}>
-				<div class={styles.popover}>
-					<div class={styles.popoverContent}>
-						<Typography class={styles.confirmText}>
-							Reset all tweaks?
-						</Typography>
-						<div class={styles.confirmButtons}>
-							<Button variant="secondary" onClick={handleCancel}>
-								Cancel
-							</Button>
-							<Button variant="error" onClick={handleConfirm}>
-								Reset
-							</Button>
+	return (
+		<Show when={hasModifications()}>
+			<div class={styles.container}>
+				<ResetIconButton
+					onClick={handleClick}
+					disabled={disabled()}
+					title={disabled() ? "Tweaks disabled" : title}
+				/>
+
+				<Show when={showConfirm()}>
+					<div class={styles.popover}>
+						<div class={styles.popoverContent}>
+							<Typography class={styles.confirmText}>{title}?</Typography>
+							<div class={styles.confirmButtons}>
+								<Button variant="secondary" onClick={handleCancel}>
+									Cancel
+								</Button>
+								<Button variant="error" onClick={handleConfirm}>
+									Reset
+								</Button>
+							</div>
 						</div>
 					</div>
-				</div>
-			</Show>
-		</div>
+				</Show>
+			</div>
+		</Show>
 	);
 }
