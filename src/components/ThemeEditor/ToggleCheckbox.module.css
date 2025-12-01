@@ -1,0 +1,11 @@
+.checkbox {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	cursor: pointer;
+}
+
+.checkbox:disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
+}

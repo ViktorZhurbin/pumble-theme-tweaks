@@ -2,7 +2,9 @@ import { colord } from "colord";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
 import styles from "./ColorPicker.module.css";
+import { ResetIconButton } from "./ResetIconButton";
 import { useThemeEditorContext } from "./ThemeEditorContext";
+import { ToggleCheckbox } from "./ToggleCheckbox";
 
 interface ColorPickerProps {
 	label: string;
@@ -30,7 +32,8 @@ export function ColorPicker(props: ColorPickerProps) {
 		);
 	};
 
-	const handleReset = () => {
+	const handleReset = (e: MouseEvent) => {
+		e.preventDefault();
 		const currentTabId = ctx.tabId();
 		if (!currentTabId) return;
 
@@ -53,61 +56,56 @@ export function ColorPicker(props: ColorPickerProps) {
 		);
 	};
 
-	const resetTitle = "Reset to default";
-
 	return (
-		<label
-			class={styles.pickerGroup}
-			classList={{ [styles.inactive]: inactive() }}
-		>
-			<span class={styles.pickerLabel}>{props.label}</span>
-			<div class={styles.pickerControls}>
+		<>
+			{/* Label cell */}
+			<span
+				class={styles.labelCell}
+				classList={{ [styles.inactive]: inactive() }}
+			>
+				{props.label}
+			</span>
+
+			{/* Reset button cell */}
+			<div
+				class={styles.resetCell}
+				classList={{ [styles.inactive]: inactive() }}
+			>
 				{isPropertyModified(tweakEntry()) && (
-					<button
-						type="button"
+					<ResetIconButton
 						class={styles.resetButton}
-						onClick={(e) => {
-							e.preventDefault();
-							handleReset();
-						}}
+						onClick={handleReset}
 						disabled={!ctx.isReady() || !ctx.store.themeName}
-						title={resetTitle}
-					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							width="16"
-							height="16"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						>
-							<title>{resetTitle}</title>
-							<path stroke="none" d="M0 0h24v24H0z" fill="none" />
-							<path d="M3.06 13a9 9 0 1 0 .49 -4.087" />
-							<path d="M3 4.001v5h5" />
-							<path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-						</svg>
-					</button>
+					/>
 				)}
+			</div>
+
+			{/* Color input cell */}
+			<div
+				class={styles.colorCell}
+				classList={{ [styles.inactive]: inactive() }}
+			>
 				<input
 					type="color"
 					value={colord(getDisplayValue(tweakEntry())).toHex()}
 					disabled={inactive() || !ctx.isReady() || !ctx.store.themeName}
 					onInput={handleInput}
 				/>
-				<input
-					type="checkbox"
-					class={styles.toggleCheckbox}
+			</div>
+
+			{/* Toggle checkbox cell */}
+			<div
+				class={styles.toggleCell}
+				classList={{ [styles.inactive]: inactive() }}
+			>
+				<ToggleCheckbox
 					checked={tweakEntry()?.enabled ?? true}
 					disabled={inactive() || !ctx.isReady() || !ctx.store.themeName}
 					onChange={handleToggle}
 					title="Enable this color tweak"
 				/>
 			</div>
-		</label>
+		</>
 	);
 }
 

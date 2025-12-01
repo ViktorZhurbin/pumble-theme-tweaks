@@ -1,6 +1,7 @@
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { useThemeEditorContext } from "./ThemeEditorContext";
 import styles from "./ThemeToggle.module.css";
+import { ToggleCheckbox } from "./ToggleCheckbox";
 
 export function ThemeToggle() {
 	const ctx = useThemeEditorContext();
@@ -19,9 +20,8 @@ export function ThemeToggle() {
 
 	return (
 		<div class={styles.wrapper}>
-			<input
+			<ToggleCheckbox
 				title="Toggle all"
-				type="checkbox"
 				disabled={ctx.store.isExtensionOff || !ctx.isReady()}
 				checked={ctx.store.themeTweaksOn}
 				onChange={handleChange}

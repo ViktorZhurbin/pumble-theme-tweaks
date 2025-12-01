@@ -1,82 +1,38 @@
-.pickerGroup {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	background: var(--picker-background);
-	padding: 8px var(--picker-padding-inline);
-	border: none;
-	border-bottom: var(--picker-border);
-	transition: background 0.2s ease-in-out;
-	cursor: pointer;
-
-	&:last-of-type {
-		border-bottom: none;
-	}
-}
-
-.pickerGroup:hover:not(.inactive) {
-	background: rgba(255, 255, 255, 0.06);
-}
-
-.pickerGroup.inactive {
-	opacity: 0.4;
-	pointer-events: none;
-	cursor: not-allowed;
-}
-
-.pickerLabel {
+.labelCell {
 	font-weight: 600;
 	font-size: 0.875rem;
 	line-height: 1.4;
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	background: var(--picker-background);
+	padding: 8px var(--picker-padding-inline);
+	border-bottom: var(--picker-border);
 }
 
-.pickerControls {
-	display: flex;
-	align-items: center;
-	gap: 8px;
+.labelCell.inactive {
+	opacity: 0.4;
+	pointer-events: none;
 }
 
-.toggleCheckbox {
-	width: 18px;
-	height: 18px;
-	flex-shrink: 0;
-	cursor: pointer;
-}
-
-.toggleCheckbox:disabled {
-	cursor: not-allowed;
-	opacity: 0.5;
-}
-
-.resetButton {
+.resetCell,
+.colorCell,
+.toggleCell {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 24px;
-	height: 24px;
-	padding: 0;
-	border: none;
-	background: rgba(255, 255, 255, 0.08);
-	border-radius: 4px;
-	cursor: pointer;
-	color: rgba(255, 255, 255, 0.7);
-	transition: all 0.2s ease-in-out;
-	flex-shrink: 0;
+	background: var(--picker-background);
+	padding: 8px 0;
+	border-bottom: var(--picker-border);
 }
 
-.resetButton:hover {
-	background: rgba(255, 255, 255, 0.12);
-	color: rgba(255, 255, 255, 0.9);
+.resetCell.inactive,
+.colorCell.inactive,
+.toggleCell.inactive {
+	opacity: 0.4;
+	pointer-events: none;
 }
 
-.resetButton:active {
-	transform: scale(0.95);
-}
-
-.pickerGroup input[type="color"] {
+.colorCell input[type="color"] {
 	width: 40px;
 	height: 30px;
 	cursor: pointer;

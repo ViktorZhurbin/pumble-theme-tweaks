@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import styles from "./ResetButton.module.css";
+import { ResetIconButton } from "./ResetIconButton";
 import { useThemeEditorContext } from "./ThemeEditorContext";
 
 export function ResetButton() {
@@ -14,7 +15,8 @@ export function ResetButton() {
 
 	const disabled = () => !hasModifications() || !ctx.store.themeTweaksOn;
 
-	const handleClick = () => {
+	const handleClick = (e: MouseEvent) => {
+		e.preventDefault();
 		if (disabled()) return;
 		setShowConfirm(true);
 	};
@@ -38,17 +40,14 @@ export function ResetButton() {
 	return (
 		<div class={styles.container}>
 			{!showConfirm() ? (
-				<button
-					type="button"
+				<ResetIconButton
 					class={styles.resetBtn}
 					onClick={handleClick}
 					disabled={disabled() || !ctx.isReady()}
 					title={
 						disabled() ? "No tweaks to reset" : "Reset tweaks for this theme"
 					}
-				>
-					Reset
-				</button>
+				/>
 			) : (
 				<div class={styles.confirmContainer}>
 					<span class={styles.confirmText}>You sure?</span>

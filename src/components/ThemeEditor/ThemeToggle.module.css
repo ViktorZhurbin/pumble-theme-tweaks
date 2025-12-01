@@ -1,13 +1,5 @@
 .wrapper {
-	align-self: flex-end;
-	background: var(--picker-background);
-	padding: 4px var(--picker-padding-inline);
-	border-bottom: var(--picker-border);
-}
-
-.wrapper input[type="checkbox"] {
-	width: 18px;
-	height: 18px;
-	flex-shrink: 0;
-	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }

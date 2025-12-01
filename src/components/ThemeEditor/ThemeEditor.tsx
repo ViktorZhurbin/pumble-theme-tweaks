@@ -120,7 +120,17 @@ export function ThemeEditor() {
 						</Show>
 						<div class={styles.controlsContainer}>
 							<div class={styles.pickersContainer}>
-								<ThemeToggle />
+								{/* Header row */}
+								<div class={styles.headerCell} />
+								<div class={styles.headerCell}>
+									<ResetButton />
+								</div>
+								<div class={styles.headerCell} />
+								<div class={styles.headerCell}>
+									<ThemeToggle />
+								</div>
+
+								{/* Picker rows */}
 								<For each={PROPERTIES}>
 									{({ label, propertyName }) => (
 										<ColorPicker label={label} propertyName={propertyName} />
@@ -136,7 +146,6 @@ export function ThemeEditor() {
 									<CopyScriptButton />
 								</div>
 								<ImportButton />
-								<ResetButton />
 							</div>
 						</div>
 					</div>
