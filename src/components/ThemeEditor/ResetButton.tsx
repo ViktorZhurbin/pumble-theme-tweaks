@@ -1,4 +1,5 @@
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";
+import { Button } from "@/components/Button/Button";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import styles from "./ResetButton.module.css";
 import { ResetIconButton } from "./ResetIconButton";
@@ -75,20 +76,12 @@ export function ResetButton() {
 					<div class={styles.popoverContent}>
 						<span class={styles.confirmText}>Reset all tweaks?</span>
 						<div class={styles.confirmButtons}>
-							<button
-								type="button"
-								class={styles.cancelBtn}
-								onClick={handleCancel}
-							>
+							<Button variant="secondary" onClick={handleCancel}>
 								Cancel
-							</button>
-							<button
-								type="button"
-								class={styles.confirmBtn}
-								onClick={handleConfirm}
-							>
+							</Button>
+							<Button variant="error" onClick={handleConfirm}>
 								Reset
-							</button>
+							</Button>
 						</div>
 					</div>
 				</div>

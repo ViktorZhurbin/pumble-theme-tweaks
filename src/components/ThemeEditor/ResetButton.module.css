@@ -53,25 +53,9 @@
 }
 
 .confirmButtons {
-	display: flex;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
 	gap: 8px;
-}
-
-.cancelBtn,
-.confirmBtn {
-	flex: 1;
-	font-size: 0.8125rem;
-}
-
-.confirmBtn {
-	background: var(--color-error);
-	color: white;
-	border: 1px solid var(--color-error);
-
-	&:hover {
-		background: #d32f2f;
-		border-color: #d32f2f;
-	}
 }
 
 @keyframes popoverIn {

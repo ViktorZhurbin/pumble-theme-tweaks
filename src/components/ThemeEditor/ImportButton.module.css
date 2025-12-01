@@ -5,26 +5,7 @@
 
 .importBtn {
 	width: 100%;
-	background: transparent;
-	color: rgba(255, 255, 255, 0.8);
-	border: 1px solid rgba(255, 255, 255, 0.2);
 	animation: slideIn 0.2s ease-out;
-}
-
-.importBtn:hover:not(:disabled) {
-	background: rgba(255, 255, 255, 0.08);
-	border-color: rgba(255, 255, 255, 0.4);
-	color: rgba(255, 255, 255, 1);
-}
-
-.importBtn:active:not(:disabled) {
-	background: rgba(255, 255, 255, 0.12);
-}
-
-.importBtn:disabled {
-	color: rgba(255, 255, 255, 0.3);
-	border-color: rgba(255, 255, 255, 0.1);
-	cursor: not-allowed;
 }
 
 .importContainer {
@@ -65,46 +46,9 @@
 }
 
 .buttons {
-	display: flex;
+	display: grid;
+	grid-template-columns: 1fr 1fr;
 	gap: 8px;
-}
-
-.cancelBtn,
-.confirmBtn {
-	flex: 1;
-}
-
-.cancelBtn {
-	background: transparent;
-	color: rgba(255, 255, 255, 0.7);
-	border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.cancelBtn:hover:not(:disabled) {
-	background: rgba(255, 255, 255, 0.05);
-	color: rgba(255, 255, 255, 0.9);
-	border-color: rgba(255, 255, 255, 0.3);
-}
-
-.cancelBtn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
-
-.confirmBtn {
-	background: #4caf50;
-	color: white;
-	border: 1px solid #4caf50;
-}
-
-.confirmBtn:hover:not(:disabled) {
-	background: #45a049;
-	border-color: #45a049;
-}
-
-.confirmBtn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
 }
 
 .error {

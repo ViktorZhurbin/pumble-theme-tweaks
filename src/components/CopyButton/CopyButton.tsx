@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import styles from "./CopyButton.module.css";
+import { Button } from "@/components/Button/Button";
 
 export function CopyButton(props: {
 	disabled: boolean;
@@ -25,14 +25,13 @@ export function CopyButton(props: {
 	};
 
 	return (
-		<button
-			type="button"
-			class={styles.copyBtn}
+		<Button
+			variant="secondary"
 			onClick={handleCopy}
 			disabled={props.disabled}
 			title={props.title}
 		>
 			{copied() ? "Copied!" : props.label}
-		</button>
+		</Button>
 	);
 }

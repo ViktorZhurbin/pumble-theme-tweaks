@@ -1,5 +1,6 @@
 import { colord } from "colord";
 import { createSignal } from "solid-js";
+import { Button } from "@/components/Button/Button";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import styles from "./ImportButton.module.css";
@@ -91,15 +92,15 @@ export function ImportButton() {
 	return (
 		<div class={styles.container}>
 			{!showImport() ? (
-				<button
-					type="button"
+				<Button
+					variant="secondary"
 					class={styles.importBtn}
 					onClick={handleClick}
 					disabled={disabled() || !ctx.isReady()}
 					title={disabled() ? "Enable tweaks to import" : "Import theme colors"}
 				>
 					Import
-				</button>
+				</Button>
 			) : (
 				<div class={styles.importContainer}>
 					<textarea
@@ -113,22 +114,20 @@ export function ImportButton() {
 						autofocus
 					/>
 					<div class={styles.buttons}>
-						<button
-							type="button"
-							class={styles.cancelBtn}
+						<Button
+							variant="secondary"
 							onClick={handleCancel}
 							disabled={importing()}
 						>
 							Cancel
-						</button>
-						<button
-							type="button"
-							class={styles.confirmBtn}
+						</Button>
+						<Button
+							variant="primary"
 							onClick={handleImport}
 							disabled={importing()}
 						>
 							{importing() ? "Importing..." : "Import"}
-						</button>
+						</Button>
 					</div>
 					{error() && <span class={styles.error}>{error()}</span>}
 				</div>

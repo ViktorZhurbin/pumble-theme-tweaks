@@ -1,3 +1,4 @@
+import { Button } from "@/components/Button/Button";
 import styles from "./ResetIconButton.module.css";
 
 interface ResetIconButtonProps {
@@ -12,9 +13,8 @@ export function ResetIconButton(props: ResetIconButtonProps) {
 	const size = () => props.size ?? 16;
 
 	return (
-		<button
-			type="button"
-			class={`${styles.button} ${props.class ?? ""}`}
+		<Button
+			class={`${styles.iconButton} ${props.class ?? ""}`}
 			onClick={props.onClick}
 			disabled={props.disabled}
 			title={props.title ?? "Reset to default"}
@@ -36,6 +36,6 @@ export function ResetIconButton(props: ResetIconButtonProps) {
 				<path d="M3 4.001v5h5" />
 				<path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
 			</svg>
-		</button>
+		</Button>
 	);
 }
