@@ -10,5 +10,5 @@ export const PUMBLE_URL = {
 export const PUMBLE_URL_PATTERNS = [
 	`https://${PUMBLE_URL.PROD}/*`,
 	`https://${PUMBLE_URL.STAGE}/*`,
-	`https://\\*.${PUMBLE_URL.DEV}/*`,
+	`https://*.${PUMBLE_URL.DEV}/*`,
 ];
