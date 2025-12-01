@@ -131,11 +131,11 @@ export function ThemeEditor() {
 							<div class={styles.separator} />
 
 							<div class={styles.actionsContainer}>
-								<ImportButton />
 								<div class={styles.copyButtonsWrapper}>
 									<CopyTweaksButton />
 									<CopyScriptButton />
 								</div>
+								<ImportButton />
 								<ResetButton />
 							</div>
 						</div>

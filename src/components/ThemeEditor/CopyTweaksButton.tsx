@@ -20,7 +20,7 @@ export const CopyTweaksButton = () => {
 					? "Enable tweaks to copy"
 					: "Copy theme to share"
 			}
-			label="Copy"
+			label="Share"
 			onCopy={handleCopy}
 		/>
 	);
