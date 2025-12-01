@@ -1,6 +1,7 @@
 import { colord } from "colord";
 import { createSignal } from "solid-js";
 import { Button } from "@/components/Button/Button";
+import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import styles from "./ImportButton.module.css";
@@ -129,7 +130,11 @@ export function ImportButton() {
 							{importing() ? "Importing..." : "Import"}
 						</Button>
 					</div>
-					{error() && <span class={styles.error}>{error()}</span>}
+					{error() && (
+						<Typography variant="caption" class={styles.error}>
+							{error()}
+						</Typography>
+					)}
 				</div>
 			)}
 		</div>

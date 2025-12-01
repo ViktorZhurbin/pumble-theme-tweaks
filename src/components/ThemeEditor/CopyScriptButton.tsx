@@ -10,8 +10,6 @@ export const CopyScriptButton = () => {
 	const handleCopy = async () => {
 		const values = getThemeValues(ctx.store.themeTweaks);
 
-		console.log(values);
-
 		return `(function() { ${JSON.stringify(values)}.forEach(({ name, value }) => { document.documentElement.style.setProperty(name, value) }) })()`;
 	};
 

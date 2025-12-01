@@ -1,3 +1,4 @@
+import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import styles from "./GlobalDisableToggle.module.css";
 import { useThemeEditorContext } from "./ThemeEditorContext";
@@ -25,7 +26,7 @@ export function GlobalDisableToggle() {
 				disabled={!ctx.isReady()}
 				onClick={() => handleToggle(false)}
 			>
-				On
+				<Typography>On</Typography>
 			</button>
 			<button
 				type="button"
@@ -34,7 +35,7 @@ export function GlobalDisableToggle() {
 				disabled={!ctx.isReady()}
 				onClick={() => handleToggle(true)}
 			>
-				Off
+				<Typography>Off</Typography>
 			</button>
 		</div>
 	);

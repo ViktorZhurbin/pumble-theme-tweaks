@@ -5,6 +5,7 @@ import { initialState } from "@/entrypoints/content/theme-state";
 import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
 import type { RuntimeState } from "@/types/runtime";
+import { Typography } from "@/components/Typography/Typography";
 import { CopyScriptButton } from "./CopyScriptButton";
 import { CopyTweaksButton } from "./CopyTweaksButton";
 import { GlobalDisableToggle } from "./GlobalDisableToggle";
@@ -94,25 +95,31 @@ export function ThemeEditor() {
 		<ThemeEditorContext.Provider value={contextValue}>
 			<div class={styles.container}>
 				<div class={styles.titleGroup}>
-					<h3>Pumble Tweaks</h3>
+					<Typography as="h3" variant="title">
+						Pumble Tweaks
+					</Typography>
 					<Show when={!loading() && !error()}>
 						<GlobalDisableToggle />
 					</Show>
 				</div>
 
 				<Show when={loading()}>
-					<p>Loading...</p>
+					<Typography as="p">Loading...</Typography>
 				</Show>
 
 				<Show when={error()}>
-					<p class={styles.error}>{error()}</p>
+					<Typography as="p" class={styles.error}>
+						{error()}
+					</Typography>
 				</Show>
 
 				<Show when={!loading() && !error()}>
 					<div class={styles.tweaksContainer}>
 						<Show when={store.themeName}>
 							{(themeName) => (
-								<p class={styles.themeName}>THEME: {themeName()}</p>
+								<Typography as="p" class={styles.themeName}>
+									THEME: {themeName()}
+								</Typography>
 							)}
 						</Show>
 						<div class={styles.controlsContainer}>

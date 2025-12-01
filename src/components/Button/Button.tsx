@@ -1,4 +1,5 @@
-import { type JSX, splitProps} from "solid-js";
+import { type JSX, splitProps } from "solid-js";
+import { Typography } from "@/components/Typography/Typography";
 import styles from "./Button.module.css";
 
 type ButtonVariant = "primary" | "secondary" | "error";
@@ -18,7 +19,7 @@ export function Button(props: ButtonProps) {
 			class={`${styles.button} ${styles[variant]} ${local.class ?? ""}`}
 			{...others}
 		>
-			{local.children}
+			<Typography>{local.children}</Typography>
 		</button>
 	);
 }

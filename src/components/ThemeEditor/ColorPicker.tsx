@@ -2,6 +2,7 @@ import { colord } from "colord";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
 import { Checkbox } from "../Checkbox/Checkbox";
+import { Typography } from "@/components/Typography/Typography";
 import styles from "./ColorPicker.module.css";
 import { ResetIconButton } from "./ResetIconButton";
 import { useThemeEditorContext } from "./ThemeEditorContext";
@@ -59,12 +60,12 @@ export function ColorPicker(props: ColorPickerProps) {
 	return (
 		<>
 			{/* Label cell */}
-			<span
+			<Typography
 				class={styles.labelCell}
 				classList={{ [styles.inactive]: inactive() }}
 			>
 				{props.label}
-			</span>
+			</Typography>
 
 			{/* Reset button cell */}
 			<div
