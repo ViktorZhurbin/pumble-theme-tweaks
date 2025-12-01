@@ -54,3 +54,16 @@ export interface StorageData {
 	global_disabled?: boolean;
 	last_update_tab_id?: number;
 }
+
+/**
+ * Configuration for a derived color
+ */
+export type DerivedColorConfig = {
+	propertyName: string;
+	derive: (baseColor: string) => string;
+};
+
+/**
+ * Registry mapping base property names to their derived colors
+ */
+export type DerivedColorRegistry = Record<string, DerivedColorConfig[]>;

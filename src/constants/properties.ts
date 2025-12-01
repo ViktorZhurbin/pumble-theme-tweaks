@@ -12,9 +12,13 @@ export const PROPERTIES: PropertyItem[] = [
 		label: "Create button",
 		propertyName: "--palette-primary-main",
 	},
+	{
+		label: "Sidebar text",
+		propertyName: "--left-nav-text",
+	},
 	// {
-	// 	label: "Search border",
-	// 	propertyName: "--main-search-stroke",
+	// 	label: "Logo color",
+	// 	propertyName: "--logo-color",
 	// },
 	{
 		label: "Main view bg",

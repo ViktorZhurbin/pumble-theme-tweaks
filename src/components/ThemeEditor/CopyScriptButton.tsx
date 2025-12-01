@@ -1,4 +1,4 @@
-import { colord } from "colord";
+import { DERIVED_COLORS } from "@/constants/derived-colors";
 import { PROPERTIES } from "@/constants/properties";
 import type { ThemeTweaks } from "@/types/tweaks";
 import { CopyButton } from "../CopyButton/CopyButton";
@@ -34,30 +34,22 @@ function getThemeValues(themeTweaks: ThemeTweaks | undefined) {
 
 	const properties = PROPERTIES.flatMap((item) => {
 		const entry = themeTweaks.cssProperties[item.propertyName];
+		const derived = DERIVED_COLORS[item.propertyName];
 
-		if (!entry) return [];
+		if (!entry && !derived) return [];
 
 		const value =
 			entry.enabled && entry.value !== null ? entry.value : entry.initialValue;
 
+		if (derived) {
+			return derived.map((item) => ({
+				name: item.propertyName,
+				value: item.derive(value),
+			}));
+		}
+
 		return { name: item.propertyName, value };
 	});
-
-	// Inject title-bar-bg for desktop, which is not available on the web
-	const main = properties.find(
-		(item) => item.name === "--palette-secondary-main",
-	);
-
-	if (main) {
-		properties.push({
-			name: "--palette-secondary-dark",
-			value: colord(main.value).darken(0.06).toRgbString(),
-		});
-		properties.push({
-			name: "--palette-secondary-light",
-			value: colord(main.value).lighten(0.02).toRgbString(),
-		});
-	}
 
 	return properties;
 }

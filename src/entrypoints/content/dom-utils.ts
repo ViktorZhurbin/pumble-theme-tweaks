@@ -1,10 +1,27 @@
+import { DERIVED_COLORS } from "@/constants/derived-colors";
 import { PROPERTY_NAMES } from "@/constants/properties";
+import { ColorDerivation } from "@/lib/color-derivation";
 
 /**
  * Applies a CSS property to the document root
  */
 const applyCSSProperty = (name: string, value: string) => {
-	document.documentElement.style.setProperty(name, value);
+	if (DERIVED_COLORS[name]) {
+		ColorDerivation.applyDerivedColors(name, value);
+	} else {
+		document.documentElement.style.setProperty(name, value);
+	}
+};
+
+/**
+ * Applies a CSS property to the document root
+ */
+const removeCSSProperty = (name: string) => {
+	if (DERIVED_COLORS[name]) {
+		ColorDerivation.removeDerivedColors(name);
+	} else {
+		document.documentElement.style.removeProperty(name);
+	}
 };
 
 /**
@@ -12,7 +29,7 @@ const applyCSSProperty = (name: string, value: string) => {
  */
 const resetCSSTweaks = () => {
 	for (const propertyName of PROPERTY_NAMES) {
-		document.documentElement.style.removeProperty(propertyName);
+		removeCSSProperty(propertyName);
 	}
 };
 
@@ -55,6 +72,7 @@ const isPropertyModified = (propertyName: string): boolean => {
 
 export const DomUtils = {
 	applyCSSProperty,
+	removeCSSProperty,
 	getCSSProperties,
 	resetCSSTweaks,
 	getCurrentTheme,
