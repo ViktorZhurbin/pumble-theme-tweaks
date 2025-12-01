@@ -1,10 +1,10 @@
 import { colord } from "colord";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
+import { Checkbox } from "../Checkbox/Checkbox";
 import styles from "./ColorPicker.module.css";
 import { ResetIconButton } from "./ResetIconButton";
 import { useThemeEditorContext } from "./ThemeEditorContext";
-import { ToggleCheckbox } from "./ToggleCheckbox";
 
 interface ColorPickerProps {
 	label: string;
@@ -98,7 +98,7 @@ export function ColorPicker(props: ColorPickerProps) {
 				class={styles.toggleCell}
 				classList={{ [styles.inactive]: inactive() }}
 			>
-				<ToggleCheckbox
+				<Checkbox
 					checked={tweakEntry()?.enabled ?? true}
 					disabled={inactive() || !ctx.isReady() || !ctx.store.themeName}
 					onChange={handleToggle}

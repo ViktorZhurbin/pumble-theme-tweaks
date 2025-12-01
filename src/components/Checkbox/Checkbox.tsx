@@ -1,6 +1,6 @@
-import styles from "./ToggleCheckbox.module.css";
+import styles from "./Checkbox.module.css";
 
-interface ToggleCheckboxProps {
+interface CheckboxProps {
 	checked: boolean;
 	disabled?: boolean;
 	onChange: (e: Event) => void;
@@ -8,7 +8,7 @@ interface ToggleCheckboxProps {
 	class?: string;
 }
 
-export function ToggleCheckbox(props: ToggleCheckboxProps) {
+export function Checkbox(props: CheckboxProps) {
 	return (
 		<input
 			type="checkbox"
