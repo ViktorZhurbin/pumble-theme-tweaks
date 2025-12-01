@@ -44,8 +44,6 @@ class ThemeStateManager {
 		return this.tabId;
 	}
 
-	private initialValuesCache: Record<string, Record<string, string>> = {};
-
 	/**
 	 * Applies tweaks for a theme and broadcasts state changes
 	 * This is the core method that updates DOM, badge, and notifies listeners
@@ -59,19 +57,11 @@ class ThemeStateManager {
 		// Load tweaks from storage
 		const storedThemeTweaks = await Storage.getTweaks(themeName);
 
-		// Get initial values (from cache or DOM)
-		// If not in cache, we assume DOM is clean (fresh load or just reset by theme watcher)
-		if (!this.initialValuesCache[themeName]) {
-			this.initialValuesCache[themeName] = DomUtils.getCSSProperties();
-		}
+		// Always start fresh - clear all tweaks to ensure DOM matches storage exactly
+		DomUtils.resetCSSTweaks();
 
-		// Build full tweaks structure using cached initial values
-		const themeTweaks = this.buildTweaksWithInitialValues(
-			storedThemeTweaks,
-			this.initialValuesCache[themeName],
-		);
-
-		const desiredProperties: Record<string, string> = {};
+		// Build full tweaks structure with initial values from DOM
+		const themeTweaks = this.buildTweaksWithInitialValues(storedThemeTweaks);
 
 		// Apply or remove tweaks based on global disable and per-theme settings
 		if (!isExtensionOff && storedThemeTweaks && !storedThemeTweaks.disabled) {
@@ -79,10 +69,10 @@ class ThemeStateManager {
 				count: Object.keys(storedThemeTweaks.cssProperties).length,
 			});
 
-			// Collect enabled properties with user-set values
+			// Apply only enabled properties with user-set values
 			for (const [key, prop] of Object.entries(themeTweaks.cssProperties)) {
 				if (prop.enabled && prop.value !== null) {
-					desiredProperties[key] = prop.value;
+					DomUtils.applyCSSProperty(key, prop.value);
 				}
 			}
 
@@ -94,9 +84,6 @@ class ThemeStateManager {
 			const badgeState = isExtensionOff ? "OFF" : "DEFAULT";
 			Background.sendMessage("updateBadge", { badgeState });
 		}
-
-		// Apply changes efficiently
-		DomUtils.applyTweaksDiff(desiredProperties);
 
 		// Update internal state - themeTweaksOn represents whether tweaking mode is enabled
 		this.currentState = {
@@ -297,9 +284,8 @@ class ThemeStateManager {
 	 */
 	private buildTweaksWithInitialValues(
 		storedTweaks: StoredThemeTweaks | undefined,
-		initialValues: Record<string, string>,
 	): ThemeTweaks {
-		const currentDOMValues = initialValues;
+		const currentDOMValues = DomUtils.getCSSProperties();
 
 		const cssProperties: Record<string, TweakEntry> = {};
 
