@@ -9,7 +9,7 @@ export default defineConfig({
 	modules: ["@wxt-dev/module-solid"],
 	manifest: {
 		name: "Pumble Tweaks",
-		version: "1.1.1",
+		version: "1.1.2",
 		description: "Change Pumble colors in web browser.",
 		permissions: ["storage", "scripting"],
 		host_permissions: [...PUMBLE_URL_PATTERNS],
