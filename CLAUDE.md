@@ -1,3 +1,11 @@
+# Instructions
+
+## CSS
+- do not use `transition: all`, prefer individual properties
+- use rem for font only, use px for the rest. Use `Typography` component when possible
+
+##
+
 # Pumble Tweaks - Architecture Documentation
 
 > **Estimated Reading Time:** 15-20 minutes for full read, 2-3 minutes for quick reference
