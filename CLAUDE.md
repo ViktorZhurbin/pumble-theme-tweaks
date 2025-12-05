@@ -1,8 +1,17 @@
 # Instructions
 
 ## CSS
-- do not use `transition: all`, prefer individual properties
-- use rem for font only, use px for the rest. Use `Typography` component when possible
+- **Never use `transition: all`** - always specify individual properties (e.g., `transition: background 0.2s ease, opacity 0.2s ease`)
+- **Never set font-size in CSS** - use the Typography component with appropriate variants (`caption`, `default`, `body`, `title`, etc.)
+- **Use px for all sizing/spacing** - only Typography component uses rem internally
+- **Use CSS variables** for colors, spacing, and other design tokens (e.g., `var(--spacing-md)`, `var(--color-accent)`)
+
+## Typography Component
+- Use `<Typography variant="caption">` for small text (0.8125rem)
+- Use `<Typography>` or `<Typography variant="default">` for normal text (0.875rem)
+- Use `<Typography variant="body">` for body text (1rem)
+- Never pass `variant="default"` - it's the default value
+- Wrap button text, labels, and UI text in Typography components
 
 ##
 
