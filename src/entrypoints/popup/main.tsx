@@ -1,6 +1,7 @@
+import "./styles.css";
+
 import { render } from "solid-js/web";
 import { App } from "@/components/App";
-import "@/app/shared.css";
 
 const target = document.getElementById("app");
 
