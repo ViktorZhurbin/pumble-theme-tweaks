@@ -24,7 +24,7 @@
 
 .confirmText {
 	font-weight: 600;
-	color: var(--color-error);
+	color: var(--color-accent-red);
 	text-align: center;
 }
 

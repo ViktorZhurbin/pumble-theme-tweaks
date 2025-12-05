@@ -1,23 +1,25 @@
 .labelCell {
+	--padding-block: var(--spacing-lg);
+
 	font-weight: 600;
 	display: flex;
 	align-items: center;
 	background: var(--picker-background);
-	padding: 14px var(--picker-padding-inline);
+	padding: var(--padding-block) var(--picker-padding-inline);
 	border-bottom: var(--picker-border);
 	transition:
-		background 0.2s ease,
-		opacity 0.2s ease;
+		background 0.25s ease,
+		opacity 0.25s ease;
 }
 
 .labelCell.inactive {
-	opacity: 0.3;
+	opacity: 0.25;
 	pointer-events: none;
 }
 
 .resetButton.resetButton {
-	width: 30px;
-	height: 30px;
+	width: 32px;
+	height: 32px;
 }
 
 .resetCell,
@@ -27,25 +29,25 @@
 	align-items: center;
 	justify-content: center;
 	background: var(--picker-background);
-	padding: 14px 0;
+	padding: var(--padding-block) 0;
 	border-bottom: var(--picker-border);
 	transition:
-		background 0.2s ease,
-		opacity 0.2s ease;
+		background 0.25s ease,
+		opacity 0.25s ease;
 }
 
 .resetCell.inactive,
 .colorCell.inactive,
 .toggleCell.inactive {
-	opacity: 0.3;
+	opacity: 0.25;
 	pointer-events: none;
 }
 
 .colorCell input[type="color"] {
-	width: 32px;
-	height: 32px;
+	width: 36px;
+	height: 36px;
 	cursor: pointer;
-	border: 2px solid rgba(255, 255, 255, 0.15);
+	border: 2px solid var(--color-border-strong);
 	border-radius: 50%;
 	background: none;
 	flex-shrink: 0;
@@ -53,17 +55,17 @@
 		transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
 		border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
 		box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	box-shadow: var(--shadow-md);
 }
 
 .colorCell input[type="color"]:hover:not(:disabled) {
-	transform: scale(1.1);
-	border: 2px solid rgba(255, 255, 255, 0.25);
-	box-shadow: 0 6px 20px rgba(233, 69, 96, 0.3);
+	transform: scale(1.12);
+	border: 2px solid hsl(258, 70%, 65%, 0.5);
+	box-shadow: var(--shadow-purple);
 }
 
 .colorCell input[type="color"]:active {
-	transform: scale(0.95);
+	transform: scale(0.96);
 }
 
 .colorCell input[type="color"]::-webkit-color-swatch-wrapper {
@@ -77,6 +79,6 @@
 }
 
 .checkbox {
-	width: 18px;
-	height: 18px;
+	width: 20px;
+	height: 20px;
 }

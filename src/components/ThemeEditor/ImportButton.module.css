@@ -11,50 +11,52 @@
 .importContainer {
 	display: flex;
 	flex-direction: column;
-	gap: 12px;
-	padding: 12px;
-	background: rgba(76, 175, 80, 0.08);
-	border: 1px solid rgba(76, 175, 80, 0.3);
+	gap: var(--spacing-sm);
+	padding: var(--spacing-md);
+	background: hsl(172, 60%, 45%, 0.06);
+	border: 1px solid hsl(172, 60%, 45%, 0.25);
 	border-radius: var(--radius-md);
-	animation: slideIn 0.2s ease-out;
+	animation: slideIn 0.25s ease-out;
 }
 
 .textarea {
 	/* width: 100%; */
 	min-height: 140px;
-	padding: 8px;
-	background: rgba(0, 0, 0, 0.2);
-	border: 1px solid rgba(255, 255, 255, 0.2);
+	padding: var(--spacing-sm);
+	background: var(--color-bg-tertiary);
+	border: 1px solid var(--color-border-medium);
 	border-radius: var(--radius-md);
-	color: white;
+	color: var(--color-text-primary);
 	font-family: monospace;
 	font-size: var(--font-size-default);
 	resize: vertical;
 	transition:
-		border-color 0.15s ease-in-out,
-		background 0.15s ease-in-out;
+		border-color 0.2s ease-in-out,
+		background 0.2s ease-in-out,
+		box-shadow 0.2s ease-in-out;
 }
 
 .textarea:focus {
 	outline: none;
-	border-color: rgba(76, 175, 80, 0.5);
-	background: rgba(0, 0, 0, 0.3);
+	border-color: hsl(172, 60%, 45%, 0.5);
+	background: var(--color-bg-elevated);
+	box-shadow: var(--shadow-teal);
 }
 
 .textarea::placeholder {
-	color: rgba(255, 255, 255, 0.4);
+	color: var(--color-text-placeholder);
 }
 
 .buttons {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	gap: 8px;
+	gap: var(--spacing-sm);
 }
 
 .error {
-	color: #f44336;
+	color: var(--color-accent-red);
 	text-align: center;
-	margin-top: 4px;
+	margin-top: var(--spacing-xs);
 }
 
 @keyframes slideIn {

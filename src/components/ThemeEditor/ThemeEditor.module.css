@@ -1,70 +1,77 @@
 .container {
 	display: flex;
 	flex-direction: column;
-	gap: 24px;
+	gap: var(--spacing-xl);
 }
 
 .titleGroup {
 	display: flex;
-	gap: 16px;
+	gap: var(--spacing-md);
 	align-items: center;
 	justify-content: space-between;
-	padding: 8px 0;
+	padding: var(--spacing-sm) 0;
 }
 
 .error {
 	color: var(--color-error);
 	text-align: center;
-	padding: 16px;
+	padding: var(--spacing-md);
 	border-radius: var(--radius-md);
-	background: rgba(255, 107, 157, 0.1);
-	border: 1px solid rgba(255, 107, 157, 0.2);
+	background: hsl(0, 80%, 60%, 0.08);
+	border: 1px solid hsl(0, 80%, 60%, 0.15);
 }
 
 .tweaksContainer {
 	display: flex;
 	flex-direction: column;
 	border-radius: var(--radius-lg);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	background: rgba(255, 255, 255, 0.03);
+	border: 1px solid var(--color-border-light);
+	background: var(--color-bg-secondary);
 	padding: 0;
 	overflow: hidden;
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-	backdrop-filter: blur(10px);
+	box-shadow: var(--shadow-sm), var(--shadow-lg);
+	backdrop-filter: blur(20px);
 }
 
 .themeName {
 	letter-spacing: 0.08em;
 	font-weight: 700;
-	color: var(--color-accent-primary);
+	color: var(--color-text-accent);
 	text-align: start;
-	padding: 20px 24px 16px 24px;
+	padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md)
+		var(--spacing-lg);
 	text-transform: uppercase;
 }
 
 .controlsContainer {
-	--padding-inline: 24px;
+	--padding-inline: var(--spacing-lg);
 
 	display: flex;
 	flex-direction: column;
-	gap: 24px;
+	gap: var(--spacing-md);
 }
 
 .separator {
 	height: 1px;
-	background-color: rgba(233, 69, 96, 0.3);
-	margin: 8px 0;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		hsl(258, 70%, 55%, 0.2) 20%,
+		hsl(213, 70%, 60%, 0.2) 80%,
+		transparent
+	);
+	margin: var(--spacing-sm) 0;
 }
 
 .actionsContainer {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
-	padding: 0 var(--padding-inline) 24px var(--padding-inline);
+	gap: var(--spacing-md);
+	padding: 0 var(--padding-inline) var(--spacing-lg) var(--padding-inline);
 }
 
 .copyButtonsWrapper {
 	display: grid;
-	gap: 12px;
+	gap: var(--spacing-sm);
 	grid-template-columns: 1fr 1fr;
 }

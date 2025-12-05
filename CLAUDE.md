@@ -1,10 +1,78 @@
 # Instructions
 
 ## CSS
+
+### General Rules
 - **Never use `transition: all`** - always specify individual properties (e.g., `transition: background 0.2s ease, opacity 0.2s ease`)
 - **Never set font-size in CSS** - use the Typography component with appropriate variants (`caption`, `default`, `body`, `title`, etc.)
 - **Use px for all sizing/spacing** - only Typography component uses rem internally
-- **Use CSS variables** for colors, spacing, and other design tokens (e.g., `var(--spacing-md)`, `var(--color-accent)`)
+- **Always use CSS variables** for colors - never use hard-coded hex, rgb, or rgba values
+- **Always use HSL format** for all colors - `hsl(hue, saturation%, lightness%)`
+
+### Color System
+All colors are defined in `src/entrypoints/popup/styles.css` using HSL format for easy adjustment.
+
+**Accent Colors:**
+- `--color-accent-purple`: Primary purple (258, 70%, 55%)
+- `--color-accent-purple-hover`: Hover state (258, 70%, 60%)
+- `--color-accent-purple-light`: Lighter variant (258, 70%, 65%)
+- `--color-accent-blue`: Blue accent (213, 70%, 60%)
+- `--color-accent-teal`: Teal accent (172, 60%, 45%)
+- `--color-accent-red`: Red accent (0, 80%, 60%)
+
+**Semantic Colors:**
+- `--color-primary`: Main brand color (purple)
+- `--color-primary-hover`: Primary hover state
+- `--color-error`: Error states (red)
+- `--color-error-hover`: Error hover state
+
+**Text Colors:**
+- `--color-text-primary`: Main text (92% lightness)
+- `--color-text-secondary`: Secondary text (85% lightness)
+- `--color-text-tertiary`: Tertiary text (50% lightness)
+- `--color-text-disabled`: Disabled text (30% lightness)
+- `--color-text-placeholder`: Placeholder text (55% lightness)
+
+**Border Colors:**
+- `--color-border-subtle`: 4% white opacity
+- `--color-border-light`: 8% white opacity
+- `--color-border-medium`: 10% white opacity
+- `--color-border-strong`: 12% white opacity
+
+**Shadows:**
+- `--shadow-sm`: Small shadow for subtle elevation
+- `--shadow-md`: Medium shadow for cards
+- `--shadow-lg`: Large shadow for modals
+- `--shadow-purple`: Purple accent shadow
+- `--shadow-purple-hover`: Purple hover shadow
+- `--shadow-blue`: Blue accent shadow
+- `--shadow-teal`: Teal accent shadow
+- `--shadow-red`: Red accent shadow
+
+**Overlays:**
+- `--overlay-white-subtle`: 1.5% white
+- `--overlay-white-light`: 6% white
+- `--overlay-white-medium`: 8% white
+- `--overlay-black-subtle`: 8% black
+- `--overlay-black-medium`: 25% black
+
+**Usage Examples:**
+```css
+/* ✓ CORRECT - use variables */
+.button {
+  background: var(--color-primary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-medium);
+  box-shadow: var(--shadow-purple);
+}
+
+/* ✗ WRONG - hard-coded colors */
+.button {
+  background: #a78bfa;
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+```
 
 ## Typography Component
 - Use `<Typography variant="caption">` for small text (0.8125rem)
@@ -592,7 +660,7 @@ Global CSS variables defined in `src/app/shared.css`:
   --color-text-primary: #ffffff;
   --color-text-secondary: #b3b3b3;
   --color-accent: #0066ff;
-  --color-error: #ff4444;
+  --color-accent-red: #ff4444;
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -675,7 +743,7 @@ export default Button;
 }
 
 .error {
-  background-color: var(--color-error);
+  background-color: var(--color-accent-red);
   color: white;
 }
 ```

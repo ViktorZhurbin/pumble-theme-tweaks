@@ -6,16 +6,74 @@
 	font-weight: 400;
 	font-size: 16px;
 
-	--radius-sm: 6px;
-	--radius-md: 12px;
-	--radius-lg: 20px;
+	--radius-sm: 8px;
+	--radius-md: 14px;
+	--radius-lg: 24px;
 
-	--color-bg: #1a1a2e;
-	--color-bg-secondary: #16213e;
-	--color-accent-primary: #e94560;
-	--color-accent-secondary: #0f3460;
-	--color-white: rgb(255, 255, 255);
-	--color-error: #ff6b9d;
+	/* Arc-inspired color palette - darker, richer dark mode */
+	--color-bg: hsl(0, 0%, 12%); /* #1e1e1e */
+	--color-bg-secondary: hsl(0, 0%, 15%); /* #262626 */
+	--color-bg-tertiary: hsl(0, 0%, 18%); /* #2e2e2e */
+	--color-bg-elevated: hsl(0, 0%, 22%); /* #383838 */
+
+	/* Accent colors - vibrant but refined */
+	--color-accent-purple: hsl(258, 70%, 55%);
+	--color-accent-purple-hover: hsl(258, 70%, 60%);
+	--color-accent-purple-light: hsl(258, 70%, 65%);
+
+	--color-accent-blue: hsl(213, 70%, 60%);
+	--color-accent-blue-hover: hsl(213, 70%, 65%);
+
+	--color-accent-teal: hsl(172, 60%, 45%);
+	--color-accent-teal-hover: hsl(172, 60%, 50%);
+
+	--color-accent-red: hsl(0, 80%, 60%);
+	--color-accent-red-hover: hsl(0, 80%, 55%);
+
+	/* Semantic colors */
+	--color-primary: var(--color-accent-purple);
+	--color-primary-hover: var(--color-accent-purple-hover);
+	--color-error: var(--color-accent-red);
+	--color-error-hover: var(--color-accent-red-hover);
+
+	/* Text colors */
+	--color-text-primary: hsl(0, 0%, 92%);
+	--color-text-secondary: hsl(0, 0%, 85%);
+	--color-text-tertiary: hsl(0, 0%, 50%);
+	--color-text-disabled: hsl(0, 0%, 30%);
+	--color-text-placeholder: hsl(0, 0%, 55%);
+	--color-text-accent: hsl(258, 85%, 74%);
+
+	/* Border colors */
+	--color-border-subtle: hsl(0, 0%, 100%, 0.04);
+	--color-border-light: hsl(0, 0%, 100%, 0.08);
+	--color-border-medium: hsl(0, 0%, 100%, 0.1);
+	--color-border-strong: hsl(0, 0%, 100%, 0.12);
+
+	/* Shadow colors */
+	--shadow-sm: 0 2px 8px hsl(0, 0%, 0%, 0.12);
+	--shadow-md: 0 4px 16px hsl(0, 0%, 0%, 0.15);
+	--shadow-lg: 0 8px 24px hsl(0, 0%, 0%, 0.08);
+	--shadow-purple: 0 4px 16px hsl(258, 70%, 55%, 0.3);
+	--shadow-purple-hover: 0 6px 24px hsl(258, 70%, 55%, 0.4);
+	--shadow-blue: 0 4px 16px hsl(213, 70%, 60%, 0.4);
+	--shadow-teal: 0 4px 16px hsl(172, 60%, 45%, 0.2);
+	--shadow-red: 0 4px 16px hsl(0, 80%, 60%, 0.3);
+	--shadow-red-hover: 0 6px 24px hsl(0, 80%, 60%, 0.4);
+
+	/* Overlay colors */
+	--overlay-white-subtle: hsl(0, 0%, 100%, 0.015);
+	--overlay-white-light: hsl(0, 0%, 100%, 0.06);
+	--overlay-white-medium: hsl(0, 0%, 100%, 0.08);
+	--overlay-black-subtle: hsl(0, 0%, 0%, 0.08);
+	--overlay-black-medium: hsl(0, 0%, 0%, 0.25);
+
+	/* Spacing scale - more generous */
+	--spacing-xs: 6px;
+	--spacing-sm: 10px;
+	--spacing-md: 16px;
+	--spacing-lg: 24px;
+	--spacing-xl: 32px;
 
 	/* Typography scale */
 	--font-size-caption: 0.8125rem;
@@ -34,7 +92,7 @@
 	--line-height-relaxed: 1.5;
 
 	color-scheme: light dark;
-	color: rgba(255, 255, 255, 0.92);
+	color: var(--color-text-primary);
 	background-color: var(--color-bg);
 
 	font-synthesis: none;
@@ -52,6 +110,6 @@ body {
 
 #app {
 	margin: 0 auto;
-	padding: 1.5rem;
+	padding: var(--spacing-lg);
 	min-width: 320px;
 }
