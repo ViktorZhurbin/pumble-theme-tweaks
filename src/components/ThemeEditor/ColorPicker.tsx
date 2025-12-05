@@ -78,6 +78,7 @@ export function ColorPicker(props: ColorPickerProps) {
 						class={styles.resetButton}
 						onClick={handleReset}
 						disabled={disabled()}
+						size={18}
 					/>
 				)}
 			</div>
@@ -105,6 +106,7 @@ export function ColorPicker(props: ColorPickerProps) {
 					disabled={disabled()}
 					onChange={handleToggle}
 					title="Enable this color tweak"
+					class={styles.checkbox}
 				/>
 			</div>
 		</>

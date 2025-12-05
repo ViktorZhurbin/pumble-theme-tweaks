@@ -1,14 +1,13 @@
 import { createMemo, createSignal, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
+import { Typography } from "@/components/Typography/Typography";
 import { Background } from "@/entrypoints/background/messenger";
 import { initialState } from "@/entrypoints/content/theme-state";
 import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
 import type { RuntimeState } from "@/types/runtime";
-import { Typography } from "@/components/Typography/Typography";
 import { CopyScriptButton } from "./CopyScriptButton";
 import { CopyTweaksButton } from "./CopyTweaksButton";
-import { GlobalDisableToggle } from "./GlobalDisableToggle";
 import { ImportButton } from "./ImportButton";
 import { PickersContainer } from "./PickersContainer";
 import {
@@ -94,15 +93,6 @@ export function ThemeEditor() {
 	return (
 		<ThemeEditorContext.Provider value={contextValue}>
 			<div class={styles.container}>
-				<div class={styles.titleGroup}>
-					<Typography as="h3" variant="title">
-						Pumble Tweaks
-					</Typography>
-					<Show when={isReady() && !error()}>
-						<GlobalDisableToggle />
-					</Show>
-				</div>
-
 				<Show when={loading()}>
 					<Typography as="p">Loading...</Typography>
 				</Show>
@@ -117,7 +107,7 @@ export function ThemeEditor() {
 					<div class={styles.tweaksContainer}>
 						<Show when={store.themeName}>
 							{(themeName) => (
-								<Typography as="p" class={styles.themeName}>
+								<Typography as="p" variant="caption" class={styles.themeName}>
 									THEME: {themeName()}
 								</Typography>
 							)}

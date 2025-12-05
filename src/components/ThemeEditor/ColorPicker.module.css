@@ -3,13 +3,21 @@
 	display: flex;
 	align-items: center;
 	background: var(--picker-background);
-	padding: 8px var(--picker-padding-inline);
+	padding: 14px var(--picker-padding-inline);
 	border-bottom: var(--picker-border);
+	transition:
+		background 0.2s ease,
+		opacity 0.2s ease;
 }
 
 .labelCell.inactive {
-	opacity: 0.4;
+	opacity: 0.3;
 	pointer-events: none;
+}
+
+.resetButton.resetButton {
+	width: 30px;
+	height: 30px;
 }
 
 .resetCell,
@@ -19,22 +27,56 @@
 	align-items: center;
 	justify-content: center;
 	background: var(--picker-background);
-	padding: 8px 0;
+	padding: 14px 0;
 	border-bottom: var(--picker-border);
+	transition:
+		background 0.2s ease,
+		opacity 0.2s ease;
 }
 
 .resetCell.inactive,
 .colorCell.inactive,
 .toggleCell.inactive {
-	opacity: 0.4;
+	opacity: 0.3;
 	pointer-events: none;
 }
 
 .colorCell input[type="color"] {
-	width: 40px;
-	height: 30px;
+	width: 32px;
+	height: 32px;
 	cursor: pointer;
-	border: none;
+	border: 2px solid rgba(255, 255, 255, 0.15);
+	border-radius: 50%;
 	background: none;
 	flex-shrink: 0;
+	transition:
+		transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+		box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.colorCell input[type="color"]:hover:not(:disabled) {
+	transform: scale(1.1);
+	border: 2px solid rgba(255, 255, 255, 0.25);
+	box-shadow: 0 6px 20px rgba(233, 69, 96, 0.3);
+}
+
+.colorCell input[type="color"]:active {
+	transform: scale(0.95);
+}
+
+.colorCell input[type="color"]::-webkit-color-swatch-wrapper {
+	padding: 0;
+	border-radius: 50%;
+}
+
+.colorCell input[type="color"]::-webkit-color-swatch {
+	border: none;
+	border-radius: 50%;
+}
+
+.checkbox {
+	width: 18px;
+	height: 18px;
 }

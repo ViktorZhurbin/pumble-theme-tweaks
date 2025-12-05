@@ -23,7 +23,7 @@ export const CopyScriptButton = () => {
 					? "Enable tweaks to copy"
 					: "Run this in DevTools console of the desktop app"
 			}
-			label="Copy script"
+			label="Script"
 			onCopy={handleCopy}
 		/>
 	);

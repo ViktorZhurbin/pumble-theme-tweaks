@@ -634,11 +634,11 @@ const Button = (props: ButtonProps) => {
 
   return (
     <button
-      class={`${styles.button} ${styles[variant()]}`}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </button>
+			type="button"
+			class={`${styles.button} ${styles[variant]} ${local.class ?? ""}`}
+		>
+			<Typography variant="caption">{local.children}</Typography>
+		</button>
   );
 };
 
@@ -651,7 +651,6 @@ export default Button;
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
   border-radius: var(--radius-md);
-  font-size: var(--font-size-md);
   cursor: pointer;
   transition: background-color 0.2s;
 }

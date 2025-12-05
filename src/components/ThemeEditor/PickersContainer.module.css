@@ -4,14 +4,15 @@
 	padding-inline: var(--padding-inline);
 
 	/* Picker component shared values */
-	--picker-padding-inline: 10px;
-	--picker-background: rgba(255, 255, 255, 0.03);
-	--picker-border: 1px solid rgba(255, 255, 255, 0.04);
+	--picker-padding-inline: 16px;
+	--picker-background: rgba(255, 255, 255, 0.02);
+	--picker-border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .headerCell {
 	display: flex;
-	background: rgba(255, 255, 255, 0.07);
-	padding: 4px var(--picker-padding-inline);
-	border-bottom: var(--picker-border);
+	align-items: center;
+	background: rgba(233, 69, 96, 0.12);
+	padding: 12px var(--picker-padding-inline);
+	border-bottom: 2px solid rgba(233, 69, 96, 0.3);
 }

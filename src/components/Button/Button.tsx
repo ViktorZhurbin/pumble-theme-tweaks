@@ -19,7 +19,7 @@ export function Button(props: ButtonProps) {
 			class={`${styles.button} ${styles[variant]} ${local.class ?? ""}`}
 			{...others}
 		>
-			<Typography>{local.children}</Typography>
+			<Typography variant="caption">{local.children}</Typography>
 		</button>
 	);
 }

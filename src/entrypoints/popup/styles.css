@@ -6,12 +6,16 @@
 	font-weight: 400;
 	font-size: 16px;
 
-	--radius-sm: 4px;
-	--radius-md: 8px;
+	--radius-sm: 6px;
+	--radius-md: 12px;
+	--radius-lg: 20px;
 
-	--color-bg: rgb(36, 36, 36);
+	--color-bg: #1a1a2e;
+	--color-bg-secondary: #16213e;
+	--color-accent-primary: #e94560;
+	--color-accent-secondary: #0f3460;
 	--color-white: rgb(255, 255, 255);
-	--color-error: rgb(244, 67, 54);
+	--color-error: #ff6b9d;
 
 	/* Typography scale */
 	--font-size-caption: 0.8125rem;
@@ -30,7 +34,7 @@
 	--line-height-relaxed: 1.5;
 
 	color-scheme: light dark;
-	color: rgba(255, 255, 255, 0.87);
+	color: rgba(255, 255, 255, 0.92);
 	background-color: var(--color-bg);
 
 	font-synthesis: none;
@@ -40,13 +44,14 @@
 }
 
 body {
-	min-width: 360px;
+	min-width: 380px;
 	margin: 0;
 	display: flex;
+	background-color: var(--color-bg);
 }
 
 #app {
 	margin: 0 auto;
-	padding: 2rem;
-	min-width: 300px;
+	padding: 1.5rem;
+	min-width: 320px;
 }
