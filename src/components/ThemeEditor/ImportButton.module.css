@@ -15,7 +15,7 @@
 	padding: 12px;
 	background: rgba(76, 175, 80, 0.08);
 	border: 1px solid rgba(76, 175, 80, 0.3);
-	border-radius: var(--radius);
+	border-radius: var(--radius-md);
 	animation: slideIn 0.2s ease-out;
 }
 
@@ -25,7 +25,7 @@
 	padding: 8px;
 	background: rgba(0, 0, 0, 0.2);
 	border: 1px solid rgba(255, 255, 255, 0.2);
-	border-radius: var(--radius);
+	border-radius: var(--radius-md);
 	color: white;
 	font-family: monospace;
 	font-size: var(--font-size-default);

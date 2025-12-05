@@ -589,7 +589,7 @@ Global CSS variables defined in `src/app/shared.css`:
   --font-size-lg: 16px;
 
   /* Border */
-  --radius: 6px;
+  --radius-md: 6px;
 }
 ```
 
@@ -642,7 +642,7 @@ export default Button;
 .button {
   padding: var(--spacing-sm) var(--spacing-md);
   border: none;
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-md);
   cursor: pointer;
   transition: background-color 0.2s;

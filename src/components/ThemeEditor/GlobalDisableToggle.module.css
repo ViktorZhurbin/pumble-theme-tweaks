@@ -11,7 +11,7 @@
 
 .toggle::before {
 	background-color: var(--color-bg);
-	border-radius: var(--radius);
+	border-radius: var(--radius-md);
 	content: "";
 	display: inline-block;
 	height: 100%;
@@ -41,7 +41,7 @@
 	white-space: nowrap;
 
 	border: 2px solid var(--color-bg);
-	border-radius: var(--radius);
+	border-radius: var(--radius-md);
 
 	&:first-of-type {
 		border-right: none;

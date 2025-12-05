@@ -6,7 +6,8 @@
 	font-weight: 400;
 	font-size: 16px;
 
-	--radius: 6px;
+	--radius-sm: 4px;
+	--radius-md: 8px;
 
 	--color-bg: rgb(36, 36, 36);
 	--color-white: rgb(255, 255, 255);
