@@ -1,10 +1,9 @@
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import styles from "./PresetSelector.module.css";
 import { useThemeEditorContext } from "./ThemeEditorContext";
-import { UnsavedChangesIndicator } from "./UnsavedChangesIndicator";
 
 export function PresetSelector() {
 	const ctx = useThemeEditorContext();
@@ -57,7 +56,9 @@ export function PresetSelector() {
 						{(presetName) => <option value={presetName}>{presetName}</option>}
 					</For>
 				</select>
-				<UnsavedChangesIndicator />
+				<Show when={ctx.store.hasUnsavedChanges}>
+					<span class="status status-info"></span>
+				</Show>
 			</div>
 		</div>
 	);
