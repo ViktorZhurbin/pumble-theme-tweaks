@@ -1,4 +1,3 @@
-import { Button } from "@/components/Button/Button";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { useThemeEditorContext } from "./ThemeEditorContext";
 
@@ -25,13 +24,13 @@ export function SavePresetButton() {
 	};
 
 	return (
-		<Button
-			variant="primary"
+		<button
+			class="btn btn-primary"
 			onClick={handleClick}
 			disabled={disabled()}
 			title={getTitle()}
 		>
 			Save
-		</Button>
+		</button>
 	);
 }

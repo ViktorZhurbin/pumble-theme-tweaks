@@ -1,5 +1,4 @@
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";
-import { Button } from "@/components/Button/Button";
 import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
@@ -82,14 +81,14 @@ export function PresetActionsDropdown() {
 
 	return (
 		<div class={styles.container}>
-			<Button
-				variant="secondary"
+			<button
+				class="btn btn-square btn-soft"
 				onClick={handleToggleMenu}
 				disabled={disabled()}
 				title={disabled() ? "Select a preset to see actions" : "Preset actions"}
 			>
 				•••
-			</Button>
+			</button>
 
 			<Show when={showMenu()}>
 				<div class={styles.menu}>
@@ -101,15 +100,15 @@ export function PresetActionsDropdown() {
 									Delete "{ctx.store.selectedPreset}"?
 								</Typography>
 								<div class={styles.confirmButtons}>
-									<Button
-										variant="secondary"
+									<button
+										class="btn btn-soft btn-secondary"
 										onClick={() => setShowDeleteConfirm(false)}
 									>
 										Cancel
-									</Button>
-									<Button variant="error" onClick={handleDelete}>
+									</button>
+									<button class="btn btn-soft btn-error" onClick={handleDelete}>
 										Delete
-									</Button>
+									</button>
 								</div>
 							</div>
 						}

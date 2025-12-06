@@ -4,7 +4,6 @@
 }
 
 .importBtn {
-	width: 100%;
 	animation: slideIn 0.2s ease-out;
 }
 
@@ -30,9 +29,7 @@
 	font-family: monospace;
 	font-size: var(--font-size-default);
 	resize: vertical;
-	transition:
-		border-color 0.2s ease-in-out,
-		background 0.2s ease-in-out,
+	transition: border-color 0.2s ease-in-out, background 0.2s ease-in-out,
 		box-shadow 0.2s ease-in-out;
 }
 

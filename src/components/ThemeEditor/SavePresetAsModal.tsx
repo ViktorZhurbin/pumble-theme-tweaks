@@ -1,5 +1,4 @@
 import { createSignal, onMount, Show } from "solid-js";
-import { Button } from "@/components/Button/Button";
 import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
@@ -104,16 +103,16 @@ export function SavePresetAsModal(props: SavePresetAsModalProps) {
 					</Show>
 
 					<div class={styles.buttons}>
-						<Button variant="secondary" onClick={handleCancel}>
+						<button class="btn btn-soft" onClick={handleCancel}>
 							Cancel
-						</Button>
-						<Button
-							variant="primary"
+						</button>
+						<button
+							class="btn btn-primary"
 							onClick={handleSave}
 							disabled={!presetName().trim()}
 						>
 							Save
-						</Button>
+						</button>
 					</div>
 				</div>
 			</div>

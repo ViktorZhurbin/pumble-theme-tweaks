@@ -1,5 +1,4 @@
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";
-import { Button } from "@/components/Button/Button";
 import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import styles from "./ResetButton.module.css";
@@ -73,6 +72,7 @@ export function ResetButton() {
 		<Show when={hasModifications()}>
 			<div class={styles.container}>
 				<ResetIconButton
+					class="btn-xs"
 					onClick={handleClick}
 					disabled={disabled()}
 					title={disabled() ? "Tweaks disabled" : title}
@@ -83,12 +83,12 @@ export function ResetButton() {
 						<div class={styles.popoverContent}>
 							<Typography class={styles.confirmText}>{title}?</Typography>
 							<div class={styles.confirmButtons}>
-								<Button variant="secondary" onClick={handleCancel}>
+								<button class="btn btn-soft" onClick={handleCancel}>
 									Cancel
-								</Button>
-								<Button variant="error" onClick={handleConfirm}>
+								</button>
+								<button class="btn btn-soft btn-error" onClick={handleConfirm}>
 									Reset
-								</Button>
+								</button>
 							</div>
 						</div>
 					</div>

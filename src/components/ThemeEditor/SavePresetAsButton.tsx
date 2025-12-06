@@ -1,4 +1,3 @@
-import { Button } from "@/components/Button/Button";
 import { useThemeEditorContext } from "./ThemeEditorContext";
 
 interface SavePresetAsButtonProps {
@@ -15,13 +14,13 @@ export function SavePresetAsButton(props: SavePresetAsButtonProps) {
 	};
 
 	return (
-		<Button
-			variant="secondary"
+		<button
+			class="btn btn-secondary"
 			onClick={handleClick}
 			disabled={disabled()}
 			title={disabled() ? "Enable tweaks to save" : "Save as new preset"}
 		>
 			Save As...
-		</Button>
+		</button>
 	);
 }
