@@ -1,5 +1,4 @@
 import { For, Show } from "solid-js";
-import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import styles from "./PresetSelector.module.css";
@@ -41,21 +40,28 @@ export function PresetSelector() {
 
 	return (
 		<div class={styles.container}>
-			<Typography variant="caption" class={styles.label}>
-				Preset:
-			</Typography>
 			<div class={styles.selectorWrapper}>
-				<select
-					class={styles.select}
-					value={ctx.store.selectedPreset ?? ""}
-					onChange={handleChange}
-					disabled={disabled()}
-				>
-					<option value="">No Preset Selected</option>
-					<For each={presetNames()}>
-						{(presetName) => <option value={presetName}>{presetName}</option>}
-					</For>
-				</select>
+				<fieldset class="fieldset w-full">
+					<legend class="fieldset-legend">Preset</legend>
+					<select
+						class="select select-sm"
+						value={ctx.store.selectedPreset ?? ""}
+						onChange={handleChange}
+						disabled={disabled()}
+					>
+						<option value="">No Preset Selected</option>
+						<For each={presetNames()}>
+							{(presetName) => (
+								<option
+									value={presetName}
+									selected={presetName === ctx.store.selectedPreset}
+								>
+									{presetName}
+								</option>
+							)}
+						</For>
+					</select>
+				</fieldset>
 				<Show when={ctx.store.hasUnsavedChanges}>
 					<span class="status status-info"></span>
 				</Show>

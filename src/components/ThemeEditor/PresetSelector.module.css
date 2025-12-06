@@ -4,46 +4,8 @@
 	gap: 4px;
 }
 
-.label {
-	color: var(--color-text-secondary);
-}
-
 .selectorWrapper {
 	display: flex;
 	align-items: center;
 	gap: 4px;
-}
-
-.select {
-	flex: 1;
-	padding: 8px 12px;
-	background: hsl(240, 10%, 8%);
-	border: 1px solid var(--color-border-medium);
-	border-radius: 4px;
-	color: var(--color-text-primary);
-	font-size: 0.875rem;
-	cursor: pointer;
-	transition:
-		border-color 0.2s ease,
-		background 0.2s ease;
-}
-
-.select:hover:not(:disabled) {
-	background: hsl(240, 10%, 10%);
-	border-color: var(--color-border-strong);
-}
-
-.select:focus {
-	outline: none;
-	border-color: var(--color-accent-purple);
-}
-
-.select:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
-
-.select option {
-	background: hsl(240, 10%, 12%);
-	color: var(--color-text-primary);
 }
