@@ -8,9 +8,7 @@ import { Utils } from "./utils";
  */
 const getTweaksOn = async (): Promise<boolean> => {
 	try {
-		const result = (await browser.storage.sync.get(
-			"tweaks_on",
-		)) as StorageData;
+		const result = (await browser.storage.sync.get("tweaks_on")) as StorageData;
 		return result.tweaks_on ?? true; // Default to enabled
 	} catch (err) {
 		logger.error("Storage read error:", err);
@@ -149,7 +147,9 @@ const setSelectedPreset = async (presetName: string | null, tabId?: number) => {
  */
 const getAllPresets = async (): Promise<Record<string, PresetData>> => {
 	try {
-		const result = (await browser.storage.sync.get("saved_presets")) as StorageData;
+		const result = (await browser.storage.sync.get(
+			"saved_presets",
+		)) as StorageData;
 		return result.saved_presets ?? {};
 	} catch (err) {
 		logger.error("Storage read error:", err);

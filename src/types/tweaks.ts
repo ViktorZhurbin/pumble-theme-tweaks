@@ -20,9 +20,7 @@ export interface TweakEntry {
  * Current state that may have unsaved changes
  */
 export interface WorkingTweaks {
-	cssProperties: {
-		[propertyName: string]: TweakEntry;
-	};
+	cssProperties: Record<string, TweakEntry>;
 }
 
 /**

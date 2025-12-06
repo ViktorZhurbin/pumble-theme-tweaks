@@ -10,6 +10,11 @@ import { CopyScriptButton } from "./CopyScriptButton";
 import { CopyTweaksButton } from "./CopyTweaksButton";
 import { ImportButton } from "./ImportButton";
 import { PickersContainer } from "./PickersContainer";
+import { PresetActionsDropdown } from "./PresetActionsDropdown";
+import { PresetSelector } from "./PresetSelector";
+import { SavePresetAsButton } from "./SavePresetAsButton";
+import { SavePresetAsModal } from "./SavePresetAsModal";
+import { SavePresetButton } from "./SavePresetButton";
 import {
 	getContentScriptState,
 	initializeTab,
@@ -26,6 +31,7 @@ export function ThemeEditor() {
 	const [tabId, setTabId] = createSignal<number | null>(null);
 	const [error, setError] = createSignal<string | null>(null);
 	const [loading, setLoading] = createSignal(true);
+	const [showSaveAsModal, setShowSaveAsModal] = createSignal(false);
 
 	const isReady = createMemo(() => tabId() !== null && !loading());
 
@@ -112,6 +118,20 @@ export function ThemeEditor() {
 								</Typography>
 							)}
 						</Show>
+
+						<div class={styles.presetSection}>
+							<PresetSelector />
+							<div class={styles.presetButtons}>
+								<SavePresetButton />
+								<SavePresetAsButton
+									onOpenModal={() => setShowSaveAsModal(true)}
+								/>
+								<PresetActionsDropdown />
+							</div>
+						</div>
+
+						<div class={styles.separator} />
+
 						<div class={styles.controlsContainer}>
 							<PickersContainer />
 
@@ -126,6 +146,11 @@ export function ThemeEditor() {
 							</div>
 						</div>
 					</div>
+
+					<SavePresetAsModal
+						show={showSaveAsModal()}
+						onClose={() => setShowSaveAsModal(false)}
+					/>
 				</Show>
 			</div>
 		</ThemeEditorContext.Provider>

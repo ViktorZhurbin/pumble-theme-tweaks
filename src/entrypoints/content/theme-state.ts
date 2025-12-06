@@ -221,12 +221,10 @@ class ThemeStateManager {
 		for (const [key, entry] of Object.entries(
 			this.currentState.workingTweaks.cssProperties,
 		)) {
-			if (entry.value !== null) {
-				cssProperties[key] = {
-					value: entry.value,
-					enabled: entry.enabled,
-				};
-			}
+			cssProperties[key] = {
+				value: entry.value ?? entry.initialValue,
+				enabled: entry.enabled,
+			};
 		}
 
 		await Storage.updatePreset(
@@ -301,8 +299,11 @@ class ThemeStateManager {
 			const workingEntry = workingProps[key];
 			const presetEntry = presetProps[key];
 
+			const workingEntryValue =
+				workingEntry?.value ?? workingEntry.initialValue;
+
 			// Different value
-			if (workingEntry?.value !== presetEntry?.value) return true;
+			if (workingEntryValue !== presetEntry?.value) return true;
 
 			// Different enabled state
 			if (workingEntry?.enabled !== presetEntry?.enabled) return true;

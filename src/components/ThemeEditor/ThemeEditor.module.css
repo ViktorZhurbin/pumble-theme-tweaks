@@ -75,3 +75,16 @@
 	gap: var(--spacing-sm);
 	grid-template-columns: 1fr 1fr;
 }
+
+.presetSection {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.presetButtons {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
