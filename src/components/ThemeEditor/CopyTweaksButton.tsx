@@ -1,15 +1,15 @@
 import { PROPERTIES } from "@/constants/properties";
-import type { ThemeTweaks } from "@/types/tweaks";
+import type { WorkingTweaks } from "@/types/tweaks";
 import { CopyButton } from "../CopyButton/CopyButton";
 import { useThemeEditorContext } from "./ThemeEditorContext";
 
 export const CopyTweaksButton = () => {
 	const ctx = useThemeEditorContext();
 
-	const disabled = () => !ctx.store.themeTweaksOn;
+	const disabled = () => !ctx.store.tweaksOn;
 
 	const handleCopy = async () => {
-		const copyObject = getCopyObject(ctx.store.themeTweaks);
+		const copyObject = getCopyObject(ctx.store.workingTweaks);
 
 		return JSON.stringify(copyObject, null, 2);
 	};
@@ -29,7 +29,7 @@ export const CopyTweaksButton = () => {
  * Returns object with property names as keys and current values (custom or initial)
  */
 function getCopyObject(
-	tweaks: ThemeTweaks | undefined,
+	tweaks: WorkingTweaks | undefined,
 ): Record<string, string> {
 	const result: Record<string, string> = {};
 

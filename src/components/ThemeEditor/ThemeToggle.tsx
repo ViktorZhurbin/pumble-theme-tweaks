@@ -12,7 +12,7 @@ export function ThemeToggle() {
 		if (!currentTabId) return;
 
 		ContentScript.sendMessage(
-			"toggleTweaks",
+			"setTweaksOn",
 			{ enabled: checked },
 			currentTabId,
 		);
@@ -22,8 +22,8 @@ export function ThemeToggle() {
 		<div class={styles.wrapper}>
 			<Checkbox
 				title="Toggle all"
-				disabled={ctx.store.isExtensionOff}
-				checked={ctx.store.themeTweaksOn}
+				disabled={false}
+				checked={ctx.store.tweaksOn}
 				onChange={handleChange}
 			/>
 		</div>

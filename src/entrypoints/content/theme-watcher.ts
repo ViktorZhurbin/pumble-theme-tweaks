@@ -1,7 +1,6 @@
-import { DomUtils } from "./dom-utils";
 import { logger } from "@/lib/logger";
+import { DomUtils } from "./dom-utils";
 import { ThemeState } from "./theme-state";
-import { Background } from "../background/messenger";
 
 /**
  * Watches for theme changes and handles theme tweak application
@@ -18,13 +17,9 @@ export const watchThemeChanges = (): MutationObserver => {
 			currentTheme = newTheme;
 
 			logger.info("Theme changed", { from: oldTheme, to: newTheme });
-			DomUtils.resetCSSTweaks();
 
 			if (newTheme) {
-				ThemeState.applyForTheme(newTheme);
-			} else {
-				// No theme detected - ensure badge is inactive
-				Background.sendMessage("updateBadge", { badgeState: "DEFAULT" });
+				ThemeState.updateDetectedTheme(newTheme);
 			}
 		}
 	});

@@ -17,9 +17,10 @@ export function ColorPicker(props: ColorPickerProps) {
 
 	// Derive from context instead of props
 	const tweakEntry = () =>
-		ctx.store.themeTweaks?.cssProperties[props.propertyName];
+		ctx.store.workingTweaks?.cssProperties[props.propertyName];
 
-	const disabled = () => !ctx.store.themeTweaksOn;
+	const areTweaksOff = () => !ctx.store.tweaksOn;
+	const disabled = () => areTweaksOff() || !tweakEntry()?.enabled;
 
 	const handleInput = (e: Event) => {
 		const value = (e.target as HTMLInputElement).value;
@@ -28,7 +29,7 @@ export function ColorPicker(props: ColorPickerProps) {
 		if (!currentTabId || !ctx.store.themeName) return;
 
 		ContentScript.sendMessage(
-			"updateProperty",
+			"updateWorkingProperty",
 			{ propertyName: props.propertyName, value },
 			currentTabId,
 		);
@@ -37,11 +38,13 @@ export function ColorPicker(props: ColorPickerProps) {
 	const handleReset = (e: MouseEvent) => {
 		e.preventDefault();
 		const currentTabId = ctx.tabId();
-		if (!currentTabId) return;
+		const entry = tweakEntry();
+		if (!currentTabId || !entry) return;
 
+		// Reset to initial value by updating working property
 		ContentScript.sendMessage(
-			"resetProperty",
-			{ propertyName: props.propertyName },
+			"updateWorkingProperty",
+			{ propertyName: props.propertyName, value: entry.initialValue },
 			currentTabId,
 		);
 	};
@@ -52,7 +55,7 @@ export function ColorPicker(props: ColorPickerProps) {
 		if (!currentTabId) return;
 
 		ContentScript.sendMessage(
-			"toggleProperty",
+			"toggleWorkingProperty",
 			{ propertyName: props.propertyName, enabled },
 			currentTabId,
 		);
@@ -99,11 +102,11 @@ export function ColorPicker(props: ColorPickerProps) {
 			{/* Toggle checkbox cell */}
 			<div
 				class={styles.toggleCell}
-				classList={{ [styles.inactive]: disabled() }}
+				classList={{ [styles.inactive]: areTweaksOff() }}
 			>
 				<Checkbox
 					checked={tweakEntry()?.enabled ?? true}
-					disabled={disabled()}
+					disabled={areTweaksOff()}
 					onChange={handleToggle}
 					title="Enable this color tweak"
 					class={styles.checkbox}

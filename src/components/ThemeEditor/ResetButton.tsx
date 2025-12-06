@@ -12,15 +12,15 @@ export function ResetButton() {
 
 	const hasModifications = () => {
 		const properties = Object.values(
-			ctx.store.themeTweaks?.cssProperties ?? {},
+			ctx.store.workingTweaks?.cssProperties ?? {},
 		);
 
 		return properties.some(
-			(prop) => !!prop.value && prop.value !== prop.initialValue,
+			(prop) => prop.value !== null && prop.value !== prop.initialValue,
 		);
 	};
 
-	const disabled = () => !ctx.store.themeTweaksOn;
+	const disabled = () => !ctx.store.tweaksOn;
 
 	const handleClick = (e: MouseEvent) => {
 		e.preventDefault();
@@ -34,9 +34,11 @@ export function ResetButton() {
 		setShowConfirm(false);
 
 		// Optimistic update for responsive UI
-		ctx.setStore("themeTweaks", undefined);
+		ctx.setStore("workingTweaks", { cssProperties: {} });
+		ctx.setStore("selectedPreset", null);
+		ctx.setStore("hasUnsavedChanges", false);
 
-		ContentScript.sendMessage("resetTweaks", undefined, currentTabId);
+		ContentScript.sendMessage("resetWorkingTweaks", undefined, currentTabId);
 	};
 
 	const handleCancel = () => {

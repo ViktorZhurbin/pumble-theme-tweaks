@@ -2,7 +2,7 @@ import { type Browser, browser } from "wxt/browser";
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { defineContentScript } from "wxt/utils/define-content-script";
 import { logger } from "@/lib/logger";
-import { DomUtils } from "./dom-utils";
+import { Storage } from "@/lib/storage";
 import { ContentScript } from "./messenger";
 import { ThemeState } from "./theme-state";
 import { watchThemeChanges } from "./theme-watcher";
@@ -18,17 +18,10 @@ export default defineContentScript({
 			timestamp: new Date().toISOString(),
 		});
 
-		// Initialize: Apply saved tweaks for current theme on page load
+		// Initialize: Apply saved tweaks on page load
 		const initializeTheme = async () => {
 			await ThemeState.initialize();
-
-			const initialTheme = DomUtils.getCurrentTheme();
-			if (initialTheme) {
-				logger.debug("Checking for saved tweaks for initial theme", {
-					theme: initialTheme,
-				});
-				ThemeState.applyForTheme(initialTheme);
-			}
+			await ThemeState.initializePresetSystem();
 		};
 
 		// Wait for DOM to be ready before initializing
@@ -45,52 +38,76 @@ export default defineContentScript({
 			return state;
 		});
 
-		ContentScript.onMessage("updateProperty", (message) => {
-			logger.debug("Updating CSS property via ThemeState", {
+		ContentScript.onMessage("setTweaksOn", (message) => {
+			logger.debug("Toggling tweaks", {
+				enabled: message.data.enabled,
+			});
+			ThemeState.setTweaksOn(message.data.enabled);
+		});
+
+		// Preset-based message handlers
+		ContentScript.onMessage("updateWorkingProperty", (message) => {
+			logger.debug("Updating working property", {
 				propertyName: message.data.propertyName,
 				value: message.data.value,
 			});
-			ThemeState.updateProperty(message.data.propertyName, message.data.value);
+			ThemeState.updateWorkingProperty(
+				message.data.propertyName,
+				message.data.value,
+			);
 		});
 
-		ContentScript.onMessage("toggleTweaks", (message) => {
-			logger.debug("Toggling tweaks", { enabled: message.data.enabled });
-			ThemeState.toggle(message.data.enabled);
-		});
-
-		ContentScript.onMessage("resetTweaks", () => {
-			logger.debug("Resetting tweaks via ThemeState");
-			ThemeState.reset();
-		});
-
-		ContentScript.onMessage("resetProperty", (message) => {
-			logger.debug("Resetting property via ThemeState", {
-				propertyName: message.data.propertyName,
-			});
-			ThemeState.resetProperty(message.data.propertyName);
-		});
-
-		ContentScript.onMessage("toggleGlobal", (message) => {
-			logger.debug("Toggling global disable", {
-				disabled: message.data.disabled,
-			});
-			ThemeState.toggleGlobal(message.data.disabled);
-		});
-
-		ContentScript.onMessage("toggleProperty", (message) => {
-			logger.debug("Toggling property", {
+		ContentScript.onMessage("toggleWorkingProperty", (message) => {
+			logger.debug("Toggling working property", {
 				propertyName: message.data.propertyName,
 				enabled: message.data.enabled,
 			});
-			ThemeState.toggleProperty(
+			ThemeState.toggleWorkingProperty(
 				message.data.propertyName,
 				message.data.enabled,
 			);
 		});
 
-		ContentScript.onMessage("importTweaks", (message) => {
-			logger.debug("Importing tweaks", { properties: message.data.properties });
-			ThemeState.importTweaks(message.data.properties);
+		ContentScript.onMessage("resetWorkingTweaks", () => {
+			logger.debug("Resetting working tweaks");
+			ThemeState.resetWorkingTweaks();
+		});
+
+		ContentScript.onMessage("loadPreset", (message) => {
+			logger.debug("Loading preset", { presetName: message.data.presetName });
+			ThemeState.loadPreset(message.data.presetName);
+		});
+
+		ContentScript.onMessage("savePreset", () => {
+			logger.debug("Saving preset");
+			ThemeState.savePreset();
+		});
+
+		ContentScript.onMessage("savePresetAs", (message) => {
+			logger.debug("Saving preset as", { presetName: message.data.presetName });
+			ThemeState.savePresetAs(message.data.presetName);
+		});
+
+		ContentScript.onMessage("deletePreset", (message) => {
+			logger.debug("Deleting preset", { presetName: message.data.presetName });
+			ThemeState.deletePreset(message.data.presetName);
+		});
+
+		ContentScript.onMessage("renamePreset", (message) => {
+			logger.debug("Renaming preset", {
+				oldName: message.data.oldName,
+				newName: message.data.newName,
+			});
+			Storage.renamePreset(
+				message.data.oldName,
+				message.data.newName,
+				ThemeState.getTabId(),
+			);
+		});
+
+		ContentScript.onMessage("getAllPresets", async () => {
+			logger.debug("Getting all presets");
+			return await Storage.getAllPresets();
 		});
 
 		// Watch for theme changes and handle accordingly
@@ -103,12 +120,15 @@ export default defineContentScript({
 		) => {
 			if (areaName !== "sync") return;
 
-			if (changes.theme_tweaks || changes.global_disabled) {
+			// Preset-based system
+			if (
+				changes.working_tweaks ||
+				changes.selected_preset ||
+				changes.saved_presets ||
+				changes.tweaks_on
+			) {
 				logger.debug("Storage changed, re-applying tweaks");
-				const currentTheme = DomUtils.getCurrentTheme();
-				if (currentTheme) {
-					ThemeState.applyForTheme(currentTheme);
-				}
+				ThemeState.reloadWorkingState();
 			}
 		};
 		browser.storage.onChanged.addListener(storageListener);

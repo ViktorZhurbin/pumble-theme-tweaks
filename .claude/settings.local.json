@@ -1,23 +1,23 @@
 {
-  "permissions": {
-    "allow": [
-      "WebSearch",
-      "Bash(npm run build:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git checkout:*)",
-      "Bash(cp:*)",
-      "Bash(rm:*)",
-      "Bash(cat:*)",
-      "Bash(tree:*)",
-      "Bash(npm install:*)",
-      "Bash(find:*)",
-      "Bash(npm run compile:*)",
-      "mcp__ide__getDiagnostics",
-      "WebFetch(domain:docs.solidjs.com)",
-      "Bash(grep:*)"
-    ],
-    "deny": [],
-    "ask": []
-  }
+	"permissions": {
+		"allow": [
+			"WebSearch",
+			"Bash(npm run build:*)",
+			"Bash(git add:*)",
+			"Bash(git commit:*)",
+			"Bash(git checkout:*)",
+			"Bash(cp:*)",
+			"Bash(rm:*)",
+			"Bash(cat:*)",
+			"Bash(tree:*)",
+			"Bash(npm install:*)",
+			"Bash(find:*)",
+			"Bash(npm run compile:*)",
+			"mcp__ide__getDiagnostics",
+			"WebFetch(domain:docs.solidjs.com)",
+			"Bash(grep:*)"
+		],
+		"deny": [],
+		"ask": []
+	}
 }

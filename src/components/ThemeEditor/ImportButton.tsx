@@ -21,7 +21,7 @@ export function ImportButton() {
 	const [error, setError] = createSignal<string | null>(null);
 	const [importing, setImporting] = createSignal(false);
 
-	const disabled = () => !ctx.store.themeTweaksOn;
+	const disabled = () => !ctx.store.tweaksOn;
 
 	const handleClick = () => {
 		if (disabled()) return;
@@ -72,12 +72,14 @@ export function ImportButton() {
 			setShowImport(false);
 			setImportValue("");
 
-			// Send to content script
-			await ContentScript.sendMessage(
-				"importTweaks",
-				{ properties: parsed },
-				currentTabId,
-			);
+			// Import by updating each property individually
+			for (const [propertyName, value] of Object.entries(parsed)) {
+				await ContentScript.sendMessage(
+					"updateWorkingProperty",
+					{ propertyName, value },
+					currentTabId,
+				);
+			}
 
 			logger.debug("ImportButton: Import successful", {
 				count: Object.keys(parsed).length,

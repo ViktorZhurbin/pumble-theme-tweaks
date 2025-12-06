@@ -1,22 +1,156 @@
 import { browser } from "wxt/browser";
 import { logger } from "@/lib/logger";
-import type {
-	StorageData,
-	StoredThemeTweaks,
-	StoredThemeTweaksRecord,
-	StoredTweakEntry,
-} from "@/types/tweaks";
+import type { PresetData, StorageData, StoredTweakEntry } from "@/types/tweaks";
 import { Utils } from "./utils";
 
 /**
- * Gets all theme tweaks from storage
+ * Gets the tweaks enabled state
  */
-const getAllTweaks = async (): Promise<StoredThemeTweaksRecord> => {
+const getTweaksOn = async (): Promise<boolean> => {
 	try {
 		const result = (await browser.storage.sync.get(
-			"theme_tweaks",
+			"tweaks_on",
 		)) as StorageData;
-		return result.theme_tweaks ?? {};
+		return result.tweaks_on ?? true; // Default to enabled
+	} catch (err) {
+		logger.error("Storage read error:", err);
+		return true;
+	}
+};
+
+/**
+ * Sets the tweaks enabled state
+ */
+const setTweaksOn = async (enabled: boolean, tabId?: number) => {
+	try {
+		const dataToSave: StorageData = { tweaks_on: enabled };
+
+		if (tabId !== undefined) {
+			dataToSave.last_update_tab_id = tabId;
+		}
+
+		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+	} catch (err) {
+		logger.warn("Storage write error:", err);
+	}
+};
+
+/**
+ * NEW PRESET-BASED STORAGE METHODS
+ */
+
+/**
+ * Gets working tweaks from storage
+ */
+const getWorkingTweaks = async (): Promise<{
+	cssProperties: Record<string, StoredTweakEntry>;
+}> => {
+	try {
+		const result = (await browser.storage.sync.get(
+			"working_tweaks",
+		)) as StorageData;
+		return result.working_tweaks ?? { cssProperties: {} };
+	} catch (err) {
+		logger.error("Storage read error:", err);
+		return { cssProperties: {} };
+	}
+};
+
+/**
+ * Sets working tweaks in storage
+ */
+const setWorkingTweaks = async (
+	cssProperties: Record<string, StoredTweakEntry>,
+	tabId?: number,
+) => {
+	try {
+		const dataToSave: StorageData = {
+			working_tweaks: { cssProperties },
+		};
+
+		if (tabId !== undefined) {
+			dataToSave.last_update_tab_id = tabId;
+		}
+
+		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+	} catch (err) {
+		logger.warn("Storage write error:", err);
+	}
+};
+
+/**
+ * Saves a single CSS property to working state
+ */
+const saveWorkingProperty = async (
+	propertyName: string,
+	value: string,
+	tabId?: number,
+) => {
+	const workingTweaks = await getWorkingTweaks();
+
+	workingTweaks.cssProperties[propertyName] = {
+		value,
+		enabled: workingTweaks.cssProperties[propertyName]?.enabled ?? true,
+	};
+
+	await setWorkingTweaks(workingTweaks.cssProperties, tabId);
+};
+
+const saveWorkingPropertyDebounced = Utils.debounce(
+	(propertyName: string, value: string, tabId?: number) => {
+		Storage.saveWorkingProperty(propertyName, value, tabId);
+	},
+	500,
+);
+
+/**
+ * Clears working tweaks
+ */
+const clearWorkingTweaks = async (tabId?: number) => {
+	await setWorkingTweaks({}, tabId);
+};
+
+/**
+ * Gets selected preset name
+ */
+const getSelectedPreset = async (): Promise<string | null> => {
+	try {
+		const result = (await browser.storage.sync.get(
+			"selected_preset",
+		)) as StorageData;
+		return result.selected_preset ?? null;
+	} catch (err) {
+		logger.error("Storage read error:", err);
+		return null;
+	}
+};
+
+/**
+ * Sets selected preset name
+ */
+const setSelectedPreset = async (presetName: string | null, tabId?: number) => {
+	try {
+		const dataToSave: StorageData = {
+			selected_preset: presetName,
+		};
+
+		if (tabId !== undefined) {
+			dataToSave.last_update_tab_id = tabId;
+		}
+
+		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+	} catch (err) {
+		logger.warn("Storage write error:", err);
+	}
+};
+
+/**
+ * Gets all presets
+ */
+const getAllPresets = async (): Promise<Record<string, PresetData>> => {
+	try {
+		const result = (await browser.storage.sync.get("saved_presets")) as StorageData;
+		return result.saved_presets ?? {};
 	} catch (err) {
 		logger.error("Storage read error:", err);
 		return {};
@@ -24,257 +158,172 @@ const getAllTweaks = async (): Promise<StoredThemeTweaksRecord> => {
 };
 
 /**
- * Migrates old storage format to new format
- * Old: cssProperties[key] = string, separate enabledProperties array
- * New: cssProperties[key] = { value, enabled }
+ * Gets a single preset by name
  */
-
-// biome-ignore lint/suspicious/noExplicitAny: no need for explanation :D
-const migrateTweaksFormat = (themeTweaks: any): StoredThemeTweaks => {
-	// If already in new format, return as-is
-	const firstPropValue = Object.values(themeTweaks.cssProperties || {})[0];
-	if (
-		firstPropValue &&
-		typeof firstPropValue === "object" &&
-		"value" in firstPropValue
-	) {
-		return themeTweaks as StoredThemeTweaks;
-	}
-
-	// Migrate from old format
-	const oldEnabledProps =
-		themeTweaks.enabledProperties ||
-		Object.keys(themeTweaks.cssProperties || {});
-
-	const newCssProperties: Record<string, StoredTweakEntry> = {};
-
-	for (const [key, value] of Object.entries(themeTweaks.cssProperties || {})) {
-		newCssProperties[key] = {
-			value: value as string,
-			enabled: oldEnabledProps.includes(key),
-		};
-	}
-
-	return {
-		disabled: themeTweaks.disabled ?? false,
-		cssProperties: newCssProperties,
-	};
+const getPreset = async (name: string): Promise<PresetData | undefined> => {
+	const allPresets = await getAllPresets();
+	return allPresets[name];
 };
 
 /**
- * Gets tweaks for a specific theme
+ * Creates a new preset
  */
-const getTweaks = async (
-	themeName: string,
-): Promise<StoredThemeTweaks | undefined> => {
-	const allTweaks = await getAllTweaks();
-	const themeTweaks = allTweaks[themeName];
-
-	if (!themeTweaks) return undefined;
-
-	// Migrate if needed
-	return migrateTweaksFormat(themeTweaks);
-};
-
-/**
- * Saves a single CSS property for a theme
- */
-const saveProperty = async (
-	themeName: string,
-	propertyName: string,
-	value: string,
+const createPreset = async (
+	name: string,
+	cssProperties: Record<string, StoredTweakEntry>,
 	tabId?: number,
 ) => {
-	const allTweaks = await getAllTweaks();
+	const allPresets = await getAllPresets();
 
-	allTweaks[themeName] ??= { disabled: false, cssProperties: {} };
+	if (allPresets[name]) {
+		throw new Error(`Preset "${name}" already exists`);
+	}
 
-	// New format: store as object with value and enabled
-	// Preserve existing enabled state, default to true
-	allTweaks[themeName].cssProperties[propertyName] = {
-		value,
-		enabled: allTweaks[themeName].cssProperties[propertyName]?.enabled ?? true,
+	allPresets[name] = {
+		name,
+		cssProperties,
+		createdAt: new Date().toISOString(),
+		updatedAt: new Date().toISOString(),
 	};
 
 	try {
-		const dataToSave: StorageData = { theme_tweaks: allTweaks };
+		const dataToSave: StorageData = { saved_presets: allPresets };
 
 		if (tabId !== undefined) {
 			dataToSave.last_update_tab_id = tabId;
 		}
 
 		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		logger.info("Storage: Created preset", { name });
 	} catch (err) {
-		logger.warn("Storage write error:", err);
-	}
-};
-
-const savePropertyDebounced = Utils.debounce(
-	(theme: string, propertyName: string, value: string, tabId?: number) => {
-		Storage.saveProperty(theme, propertyName, value, tabId);
-	},
-	500,
-);
-
-/**
- * Deletes a single CSS property for a theme
- */
-const deleteProperty = async (
-	themeName: string,
-	propertyName: string,
-	tabId?: number,
-) => {
-	const allTweaks = await getAllTweaks();
-
-	if (!allTweaks[themeName]?.cssProperties[propertyName]) {
-		logger.warn(
-			"Storage delete property failed. No property found in stored tweaks:",
-			{ themeName, propertyName },
-		);
-		return;
-	}
-
-	logger.info("Storage deleting property:", { themeName, propertyName });
-	delete allTweaks[themeName].cssProperties[propertyName];
-
-	// If no more properties, remove the theme entry entirely
-	if (Object.keys(allTweaks[themeName].cssProperties).length === 0) {
-		delete allTweaks[themeName];
-	}
-
-	try {
-		const dataToSave: StorageData = { theme_tweaks: allTweaks };
-		if (tabId !== undefined) {
-			dataToSave.last_update_tab_id = tabId;
-		}
-		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
-	} catch (err) {
-		logger.error("Storage delete property error:", err);
+		logger.error("Storage: Create preset error:", err);
 		throw err;
 	}
 };
 
 /**
- * Deletes all tweaks for a specific theme
+ * Updates an existing preset
  */
-const deleteTweaks = async (themeName: string, tabId?: number) => {
-	const allTweaks = await getAllTweaks();
-
-	if (allTweaks[themeName]) {
-		delete allTweaks[themeName];
-		try {
-			const dataToSave: StorageData = { theme_tweaks: allTweaks };
-			if (tabId !== undefined) {
-				dataToSave.last_update_tab_id = tabId;
-			}
-			await browser.storage.sync.set(dataToSave as Record<string, unknown>);
-		} catch (err) {
-			logger.error("Storage delete error:", err);
-			throw err;
-		}
-	}
-};
-
-/**
- * Sets the disabled state for a specific theme
- */
-const setDisabled = async (
-	themeName: string,
-	disabled: boolean,
+const updatePreset = async (
+	name: string,
+	cssProperties: Record<string, StoredTweakEntry>,
 	tabId?: number,
 ) => {
-	const allTweaks = await getAllTweaks();
+	const allPresets = await getAllPresets();
 
-	allTweaks[themeName] ??= { disabled: false, cssProperties: {} };
-	allTweaks[themeName].disabled = disabled;
+	if (!allPresets[name]) {
+		throw new Error(`Preset "${name}" does not exist`);
+	}
+
+	allPresets[name] = {
+		...allPresets[name],
+		cssProperties,
+		updatedAt: new Date().toISOString(),
+	};
 
 	try {
-		const dataToSave: StorageData = { theme_tweaks: allTweaks };
+		const dataToSave: StorageData = { saved_presets: allPresets };
 
 		if (tabId !== undefined) {
 			dataToSave.last_update_tab_id = tabId;
 		}
 
 		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		logger.info("Storage: Updated preset", { name });
 	} catch (err) {
-		logger.warn("Storage write error:", err);
+		logger.error("Storage: Update preset error:", err);
+		throw err;
 	}
 };
 
 /**
- * Sets whether a specific property is enabled or disabled
+ * Deletes a preset
  */
-const setPropertyEnabled = async (
-	themeName: string,
-	propertyName: string,
-	enabled: boolean,
-	tabId?: number,
-) => {
-	const allTweaks = await getAllTweaks();
+const deletePreset = async (name: string, tabId?: number) => {
+	const allPresets = await getAllPresets();
 
-	if (!allTweaks[themeName]?.cssProperties[propertyName]) {
-		logger.warn("Cannot toggle non-existent property", {
-			themeName,
-			propertyName,
-		});
+	if (!allPresets[name]) {
+		logger.warn("Storage: Cannot delete non-existent preset", { name });
 		return;
 	}
 
-	// Simply update the enabled flag
-	allTweaks[themeName].cssProperties[propertyName].enabled = enabled;
+	delete allPresets[name];
 
 	try {
-		const dataToSave: StorageData = { theme_tweaks: allTweaks };
-		if (tabId !== undefined) {
-			dataToSave.last_update_tab_id = tabId;
-		}
-
-		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
-	} catch (err) {
-		logger.warn("Storage write error:", err);
-	}
-};
-
-/**
- * Gets the global disabled state
- */
-const getGlobalDisabled = async (): Promise<boolean> => {
-	try {
-		const result = (await browser.storage.sync.get(
-			"global_disabled",
-		)) as StorageData;
-		return result.global_disabled ?? false;
-	} catch (err) {
-		logger.error("Storage read error:", err);
-		return false;
-	}
-};
-
-/**
- * Sets the global disabled state
- */
-const setGlobalDisabled = async (disabled: boolean, tabId?: number) => {
-	try {
-		const dataToSave: StorageData = { global_disabled: disabled };
+		const dataToSave: StorageData = { saved_presets: allPresets };
 
 		if (tabId !== undefined) {
 			dataToSave.last_update_tab_id = tabId;
 		}
 
 		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		logger.info("Storage: Deleted preset", { name });
 	} catch (err) {
-		logger.warn("Storage write error:", err);
+		logger.error("Storage: Delete preset error:", err);
+		throw err;
+	}
+};
+
+/**
+ * Renames a preset
+ */
+const renamePreset = async (
+	oldName: string,
+	newName: string,
+	tabId?: number,
+) => {
+	const allPresets = await getAllPresets();
+
+	if (!allPresets[oldName]) {
+		throw new Error(`Preset "${oldName}" does not exist`);
+	}
+
+	if (allPresets[newName]) {
+		throw new Error(`Preset "${newName}" already exists`);
+	}
+
+	allPresets[newName] = {
+		...allPresets[oldName],
+		name: newName,
+		updatedAt: new Date().toISOString(),
+	};
+
+	delete allPresets[oldName];
+
+	try {
+		const dataToSave: StorageData = { saved_presets: allPresets };
+
+		if (tabId !== undefined) {
+			dataToSave.last_update_tab_id = tabId;
+		}
+
+		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		logger.info("Storage: Renamed preset", { oldName, newName });
+	} catch (err) {
+		logger.error("Storage: Rename preset error:", err);
+		throw err;
 	}
 };
 
 export const Storage = {
-	getTweaks,
-	saveProperty,
-	savePropertyDebounced,
-	deleteProperty,
-	deleteTweaks,
-	setDisabled,
-	setPropertyEnabled,
-	getGlobalDisabled,
-	setGlobalDisabled,
+	// Tweaks toggle
+	getTweaksOn,
+	setTweaksOn,
+
+	// Working state
+	getWorkingTweaks,
+	setWorkingTweaks,
+	saveWorkingProperty,
+	saveWorkingPropertyDebounced,
+	clearWorkingTweaks,
+
+	// Presets
+	getSelectedPreset,
+	setSelectedPreset,
+	getAllPresets,
+	getPreset,
+	createPreset,
+	updatePreset,
+	deletePreset,
+	renamePreset,
 };

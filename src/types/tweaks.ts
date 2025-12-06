@@ -16,10 +16,10 @@ export interface TweakEntry {
 }
 
 /**
- * Runtime theme tweaks (includes computed initialValues)
+ * Runtime working tweaks (includes computed initialValues)
+ * Current state that may have unsaved changes
  */
-export interface ThemeTweaks {
-	disabled: boolean;
+export interface WorkingTweaks {
 	cssProperties: {
 		[propertyName: string]: TweakEntry;
 	};
@@ -35,23 +35,25 @@ export interface StoredTweakEntry {
 }
 
 /**
- * Stored theme tweaks (persisted to browser.storage)
+ * Preset data (persisted to browser.storage)
  */
-export interface StoredThemeTweaks {
-	disabled: boolean;
-	cssProperties: {
-		[propertyName: string]: StoredTweakEntry;
-	};
+export interface PresetData {
+	name: string;
+	cssProperties: Record<string, StoredTweakEntry>;
+	createdAt: string;
+	updatedAt: string;
 }
 
-export type StoredThemeTweaksRecord = Record<string, StoredThemeTweaks>;
-
 /**
- * Storage data structure
+ * Storage data structure (preset-based format)
  */
 export interface StorageData {
-	theme_tweaks?: StoredThemeTweaksRecord;
-	global_disabled?: boolean;
+	working_tweaks?: {
+		cssProperties: Record<string, StoredTweakEntry>;
+	};
+	selected_preset?: string | null;
+	saved_presets?: Record<string, PresetData>;
+	tweaks_on?: boolean;
 	last_update_tab_id?: number;
 }
 
