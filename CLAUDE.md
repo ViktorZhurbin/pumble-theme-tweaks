@@ -4,6 +4,9 @@
 
 - when applying changes, make sure to update CLAUDE.md as needed
 
+## SolidJS
+- Use arrow functions to define components (NOT function notation)
+
 ## CSS
 
 ### General Rules
