@@ -1,8 +1,8 @@
 import { createEffect, createSignal, onCleanup, Show } from "solid-js";
 import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
+import { ResetIconButton } from "../ResetIconButton";
 import styles from "./ResetButton.module.css";
-import { ResetIconButton } from "./ResetIconButton";
 import { useThemeEditorContext } from "./ThemeEditorContext";
 
 export function ResetButton() {

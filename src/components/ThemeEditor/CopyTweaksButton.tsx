@@ -1,6 +1,6 @@
 import { PROPERTIES } from "@/constants/properties";
 import type { WorkingTweaks } from "@/types/tweaks";
-import { CopyButton } from "../CopyButton/CopyButton";
+import { CopyButton } from "../CopyButton";
 import { useThemeEditorContext } from "./ThemeEditorContext";
 
 export const CopyTweaksButton = () => {

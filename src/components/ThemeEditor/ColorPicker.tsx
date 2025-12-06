@@ -2,8 +2,8 @@ import { colord } from "colord";
 import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
+import { ResetIconButton } from "../ResetIconButton";
 import styles from "./ColorPicker.module.css";
-import { ResetIconButton } from "./ResetIconButton";
 import { useThemeEditorContext } from "./ThemeEditorContext";
 
 interface ColorPickerProps {
