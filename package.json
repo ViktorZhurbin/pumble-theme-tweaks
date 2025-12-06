@@ -16,8 +16,11 @@
 		"postinstall": "wxt prepare"
 	},
 	"dependencies": {
+		"@tailwindcss/vite": "^4.1.17",
 		"colord": "^2.9.3",
-		"solid-js": "^1.9.10"
+		"daisyui": "^5.5.8",
+		"solid-js": "^1.9.10",
+		"tailwindcss": "^4.1.17"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.3.6",

@@ -6,7 +6,7 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["**", "!!**/.output", "!!**/.wxt"]
+		"includes": ["**", "!!**/.output", "!!**/.wxt", "!!**/*.css"]
 	},
 	"formatter": {
 		"enabled": true,

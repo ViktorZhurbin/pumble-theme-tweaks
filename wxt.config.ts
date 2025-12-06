@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "wxt";
 import { PUMBLE_URL_PATTERNS } from "./src/constants/pumble-urls";
 
@@ -25,4 +26,7 @@ export default defineConfig({
 			port: 5173,
 		},
 	},
+	vite: () => ({
+		plugins: [tailwindcss()],
+	}),
 });
