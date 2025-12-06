@@ -124,7 +124,7 @@ All colors are defined in `src/entrypoints/popup/styles.css` using HSL format fo
 ### Tech Stack
 - **Framework:** SolidJS
 - **Language:** TypeScript
-- **Extension Framework:** WXT 0.20 (Vite-based cross-browser extension wrapper)
+- **Extension Framework:** WXT (Vite-based cross-browser extension wrapper)
 - **Styling:** CSS Modules with CSS custom properties
 - **Color Manipulation:** colord
 - **Code Quality:** Biome v2
@@ -237,7 +237,7 @@ src/
 **Runtime State** (lives in content script):
 ```typescript
 interface RuntimeState {
-  themeName: string | null;      // "dark" | "light"
+  themeName: string | null;      // "wednesday_dark" | "picklejar_light"
   themeTweaksOn: boolean;        // Extension active for theme
   themeTweaks: ThemeTweaks;      // All properties with values
   isExtensionOff: boolean;       // Global master switch
@@ -321,22 +321,6 @@ await sendMessage("updateProperty", { propertyName, value, enabled });
 
 **WXT Configuration** (`wxt.config.ts`): Defines extension manifest, permissions, and host URLs
 
-**Development vs Production:**
-
-| Feature | Development | Production |
-|---------|-------------|------------|
-| **Hot Reload** | ✓ Yes | ✗ No |
-| **Source Maps** | ✓ Included | ✗ Not included |
-| **Minification** | ✗ Disabled | ✓ Enabled |
-
-**Build Commands:**
-```bash
-npm run dev              # Start dev server (Chrome)
-npm run dev:firefox      # Start dev server (Firefox)
-npm run build            # Production build (Chrome)
-npm run build:firefox    # Production build (Firefox)
-```
-
 
 ## Code Quality & Conventions
 
@@ -365,11 +349,6 @@ npm run dev              # Start dev server
 # Code Quality
 npm run format           # Format code before commit
 npm run compile          # Type-check
-
-# Add new color property
-# 1. Edit src/constants/properties.ts
-# 2. Edit src/constants/derived-colors.ts (if needed)
-# 3. Test in dev server
 ```
 
 ### Key File Locations
@@ -380,14 +359,6 @@ npm run compile          # Type-check
 - **Add properties:** `src/constants/properties.ts`
 - **Add derivations:** `src/constants/derived-colors.ts`
 - **Message protocols:** `src/entrypoints/*/protocol.ts`
-
-### When Things Break
-
-1. **Check browser console** (F12) for errors
-2. **Inspect extension storage** (DevTools → Application → Storage)
-3. **Verify content script is running** (check console on Pumble page)
-4. **Refresh page** after code changes
-5. **Restart dev server** if hot reload fails
 
 ---
 
