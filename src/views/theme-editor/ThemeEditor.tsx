@@ -6,15 +6,15 @@ import { initialState } from "@/entrypoints/content/theme-state";
 import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
 import type { RuntimeState } from "@/types/runtime";
-import { PickersContainer } from "./components/PickersContainer";
-import { PresetSelector } from "./components/PresetSelector";
 import {
 	getContentScriptState,
 	initializeTab,
 	injectContentScript,
 	isConnectionError,
 } from "./helpers";
+import { PresetSelector } from "./presets/PresetSelector";
 import styles from "./ThemeEditor.module.css";
+import { TweaksContainer } from "./tweaks";
 
 export function ThemeEditor() {
 	// Use createStore for runtime state (reactive view of content script state)
@@ -106,7 +106,7 @@ export function ThemeEditor() {
 					<div class={`${styles.tweaksContainer} bg-base-100 rounded-3xl`}>
 						<PresetSelector />
 						<div class="divider" />
-						<PickersContainer />
+						<TweaksContainer />
 					</div>
 				</Show>
 			</div>

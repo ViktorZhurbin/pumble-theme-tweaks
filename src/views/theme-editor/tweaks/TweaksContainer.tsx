@@ -1,10 +1,10 @@
 import { For } from "solid-js";
 import { PROPERTIES } from "@/constants/properties";
 import { ResetButton } from "./ResetButton";
-import { ThemeToggle } from "./ThemeToggle";
 import { TweakEntryRow } from "./TweakEntryRow";
+import { TweaksToggle } from "./TweaksToggle";
 
-export function PickersContainer() {
+export const TweaksContainer = () => {
 	return (
 		<table class="table">
 			<thead>
@@ -15,7 +15,7 @@ export function PickersContainer() {
 					</th>
 					<th></th>
 					<th>
-						<ThemeToggle />
+						<TweaksToggle />
 					</th>
 				</tr>
 			</thead>
@@ -29,4 +29,4 @@ export function PickersContainer() {
 			</tbody>
 		</table>
 	);
-}
+};

@@ -1,7 +1,7 @@
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 
-export function ThemeToggle() {
+export const TweaksToggle = () => {
 	const ctx = useThemeEditorContext();
 
 	const handleChange = (e: Event) => {
@@ -26,4 +26,4 @@ export function ThemeToggle() {
 			onChange={handleChange}
 		/>
 	);
-}
+};
