@@ -21,6 +21,8 @@ export const PresetDropdown = () => {
 
 	const disabled = () => !ctx.tabId() || !ctx.store.tweaksOn;
 
+	// === Export Handlers ===
+
 	const handleExport = () => {
 		const json = getExportJson(ctx.store.workingTweaks);
 
@@ -32,6 +34,8 @@ export const PresetDropdown = () => {
 
 		navigator.clipboard.writeText(script);
 	};
+
+	// === Preset Management ===
 
 	const openDeleteDialog = () => {
 		const presetName = ctx.store.selectedPreset;
@@ -45,7 +49,7 @@ export const PresetDropdown = () => {
 				const currentTabId = ctx.tabId();
 				if (!currentTabId || !presetName) {
 					logger.warn(
-						"PresetActionsDropdown: Cannot delete without tab ID or preset",
+						"PresetDropdown: Cannot delete without tab ID or preset",
 					);
 					return;
 				}
@@ -57,7 +61,7 @@ export const PresetDropdown = () => {
 						currentTabId,
 					);
 				} catch (err) {
-					logger.error("PresetActionsDropdown: Failed to delete preset", err);
+					logger.error("PresetDropdown: Failed to delete preset", err);
 					throw err;
 				}
 			},
@@ -75,13 +79,8 @@ export const PresetDropdown = () => {
 			placeholder: "Enter new name",
 			defaultValue: oldName,
 			confirmText: "Rename",
-			validate: (value) => {
-				if (!value.trim()) return "Preset name cannot be empty";
-				if (value === oldName) return null;
-				if (ctx.store.savedPresets[value])
-					return `Preset "${value}" already exists`;
-				return null;
-			},
+			validate: (value) =>
+				validatePresetName(value, ctx.store.savedPresets, oldName),
 			onConfirm: async (newName) => {
 				if (newName === oldName) return;
 
@@ -92,7 +91,7 @@ export const PresetDropdown = () => {
 						currentTabId,
 					);
 				} catch (err) {
-					logger.error("PresetActionsDropdown: Failed to rename preset", err);
+					logger.error("PresetDropdown: Failed to rename preset", err);
 					throw err;
 				}
 			},
@@ -107,12 +106,7 @@ export const PresetDropdown = () => {
 			title: "Save Preset As",
 			placeholder: "Enter preset name",
 			confirmText: "Save",
-			validate: (value) => {
-				if (!value.trim()) return "Preset name cannot be empty";
-				if (ctx.store.savedPresets[value])
-					return `Preset "${value}" already exists`;
-				return null;
-			},
+			validate: (value) => validatePresetName(value, ctx.store.savedPresets),
 			onConfirm: async (name) => {
 				try {
 					await ContentScript.sendMessage(
@@ -121,12 +115,14 @@ export const PresetDropdown = () => {
 						currentTabId,
 					);
 				} catch (err) {
-					logger.error("Failed to save preset", err);
+					logger.error("PresetDropdown: Failed to save preset", err);
 					throw err;
 				}
 			},
 		});
 	};
+
+	// === Import Handlers ===
 
 	const handleImport = async (value: string) => {
 		const parsed = parseImportJSON(value) as Record<string, string>;
@@ -134,7 +130,7 @@ export const PresetDropdown = () => {
 		try {
 			const currentTabId = ctx.tabId();
 			if (!currentTabId) {
-				logger.warn("PresetActionsDropdown: No tab ID available");
+				logger.warn("PresetDropdown: No tab ID available");
 				return;
 			}
 
@@ -146,17 +142,16 @@ export const PresetDropdown = () => {
 				);
 			}
 
-			logger.debug("PresetActionsDropdown: Import successful", {
+			logger.debug("PresetDropdown: Import successful", {
 				count: Object.keys(parsed).length,
 			});
 		} catch (err) {
-			logger.error("PresetActionsDropdown: Import failed", err);
+			logger.error("PresetDropdown: Import failed", err);
+			throw err;
 		}
 	};
 
 	const openImportDialog = () => {
-		if (disabled()) return;
-
 		importDialog.open({
 			type: "textarea",
 			title: "Import preset",
@@ -167,6 +162,8 @@ export const PresetDropdown = () => {
 			validate: validateImport,
 		});
 	};
+
+	// === Menu Items ===
 
 	const items = (): DropdownItem[] => [
 		{
@@ -217,3 +214,16 @@ export const PresetDropdown = () => {
 		</>
 	);
 };
+
+// === Helpers ===
+
+function validatePresetName(
+	name: string,
+	savedPresets: Record<string, unknown>,
+	existingName?: string,
+): string | null {
+	if (!name.trim()) return "Preset name cannot be empty";
+	if (existingName && name === existingName) return null;
+	if (savedPresets[name]) return `Preset "${name}" already exists`;
+	return null;
+}
