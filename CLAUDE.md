@@ -102,9 +102,11 @@
 |------|---------|----------------|
 | `src/entrypoints/content/theme-state.ts` | Core state manager. Single instance controls all DOM changes, storage sync, and state broadcasting | Adding state logic, changing how tweaks are applied |
 | `src/entrypoints/content/theme-watcher.ts` | MutationObserver watching for theme changes in DOM | Changing theme detection logic |
-| `src/components/ThemeEditor/ThemeEditor.tsx` | Popup UI root. Initializes connection, syncs state, provides context | Changing popup UI structure or initialization |
+| `src/views/theme-editor/ThemeEditor.tsx` | Popup UI root. Initializes connection, syncs state, provides ThemeEditorContext | Changing popup UI structure or initialization |
+| `src/context/ThemeEditorContext.tsx` | SolidJS context providing shared state access (`store`, `setStore`, `tabId`, `isReady`) to all theme editor components | Adding or modifying shared UI state |
 | `src/lib/messages/createMessenger.ts` | Generic type-safe message handler factory | Changing message passing infrastructure |
 | `src/lib/storage.ts` | Storage operations facade. Handles persistence, migration, CRUD | Adding storage operations or changing storage format |
+| `src/lib/import-export.ts` | Import/export utilities for color configurations | Adding import/export functionality |
 | `src/constants/properties.ts` | Defines which CSS properties are customizable. Source of truth for property list | **Adding or removing customizable properties** |
 | `src/constants/derived-colors.ts` | Registry mapping base colors to derived colors with computation functions | Adding automatic color derivations |
 | `wxt.config.ts` | Extension manifest, permissions, URL patterns, dev server config | Changing browser permissions or target URLs |
@@ -200,7 +202,21 @@ await sendMessage("updateProperty", { propertyName, value, enabled });
 - `createSignal` - Simple values: `const [count, setCount] = createSignal(0);` Access with `count()`
 - `createStore` - Nested objects: `setStore("path", "to", "property", value);` Property-level reactivity
 - `createMemo` - Derived values: `const doubled = createMemo(() => count() * 2);` Auto-updates on dependencies
-- **Context** - Use `createContext` for prop drilling avoidance (see `ThemeEditor.tsx`)
+- **Context** - Use `createContext` for prop drilling avoidance (see `src/context/ThemeEditorContext.tsx`)
+
+**Context Pattern in This Project:**
+```typescript
+// Create context (src/context/ThemeEditorContext.tsx)
+const ThemeEditorContext = createContext<ThemeEditorContextValue>();
+
+// Provide context (src/views/theme-editor/ThemeEditor.tsx)
+<ThemeEditorContext.Provider value={{ store, setStore, tabId, isReady }}>
+  {props.children}
+</ThemeEditorContext.Provider>
+
+// Consume context in any child component
+const { store, setStore, tabId, isReady } = useThemeEditorContext();
+```
 
 **Key Conventions:**
 - Signals must be called as functions: `loading()` not `loading`
@@ -211,9 +227,11 @@ await sendMessage("updateProperty", { propertyName, value, enabled });
 
 ## Styling
 
-- **CSS Modules**: Each component has `.module.css` with scoped styles
-- **CSS Variables**: Defined in `src/entrypoints/popup/styles.css` (see color system above)
-- Always use variables for colors, spacing, and design tokens
+- **Primary**: Tailwind CSS + daisyUI component classes
+- **CSS Modules**: Legacy approach, mostly removed (only `ColorPicker.module.css` remains)
+- **CSS Variables**: Defined in `src/entrypoints/popup/styles.css` for root-level design tokens
+- Always prefer Tailwind utility classes over custom CSS
+- Specify individual transition properties (never `transition: all`)
 
 
 ## Build System
@@ -253,9 +271,27 @@ npm run compile          # Type-check
 ### Key File Locations
 
 - **State management:** `src/entrypoints/content/theme-state.ts`
-- **Popup UI root:** `src/components/ThemeEditor/ThemeEditor.tsx`
+- **Popup UI root:** `src/views/theme-editor/ThemeEditor.tsx`
+- **UI Context:** `src/context/ThemeEditorContext.tsx`
 - **Storage operations:** `src/lib/storage.ts`
+- **Import/Export:** `src/lib/import-export.ts`
 - **Add properties:** `src/constants/properties.ts`
 - **Add derivations:** `src/constants/derived-colors.ts`
 - **Message protocols:** `src/entrypoints/*/protocol.ts`
+
+### Directory Organization
+
+```
+src/
+├── components/          # Reusable UI components (Dialog, Dropdown, icons)
+├── context/             # SolidJS context providers
+├── views/               # Feature-specific view components
+│   └── theme-editor/    # Theme editor UI
+│       ├── presets/     # Preset management components
+│       └── tweaks/      # Color picker and tweak components
+├── entrypoints/         # Extension entry points (content, popup, background)
+├── lib/                 # Utility libraries and helpers
+├── constants/           # Configuration constants
+└── types/               # TypeScript type definitions
+```
 
