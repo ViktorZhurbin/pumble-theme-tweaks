@@ -14,7 +14,6 @@ import { PickersContainer } from "./components/PickersContainer";
 import { PresetActionsDropdown } from "./components/PresetActionsDropdown";
 import { PresetSelector } from "./components/PresetSelector";
 import { SavePresetAsButton } from "./components/SavePresetAsButton";
-import { SavePresetAsModal } from "./components/SavePresetAsModal";
 import { SavePresetButton } from "./components/SavePresetButton";
 
 import {
@@ -32,7 +31,6 @@ export function ThemeEditor() {
 	const [tabId, setTabId] = createSignal<number | null>(null);
 	const [error, setError] = createSignal<string | null>(null);
 	const [loading, setLoading] = createSignal(true);
-	const [showSaveAsModal, setShowSaveAsModal] = createSignal(false);
 
 	const isReady = createMemo(() => tabId() !== null && !loading());
 
@@ -124,9 +122,7 @@ export function ThemeEditor() {
 							<PresetSelector />
 							<div class={styles.presetButtons}>
 								<SavePresetButton />
-								<SavePresetAsButton
-									onOpenModal={() => setShowSaveAsModal(true)}
-								/>
+								<SavePresetAsButton />
 								<PresetActionsDropdown />
 							</div>
 						</div>
@@ -147,11 +143,6 @@ export function ThemeEditor() {
 							</div>
 						</div>
 					</div>
-
-					<SavePresetAsModal
-						show={showSaveAsModal()}
-						onClose={() => setShowSaveAsModal(false)}
-					/>
 				</Show>
 			</div>
 		</ThemeEditorContext.Provider>
