@@ -1,24 +1,16 @@
 .colorInput {
-	width: 36px;
-	height: 36px;
-	border: 2px solid var(--color-border-strong);
 	border-radius: 50%;
-	background: none;
 	flex-shrink: 0;
-	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-		border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-		box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-	box-shadow: var(--shadow-md);
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .colorInput:not(:disabled) {
 	cursor: pointer;
-}
 
-.colorInput:hover:not(:disabled) {
-	transform: scale(1.12);
-	border: 2px solid hsl(258, 70%, 65%, 0.5);
-	box-shadow: var(--shadow-purple);
+	&:hover {
+		transform: scale(1.12);
+		border-width: 2px;
+	}
 }
 
 .colorInput:active {

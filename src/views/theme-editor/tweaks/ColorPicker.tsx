@@ -30,7 +30,7 @@ export function ColorPicker(props: {
 	return (
 		<input
 			type="color"
-			class={styles.colorInput}
+			class={`${styles.colorInput} border-2 border-neutral-600 bg-none h-9 w-9`}
 			value={colord(getDisplayValue(tweakEntry())).toHex()}
 			disabled={props.disabled}
 			onInput={handleInput}

@@ -3,7 +3,6 @@ import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
 import { ColorPicker } from "./ColorPicker";
-import styles from "./TweakEntryRow.module.css";
 
 interface TweakEntryRowProps {
 	label: string;
@@ -46,7 +45,8 @@ export function TweakEntryRow(props: TweakEntryRowProps) {
 		);
 	};
 
-	const inactiveClass = () => (disabled() ? styles.inactive : "");
+	const disabledClasses = "opacity-25 pointer-events-none";
+	const inactiveClass = () => (disabled() ? disabledClasses : "");
 
 	return (
 		<tr class="hover:bg-base-300">
@@ -68,7 +68,7 @@ export function TweakEntryRow(props: TweakEntryRowProps) {
 				<ColorPicker disabled={disabled()} propertyName={props.propertyName} />
 			</th>
 
-			<th classList={{ [styles.inactive]: areTweaksOff() }}>
+			<th class={areTweaksOff() ? disabledClasses : ""}>
 				<input
 					type="checkbox"
 					class="checkbox checkbox-primary checkbox-sm"
