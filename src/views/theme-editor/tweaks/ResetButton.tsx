@@ -1,6 +1,6 @@
 import { Show } from "solid-js";
 import { useConfirmDialog } from "@/components/Dialog";
-import { ResetIconButton } from "@/components/ResetIconButton";
+import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 
@@ -47,12 +47,14 @@ export function ResetButton() {
 
 	return (
 		<Show when={hasModifications()}>
-			<ResetIconButton
-				class="btn-xs"
+			<button
+				class="btn btn-xs btn-neutral btn-circle"
 				onClick={openResetDialog}
 				disabled={disabled()}
 				title={disabled() ? "Tweaks disabled" : title}
-			/>
+			>
+				<ResetIcon />
+			</button>
 
 			{resetDialog.Dialog()}
 		</Show>

@@ -1,4 +1,4 @@
-import { ResetIconButton } from "@/components/ResetIconButton";
+import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
@@ -54,12 +54,13 @@ export function TweakEntryRow(props: TweakEntryRowProps) {
 
 			<th class={inactiveClass()}>
 				{isPropertyModified(tweakEntry()) && (
-					<ResetIconButton
-						class={styles.resetButton}
+					<button
+						class="btn btn-sm btn-neutral btn-circle"
 						onClick={handleReset}
 						disabled={disabled()}
-						size={18}
-					/>
+					>
+						<ResetIcon size={18} />
+					</button>
 				)}
 			</th>
 
