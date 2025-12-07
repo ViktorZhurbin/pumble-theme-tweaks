@@ -13,7 +13,6 @@ import {
 	isConnectionError,
 } from "./helpers";
 import { PresetSelector } from "./presets/PresetSelector";
-import styles from "./ThemeEditor.module.css";
 import { TweaksContainer } from "./tweaks";
 
 export function ThemeEditor() {
@@ -89,7 +88,7 @@ export function ThemeEditor() {
 
 	return (
 		<ThemeEditorContext.Provider value={contextValue}>
-			<div class={styles.container}>
+			<div class="flex-col gap-3">
 				<Show when={loading()}>
 					<div class="w-full flex justify-center">
 						<span class="loading loading-dots" />
@@ -97,13 +96,13 @@ export function ThemeEditor() {
 				</Show>
 
 				<Show when={error()}>
-					<p class={`${styles.error} text-error text-wrap text-sm rounded-xl`}>
+					<p class="text-error text-wrap text-sm rounded-xl text-center p-4 bg-red-200 border border-red-500">
 						error()
 					</p>
 				</Show>
 
 				<Show when={isReady() && !error()}>
-					<div class={`${styles.tweaksContainer} bg-base-100 rounded-3xl`}>
+					<div class="flex-col bg-base-100 rounded-3xl border border-neutral-700">
 						<PresetSelector />
 						<div class="divider" />
 						<TweaksContainer />
