@@ -11,7 +11,6 @@ import { CopyTweaksButton } from "./components/CopyTweaksButton";
 import { ImportButton } from "./components/ImportButton";
 import { PickersContainer } from "./components/PickersContainer";
 import { PresetSelector } from "./components/PresetSelector";
-import { SaveButton } from "./components/SaveButton";
 import {
 	getContentScriptState,
 	initializeTab,
@@ -108,12 +107,7 @@ export function ThemeEditor() {
 
 				<Show when={isReady() && !error()}>
 					<div class={`${styles.tweaksContainer} bg-base-100 rounded-3xl`}>
-						<div class={styles.presetSection}>
-							<PresetSelector />
-							<div class={styles.presetButtons}>
-								<SaveButton />
-							</div>
-						</div>
+						<PresetSelector />
 
 						<div class={styles.separator} />
 

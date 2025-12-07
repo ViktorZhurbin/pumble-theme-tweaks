@@ -4,6 +4,7 @@ import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import { PresetActionsDropdown } from "./PresetActionsDropdown";
+import { SaveButton } from "./SaveButton";
 
 export function PresetSelector() {
 	const ctx = useThemeEditorContext();
@@ -63,30 +64,33 @@ export function PresetSelector() {
 
 	return (
 		<>
-			<div class="flex items-baseline gap-2">
-				<fieldset class="fieldset w-full">
+			<div class="w-full px-6 py-4">
+				<fieldset class="fieldset ">
 					<legend class="fieldset-legend">Preset</legend>
-					<select
-						class="select"
-						value={ctx.store.selectedPreset ?? ""}
-						onChange={handleChange}
-						disabled={disabled()}
-					>
-						<option value="">No Preset Selected</option>
-						<For each={presetNames()}>
-							{(presetName) => (
-								<option
-									value={presetName}
-									selected={presetName === ctx.store.selectedPreset}
-								>
-									{presetName}
-								</option>
-							)}
-						</For>
-					</select>
-				</fieldset>
+					<div class="flex items-center gap-2">
+						<select
+							class="select"
+							value={ctx.store.selectedPreset ?? ""}
+							onChange={handleChange}
+							disabled={disabled()}
+						>
+							<option value="">No Preset Selected</option>
+							<For each={presetNames()}>
+								{(presetName) => (
+									<option
+										value={presetName}
+										selected={presetName === ctx.store.selectedPreset}
+									>
+										{presetName}
+									</option>
+								)}
+							</For>
+						</select>
 
-				<PresetActionsDropdown />
+						<SaveButton />
+						<PresetActionsDropdown />
+					</div>
+				</fieldset>
 			</div>
 
 			{confirmDialog.Dialog()}

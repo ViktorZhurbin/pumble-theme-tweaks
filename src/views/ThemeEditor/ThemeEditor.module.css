@@ -68,9 +68,3 @@
 	gap: 12px;
 	padding: var(--spacing-md) var(--spacing-lg);
 }
-
-.presetButtons {
-	display: flex;
-	gap: 8px;
-	align-items: center;
-}

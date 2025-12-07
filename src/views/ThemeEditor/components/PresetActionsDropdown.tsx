@@ -43,7 +43,7 @@ export function PresetActionsDropdown() {
 			</button>
 
 			<ul
-				class="dropdown menu bg-base-100 shadow-sm"
+				class="dropdown dropdown-end menu bg-base-100 shadow-sm"
 				popover="auto"
 				id="preset-actions-popover"
 				style={{ "position-anchor": "--anchor-1" }}
