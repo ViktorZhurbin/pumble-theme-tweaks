@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js";
+import { For } from "solid-js";
 import { useConfirmDialog } from "@/components/Dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
@@ -85,9 +85,6 @@ export function PresetSelector() {
 						</For>
 					</select>
 				</fieldset>
-				<Show when={ctx.store.hasUnsavedChanges}>
-					<span class="status status-info"></span>
-				</Show>
 			</div>
 
 			{confirmDialog.Dialog()}

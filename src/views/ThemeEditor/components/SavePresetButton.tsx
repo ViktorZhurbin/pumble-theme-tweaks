@@ -1,3 +1,4 @@
+import { Show } from "solid-js";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 
@@ -24,13 +25,19 @@ export function SavePresetButton() {
 	};
 
 	return (
-		<button
-			class="btn btn-primary"
-			onClick={handleClick}
-			disabled={disabled()}
-			title={getTitle()}
-		>
-			Save
-		</button>
+		<div class="indicator">
+			<Show when={ctx.store.hasUnsavedChanges}>
+				<span class="indicator-item status status-success status-md"></span>
+			</Show>
+
+			<button
+				class="btn btn-primary"
+				onClick={handleClick}
+				disabled={disabled()}
+				title={getTitle()}
+			>
+				Save
+			</button>
+		</div>
 	);
 }
