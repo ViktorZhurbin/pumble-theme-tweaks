@@ -293,6 +293,12 @@ const renamePreset = async (
 	try {
 		const dataToSave: StorageData = { saved_presets: allPresets };
 
+		// If the renamed preset is currently selected, update selected_preset
+		const currentSelected = await getSelectedPreset();
+		if (currentSelected === oldName) {
+			dataToSave.selected_preset = newName;
+		}
+
 		if (tabId !== undefined) {
 			dataToSave.last_update_tab_id = tabId;
 		}

@@ -114,18 +114,21 @@ All colors are defined in `src/entrypoints/popup/styles.css` using HSL format fo
 **Pumble Tweaks** is a browser extension that enables real-time customization of the Pumble web application's appearance through CSS color property modifications.
 
 ### What It Does
-- Customizes CSS color properties
+- Customizes CSS color properties in real-time
 - Automatically derives related color variants (darker/lighter versions)
-- Per-theme customization (separate settings for dark/light themes)
-- Global enable/disable toggle
+- **Preset-based color management** - save/load/switch between named color schemes
+- **Global tweaks** - color values apply regardless of Pumble theme (color scheme)
+- **Unsaved changes tracking** - visual indicator when working state differs from saved preset
+- Master enable/disable toggle
 - Import/export color configurations
-- Instant live preview with browser storage sync
+- Multi-tab synchronization via browser storage sync
+- Instant live preview with debounced persistence
 
 ### Tech Stack
 - **Framework:** SolidJS
 - **Language:** TypeScript
 - **Extension Framework:** WXT (Vite-based cross-browser extension wrapper)
-- **Styling:** CSS Modules with CSS custom properties
+- **Styling:** Tailwind CSS + daisyUI components, CSS Modules with CSS custom properties
 - **Color Manipulation:** colord
 - **Code Quality:** Biome v2
 
@@ -211,7 +214,7 @@ src/
 
 - **Type-Safe Messaging**: `createMessenger<Protocol>()` factory for strongly-typed communication between extension contexts
 - **Single Source of Truth**: `ThemeState` class in content script owns runtime state, broadcasts changes to popup
-- **Storage Architecture**: Browser sync storage with per-theme customizations, debounced writes (500ms), automatic migration
+- **Preset-Based Storage**: Browser sync storage with named presets (global tweaks independent of Pumble theme), debounced writes (500ms), unsaved changes tracking
 
 ---
 
@@ -237,30 +240,48 @@ src/
 **Runtime State** (lives in content script):
 ```typescript
 interface RuntimeState {
-  themeName: string | null;      // "wednesday_dark" | "picklejar_light"
-  themeTweaksOn: boolean;        // Extension active for theme
-  themeTweaks: ThemeTweaks;      // All properties with values
-  isExtensionOff: boolean;       // Global master switch
+  themeName: string | null;          // "wednesday_dark" | "picklejar_light" (display only)
+  tweaksOn: boolean;                 // Master toggle for all tweaks
+  workingTweaks: WorkingTweaks;      // Current working state (may have unsaved changes)
+  selectedPreset: string | null;     // Currently selected preset (null = no preset)
+  savedPresets: Record<string, PresetData>;  // All saved presets
+  hasUnsavedChanges: boolean;        // Working state differs from selected preset?
 }
 ```
 
 **Storage Format** (`browser.storage.sync`):
 ```typescript
 {
-  theme_tweaks: {
-    [themeName]: {
-      disabled: boolean,
-      cssProperties: { [propertyName]: { value, enabled } }
+  working_tweaks: {                  // Active working state (current unsaved changes)
+    cssProperties: { [propertyName]: { value, enabled } }
+  },
+  selected_preset: string | null,    // Selected preset name
+  saved_presets: {                   // Named presets registry
+    [presetName]: {
+      name: string,
+      cssProperties: { [propertyName]: { value, enabled } },
+      createdAt: string,
+      updatedAt: string
     }
   },
-  global_disabled: boolean
+  tweaks_on: boolean,                // Global master switch
+  last_update_tab_id: number         // For multi-tab sync coordination
 }
 ```
 
+**Key Concepts:**
+- **Global Tweaks**: Color values are NOT tied to Pumble color theme - same colors apply regardless
+- **Working State**: Current unsaved modifications being previewed in real-time
+- **Presets**: Named snapshots of color configurations users can save/load/switch between
+- **Unsaved Changes**: Tracked by comparing working state to selected preset
+
 **Data Flows:**
-- **Color Change**: Popup sends message → Content script applies CSS + derived colors → Broadcasts to popup → Debounced storage write (500ms)
-- **Theme Detection**: Page loads → Read HTML classes for "dark"/"light" → Load saved tweaks → Apply CSS
-- **Multi-Tab Sync**: Change in Tab 1 → Write to `browser.storage.sync` → All tabs receive `onChanged` event → Re-apply tweaks
+- **Color Change**: Popup sends message → Content script applies CSS + derived colors → Updates working state → Broadcasts to popup → Debounced storage write (500ms)
+- **Save Preset**: User clicks Save → Updates selected preset with current working state → Sets `hasUnsavedChanges = false`
+- **Load Preset**: User selects preset → Loads preset values into working state → Applies to DOM → Sets `hasUnsavedChanges = false`
+- **Reset**: User clicks Reset → Clears working state → Deselects preset → Removes all CSS overrides (shows Pumble defaults)
+- **Theme Detection**: Page loads → Detects theme name for display → Does NOT reload tweaks (working state persists)
+- **Multi-Tab Sync**: Change in Tab 1 → Write to `browser.storage.sync` → All tabs receive `onChanged` event → Re-apply working state
 
 ---
 
@@ -360,8 +381,3 @@ npm run compile          # Type-check
 - **Add derivations:** `src/constants/derived-colors.ts`
 - **Message protocols:** `src/entrypoints/*/protocol.ts`
 
----
-
-**Last Updated:** 2025-12-06
-
-This documentation reflects the current architecture of Pumble Tweaks. When making significant architectural changes, please update this file to maintain accuracy across future Claude sessions.

@@ -216,16 +216,7 @@ class ThemeStateManager {
 			presetName: this.currentState.selectedPreset,
 		});
 
-		// Extract stored format (without initialValue)
-		const cssProperties: Record<string, StoredTweakEntry> = {};
-		for (const [key, entry] of Object.entries(
-			this.currentState.workingTweaks.cssProperties,
-		)) {
-			cssProperties[key] = {
-				value: entry.value ?? entry.initialValue,
-				enabled: entry.enabled,
-			};
-		}
+		const cssProperties = this.buildStoredCssProperties();
 
 		await Storage.updatePreset(
 			this.currentState.selectedPreset,
@@ -242,18 +233,7 @@ class ThemeStateManager {
 	async savePresetAs(presetName: string) {
 		logger.info("ThemeState: Saving preset as", { presetName });
 
-		// Extract stored format (without initialValue)
-		const cssProperties: Record<string, StoredTweakEntry> = {};
-		for (const [key, entry] of Object.entries(
-			this.currentState.workingTweaks.cssProperties,
-		)) {
-			if (entry.value !== null) {
-				cssProperties[key] = {
-					value: entry.value,
-					enabled: entry.enabled,
-				};
-			}
-		}
+		const cssProperties = this.buildStoredCssProperties();
 
 		await Storage.createPreset(presetName, cssProperties, this.tabId);
 		await Storage.setSelectedPreset(presetName, this.tabId);
@@ -275,6 +255,22 @@ class ThemeStateManager {
 		}
 
 		// Re-apply will be triggered by storage.onChanged listener
+	}
+
+	/**
+	 * Converts working tweaks to stored format (without initialValue)
+	 */
+	private buildStoredCssProperties(): Record<string, StoredTweakEntry> {
+		const cssProperties: Record<string, StoredTweakEntry> = {};
+		for (const [key, entry] of Object.entries(
+			this.currentState.workingTweaks.cssProperties,
+		)) {
+			cssProperties[key] = {
+				value: entry.value ?? entry.initialValue,
+				enabled: entry.enabled,
+			};
+		}
+		return cssProperties;
 	}
 
 	/**

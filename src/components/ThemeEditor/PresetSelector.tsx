@@ -1,4 +1,5 @@
-import { For, Show } from "solid-js";
+import { For, Show, createSignal } from "solid-js";
+import { Typography } from "@/components/Typography/Typography";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import styles from "./PresetSelector.module.css";
@@ -6,6 +7,9 @@ import { useThemeEditorContext } from "./ThemeEditorContext";
 
 export function PresetSelector() {
 	const ctx = useThemeEditorContext();
+	const [pendingValue, setPendingValue] = createSignal<string | null>(null);
+
+	let confirmDialog!: HTMLDialogElement;
 
 	const disabled = () => !ctx.store.tweaksOn;
 
@@ -19,6 +23,32 @@ export function PresetSelector() {
 			return;
 		}
 
+		// Check for unsaved changes
+		if (ctx.store.hasUnsavedChanges) {
+			// Show confirmation dialog
+			setPendingValue(value);
+			confirmDialog.showModal();
+			// Reset select to current value (will update after confirmation)
+			select.value = ctx.store.selectedPreset ?? "";
+			return;
+		}
+
+		// No unsaved changes, proceed with load
+		await loadPreset(value, currentTabId);
+	};
+
+	const handleConfirmSwitch = async () => {
+		const value = pendingValue();
+		const currentTabId = ctx.tabId();
+
+		if (value === null || !currentTabId) return;
+
+		confirmDialog.close();
+		await loadPreset(value, currentTabId);
+		setPendingValue(null);
+	};
+
+	const loadPreset = async (value: string, currentTabId: number) => {
 		if (value === "") {
 			// User selected "No Preset Selected" - reset working tweaks
 			await ContentScript.sendMessage(
@@ -66,6 +96,27 @@ export function PresetSelector() {
 					<span class="status status-info"></span>
 				</Show>
 			</div>
+
+			{/* Unsaved changes confirmation dialog */}
+			<dialog class="modal" ref={confirmDialog}>
+				<div class="modal-box">
+					<Typography variant="caption">
+						You have unsaved changes. Switch preset anyway?
+					</Typography>
+					<div class="modal-action">
+						<form method="dialog">
+							<button class="btn btn-soft btn-secondary">Cancel</button>
+							<button
+								type="button"
+								class="btn btn-soft btn-primary"
+								onClick={handleConfirmSwitch}
+							>
+								Switch
+							</button>
+						</form>
+					</div>
+				</div>
+			</dialog>
 		</div>
 	);
 }
