@@ -10,9 +10,7 @@ import { CopyScriptButton } from "./components/CopyScriptButton";
 import { CopyTweaksButton } from "./components/CopyTweaksButton";
 import { ImportButton } from "./components/ImportButton";
 import { PickersContainer } from "./components/PickersContainer";
-import { PresetActionsDropdown } from "./components/PresetActionsDropdown";
 import { PresetSelector } from "./components/PresetSelector";
-import { SaveAsButton } from "./components/SaveAsButton";
 import { SaveButton } from "./components/SaveButton";
 import {
 	getContentScriptState,
@@ -114,8 +112,6 @@ export function ThemeEditor() {
 							<PresetSelector />
 							<div class={styles.presetButtons}>
 								<SaveButton />
-								<SaveAsButton />
-								<PresetActionsDropdown />
 							</div>
 						</div>
 

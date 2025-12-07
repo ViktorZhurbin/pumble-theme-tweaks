@@ -4,7 +4,7 @@ import { DialogContent } from "./DialogContent";
 import { DialogHeader } from "./DialogHeader";
 import { DialogWrapper } from "./DialogWrapper";
 
-interface InputDialogProps {
+export interface InputDialogProps {
 	type?: "input" | "textarea";
 	title: string;
 	placeholder?: string;

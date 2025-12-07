@@ -1,37 +1,17 @@
-import { useConfirmDialog, useInputDialog } from "@/components/Dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
-import { ContentScript } from "@/entrypoints/content/messenger";
-import { logger } from "@/lib/logger";
+import {
+	useDeleteDialog,
+	useRenameDialog,
+	useSaveAsDialog,
+} from "./PresetActionsDropdown.hooks";
 
 export function PresetActionsDropdown() {
 	const ctx = useThemeEditorContext();
-	const deleteDialog = useConfirmDialog();
-	const renameDialog = useInputDialog();
+	const deleteDialog = useDeleteDialog();
+	const renameDialog = useRenameDialog();
+	const saveAsDialog = useSaveAsDialog();
 
 	const disabled = () => !ctx.store.tweaksOn || !ctx.store.selectedPreset;
-
-	const handleDelete = async () => {
-		const currentTabId = ctx.tabId();
-		const presetName = ctx.store.selectedPreset;
-
-		if (!currentTabId || !presetName) {
-			logger.warn(
-				"PresetActionsDropdown: Cannot delete without tab ID or preset",
-			);
-			return;
-		}
-
-		try {
-			await ContentScript.sendMessage(
-				"deletePreset",
-				{ presetName },
-				currentTabId,
-			);
-		} catch (err) {
-			logger.error("PresetActionsDropdown: Failed to delete preset", err);
-			throw err; // Re-throw to prevent dialog from closing
-		}
-	};
 
 	const handleExport = () => {
 		const presetName = ctx.store.selectedPreset;
@@ -50,57 +30,10 @@ export function PresetActionsDropdown() {
 		navigator.clipboard.writeText(json);
 	};
 
-	const openDeleteDialog = () => {
-		const presetName = ctx.store.selectedPreset;
-		if (!presetName) return;
-
-		deleteDialog.open({
-			title: `Delete "${presetName}"?`,
-			confirmText: "Delete",
-			confirmType: "error",
-			onConfirm: handleDelete,
-		});
-	};
-
-	const openRenameDialog = () => {
-		const currentTabId = ctx.tabId();
-		const oldName = ctx.store.selectedPreset;
-
-		if (!currentTabId || !oldName) return;
-
-		renameDialog.open({
-			title: `Rename "${oldName}"`,
-			placeholder: "Enter new name",
-			defaultValue: oldName,
-			confirmText: "Rename",
-			validate: (value) => {
-				if (!value.trim()) return "Preset name cannot be empty";
-				if (value === oldName) return null; // Same name, just close
-				if (ctx.store.savedPresets[value])
-					return `Preset "${value}" already exists`;
-				return null;
-			},
-			onConfirm: async (newName) => {
-				if (newName === oldName) return; // No change, just close
-
-				try {
-					await ContentScript.sendMessage(
-						"renamePreset",
-						{ oldName, newName },
-						currentTabId,
-					);
-				} catch (err) {
-					logger.error("PresetActionsDropdown: Failed to rename preset", err);
-					throw err; // Re-throw to prevent dialog from closing
-				}
-			},
-		});
-	};
-
 	return (
 		<div>
 			<button
-				class="btn btn-square btn-soft"
+				class="btn btn-square btn-soft btn-sm"
 				popoverTarget="preset-actions-popover"
 				style={{ "anchor-name": "--anchor-1" }}
 				disabled={disabled()}
@@ -115,19 +48,23 @@ export function PresetActionsDropdown() {
 				id="preset-actions-popover"
 				style={{ "position-anchor": "--anchor-1" }}
 			>
-				<li onClick={openRenameDialog}>
+				<li onClick={renameDialog.open}>
 					<a>Rename</a>
 				</li>
 				<li onClick={handleExport}>
 					<a>Export</a>
 				</li>
-				<li class="text-error" onClick={openDeleteDialog}>
+				<li onClick={saveAsDialog.open}>
+					<a>Save As</a>
+				</li>
+				<li class="text-error" onClick={deleteDialog.open}>
 					<a>Delete</a>
 				</li>
 			</ul>
 
 			{deleteDialog.Dialog()}
 			{renameDialog.Dialog()}
+			{saveAsDialog.Dialog()}
 		</div>
 	);
 }
