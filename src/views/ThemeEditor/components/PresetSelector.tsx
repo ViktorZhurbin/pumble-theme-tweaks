@@ -3,7 +3,6 @@ import { useConfirmDialog } from "@/components/Dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
-import styles from "./PresetSelector.module.css";
 
 export function PresetSelector() {
 	const ctx = useThemeEditorContext();
@@ -62,32 +61,30 @@ export function PresetSelector() {
 	const presetNames = () => Object.keys(ctx.store.savedPresets).sort();
 
 	return (
-		<div class={styles.container}>
-			<div class={styles.selectorWrapper}>
-				<fieldset class="fieldset w-full">
-					<legend class="fieldset-legend">Preset</legend>
-					<select
-						class="select select-sm"
-						value={ctx.store.selectedPreset ?? ""}
-						onChange={handleChange}
-						disabled={disabled()}
-					>
-						<option value="">No Preset Selected</option>
-						<For each={presetNames()}>
-							{(presetName) => (
-								<option
-									value={presetName}
-									selected={presetName === ctx.store.selectedPreset}
-								>
-									{presetName}
-								</option>
-							)}
-						</For>
-					</select>
-				</fieldset>
-			</div>
+		<>
+			<fieldset class="fieldset w-full">
+				<legend class="fieldset-legend">Preset</legend>
+				<select
+					class="select select-sm"
+					value={ctx.store.selectedPreset ?? ""}
+					onChange={handleChange}
+					disabled={disabled()}
+				>
+					<option value="">No Preset Selected</option>
+					<For each={presetNames()}>
+						{(presetName) => (
+							<option
+								value={presetName}
+								selected={presetName === ctx.store.selectedPreset}
+							>
+								{presetName}
+							</option>
+						)}
+					</For>
+				</select>
+			</fieldset>
 
 			{confirmDialog.Dialog()}
-		</div>
+		</>
 	);
 }

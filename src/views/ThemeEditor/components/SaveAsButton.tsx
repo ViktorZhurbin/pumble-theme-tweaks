@@ -44,7 +44,7 @@ export function SaveAsButton() {
 	return (
 		<>
 			<button
-				class="btn btn-secondary"
+				class="btn btn-secondary btn-sm"
 				onClick={openDialog}
 				disabled={disabled()}
 				title={disabled() ? "Enable tweaks to save" : "Save as new preset"}

@@ -31,7 +31,7 @@ export function SaveButton() {
 			</Show>
 
 			<button
-				class="btn btn-primary"
+				class="btn btn-primary btn-sm"
 				onClick={handleClick}
 				disabled={disabled()}
 				title={getTitle()}
