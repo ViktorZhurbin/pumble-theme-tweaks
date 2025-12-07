@@ -2,7 +2,7 @@ import { Show } from "solid-js";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 
-export function SavePresetButton() {
+export function SaveButton() {
 	const ctx = useThemeEditorContext();
 
 	const disabled = () =>

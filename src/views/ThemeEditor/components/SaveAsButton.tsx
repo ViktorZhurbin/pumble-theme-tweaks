@@ -3,7 +3,7 @@ import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 
-export function SavePresetAsButton() {
+export function SaveAsButton() {
 	const ctx = useThemeEditorContext();
 	const inputDialog = useInputDialog();
 

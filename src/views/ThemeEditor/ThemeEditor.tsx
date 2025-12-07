@@ -13,9 +13,8 @@ import { ImportButton } from "./components/ImportButton";
 import { PickersContainer } from "./components/PickersContainer";
 import { PresetActionsDropdown } from "./components/PresetActionsDropdown";
 import { PresetSelector } from "./components/PresetSelector";
-import { SavePresetAsButton } from "./components/SavePresetAsButton";
-import { SavePresetButton } from "./components/SavePresetButton";
-
+import { SaveAsButton } from "./components/SaveAsButton";
+import { SaveButton } from "./components/SaveButton";
 import {
 	getContentScriptState,
 	initializeTab,
@@ -123,8 +122,8 @@ export function ThemeEditor() {
 						<div class={styles.presetSection}>
 							<PresetSelector />
 							<div class={styles.presetButtons}>
-								<SavePresetButton />
-								<SavePresetAsButton />
+								<SaveButton />
+								<SaveAsButton />
 								<PresetActionsDropdown />
 							</div>
 						</div>
