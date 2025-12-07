@@ -13,35 +13,6 @@
 - **Never use `transition: all`** - always specify individual properties (e.g., `transition: background 0.2s ease, opacity 0.2s ease`)
 - Use Tailwind's and daisyUI classes
 
-### Color System
-All colors are defined in `src/entrypoints/popup/styles.css` using HSL format for easy adjustment.
-
-**Border Colors:**
-- `--color-border-subtle`: 4% white opacity
-- `--color-border-light`: 8% white opacity
-- `--color-border-medium`: 10% white opacity
-- `--color-border-strong`: 12% white opacity
-
-**Usage Examples:**
-```css
-/* ✓ CORRECT - use variables */
-.button {
-  background: var(--color-primary);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border-medium);
-  box-shadow: var(--shadow-purple);
-}
-
-/* ✗ WRONG - hard-coded colors */
-.button {
-  background: #a78bfa;
-  color: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-```
-
-##
-
 # Pumble Tweaks - Architecture
 
 > Concise architectural reference for the Pumble Tweaks browser extension.
