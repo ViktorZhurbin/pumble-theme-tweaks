@@ -11,7 +11,7 @@ import {
 } from "@/lib/import-export";
 import { logger } from "@/lib/logger";
 
-export function PresetActionsDropdown() {
+export const PresetDropdown = () => {
 	const ctx = useThemeEditorContext();
 
 	const deleteDialog = useConfirmDialog();
@@ -216,4 +216,4 @@ export function PresetActionsDropdown() {
 			{importDialog.Dialog()}
 		</>
 	);
-}
+};

@@ -3,7 +3,7 @@ import { useConfirmDialog } from "@/components/Dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
-import { PresetActionsDropdown } from "./PresetActionsDropdown";
+import { PresetDropdown } from "./PresetDropdown";
 import { SaveButton } from "./SaveButton";
 
 export function PresetSelector() {
@@ -88,7 +88,7 @@ export function PresetSelector() {
 						</select>
 
 						<SaveButton />
-						<PresetActionsDropdown />
+						<PresetDropdown />
 					</div>
 				</fieldset>
 			</div>
