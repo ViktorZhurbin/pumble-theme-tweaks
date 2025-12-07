@@ -6,9 +6,6 @@ import { initialState } from "@/entrypoints/content/theme-state";
 import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
 import type { RuntimeState } from "@/types/runtime";
-import { CopyScriptButton } from "./components/CopyScriptButton";
-import { CopyTweaksButton } from "./components/CopyTweaksButton";
-import { ImportButton } from "./components/ImportButton";
 import { PickersContainer } from "./components/PickersContainer";
 import { PresetSelector } from "./components/PresetSelector";
 import {
@@ -108,22 +105,8 @@ export function ThemeEditor() {
 				<Show when={isReady() && !error()}>
 					<div class={`${styles.tweaksContainer} bg-base-100 rounded-3xl`}>
 						<PresetSelector />
-
-						<div class={styles.separator} />
-
-						<div class={styles.controlsContainer}>
-							<PickersContainer />
-
-							<div class={styles.separator} />
-
-							<div class={styles.actionsContainer}>
-								<div class={styles.copyButtonsWrapper}>
-									<CopyTweaksButton />
-									<CopyScriptButton />
-								</div>
-								<ImportButton />
-							</div>
-						</div>
+						<div class="divider" />
+						<PickersContainer />
 					</div>
 				</Show>
 			</div>
