@@ -1,5 +1,5 @@
+import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
-import { useThemeEditorContext } from "./ThemeEditorContext";
 
 export function SavePresetButton() {
 	const ctx = useThemeEditorContext();

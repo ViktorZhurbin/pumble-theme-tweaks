@@ -1,28 +1,29 @@
 import { createMemo, createSignal, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { Typography } from "@/components/Typography/Typography";
+import { ThemeEditorContext } from "@/context/ThemeEditorContext";
 import { Background } from "@/entrypoints/background/messenger";
 import { initialState } from "@/entrypoints/content/theme-state";
 import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
 import type { RuntimeState } from "@/types/runtime";
-import { CopyScriptButton } from "./CopyScriptButton";
-import { CopyTweaksButton } from "./CopyTweaksButton";
-import { ImportButton } from "./ImportButton";
-import { PickersContainer } from "./PickersContainer";
-import { PresetActionsDropdown } from "./PresetActionsDropdown";
-import { PresetSelector } from "./PresetSelector";
-import { SavePresetAsButton } from "./SavePresetAsButton";
-import { SavePresetAsModal } from "./SavePresetAsModal";
-import { SavePresetButton } from "./SavePresetButton";
+import { CopyScriptButton } from "./components/CopyScriptButton";
+import { CopyTweaksButton } from "./components/CopyTweaksButton";
+import { ImportButton } from "./components/ImportButton";
+import { PickersContainer } from "./components/PickersContainer";
+import { PresetActionsDropdown } from "./components/PresetActionsDropdown";
+import { PresetSelector } from "./components/PresetSelector";
+import { SavePresetAsButton } from "./components/SavePresetAsButton";
+import { SavePresetAsModal } from "./components/SavePresetAsModal";
+import { SavePresetButton } from "./components/SavePresetButton";
+
 import {
 	getContentScriptState,
 	initializeTab,
 	injectContentScript,
 	isConnectionError,
-} from "./ThemeEditor.helpers";
+} from "./helpers";
 import styles from "./ThemeEditor.module.css";
-import { ThemeEditorContext } from "./ThemeEditorContext";
 
 export function ThemeEditor() {
 	// Use createStore for runtime state (reactive view of content script state)

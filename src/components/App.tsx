@@ -1,4 +1,4 @@
-import { ThemeEditor } from "./ThemeEditor/ThemeEditor";
+import { ThemeEditor } from "@/views/ThemeEditor/ThemeEditor";
 
 export function App() {
 	return <ThemeEditor />;

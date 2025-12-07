@@ -1,8 +1,8 @@
+import { CopyButton } from "@/components/CopyButton";
 import { DERIVED_COLORS } from "@/constants/derived-colors";
 import { PROPERTIES } from "@/constants/properties";
+import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import type { WorkingTweaks } from "@/types/tweaks";
-import { CopyButton } from "../CopyButton";
-import { useThemeEditorContext } from "./ThemeEditorContext";
 
 export const CopyScriptButton = () => {
 	const ctx = useThemeEditorContext();

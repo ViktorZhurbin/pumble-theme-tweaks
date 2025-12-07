@@ -1,4 +1,4 @@
-import { useThemeEditorContext } from "./ThemeEditorContext";
+import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 
 interface SavePresetAsButtonProps {
 	onOpenModal: () => void;

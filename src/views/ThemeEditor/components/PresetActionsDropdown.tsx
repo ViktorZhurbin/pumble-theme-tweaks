@@ -1,9 +1,9 @@
 import { createSignal } from "solid-js";
 import { Typography } from "@/components/Typography/Typography";
+import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import styles from "./PresetActionsDropdown.module.css";
-import { useThemeEditorContext } from "./ThemeEditorContext";
 
 export function PresetActionsDropdown() {
 	const ctx = useThemeEditorContext();
@@ -69,7 +69,9 @@ export function PresetActionsDropdown() {
 		const trimmedNewName = newName().trim();
 
 		if (!currentTabId || !oldName) {
-			logger.warn("PresetActionsDropdown: Cannot rename without tab ID or preset");
+			logger.warn(
+				"PresetActionsDropdown: Cannot rename without tab ID or preset",
+			);
 			return;
 		}
 

@@ -1,9 +1,9 @@
 import { createSignal, onMount, Show } from "solid-js";
 import { Typography } from "@/components/Typography/Typography";
+import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import styles from "./SavePresetAsModal.module.css";
-import { useThemeEditorContext } from "./ThemeEditorContext";
 
 interface SavePresetAsModalProps {
 	show: boolean;

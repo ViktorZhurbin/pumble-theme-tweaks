@@ -1,10 +1,10 @@
 import { colord } from "colord";
 import { createSignal } from "solid-js";
 import { Typography } from "@/components/Typography/Typography";
+import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import styles from "./ImportButton.module.css";
-import { useThemeEditorContext } from "./ThemeEditorContext";
 
 const ERROR_MESSAGES = {
 	EMPTY: "Please paste JSON with valid theme variables to import",
