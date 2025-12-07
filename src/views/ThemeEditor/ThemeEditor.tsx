@@ -99,7 +99,9 @@ export function ThemeEditor() {
 		<ThemeEditorContext.Provider value={contextValue}>
 			<div class={styles.container}>
 				<Show when={loading()}>
-					<Typography as="p">Loading...</Typography>
+					<div class="w-full flex justify-center">
+						<span class="loading loading-dots" />
+					</div>
 				</Show>
 
 				<Show when={error()}>
