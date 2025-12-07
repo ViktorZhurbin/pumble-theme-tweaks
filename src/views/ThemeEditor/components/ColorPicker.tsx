@@ -1,24 +1,18 @@
 import { colord } from "colord";
-import { ResetIconButton } from "@/components/ResetIconButton";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
 import styles from "./ColorPicker.module.css";
 
-interface ColorPickerProps {
-	label: string;
+export function ColorPicker(props: {
 	propertyName: string;
-}
-
-export function ColorPicker(props: ColorPickerProps) {
+	disabled: boolean;
+}) {
 	const ctx = useThemeEditorContext();
 
 	// Derive from context instead of props
 	const tweakEntry = () =>
 		ctx.store.workingTweaks?.cssProperties[props.propertyName];
-
-	const areTweaksOff = () => !ctx.store.tweaksOn;
-	const disabled = () => areTweaksOff() || !tweakEntry()?.enabled;
 
 	const handleInput = (e: Event) => {
 		const value = (e.target as HTMLInputElement).value;
@@ -33,85 +27,14 @@ export function ColorPicker(props: ColorPickerProps) {
 		);
 	};
 
-	const handleReset = (e: MouseEvent) => {
-		e.preventDefault();
-		const currentTabId = ctx.tabId();
-		const entry = tweakEntry();
-		if (!currentTabId || !entry) return;
-
-		// Reset to initial value by updating working property
-		ContentScript.sendMessage(
-			"updateWorkingProperty",
-			{ propertyName: props.propertyName, value: entry.initialValue },
-			currentTabId,
-		);
-	};
-
-	const handleToggle = (e: Event) => {
-		const enabled = (e.target as HTMLInputElement).checked;
-		const currentTabId = ctx.tabId();
-		if (!currentTabId) return;
-
-		ContentScript.sendMessage(
-			"toggleWorkingProperty",
-			{ propertyName: props.propertyName, enabled },
-			currentTabId,
-		);
-	};
-
 	return (
-		<>
-			{/* Label cell */}
-			<p
-				class={`${styles.labelCell} text-sm`}
-				classList={{ [styles.inactive]: disabled() }}
-			>
-				{props.label}
-			</p>
-
-			{/* Reset button cell */}
-			<div
-				class={styles.resetCell}
-				classList={{ [styles.inactive]: disabled() }}
-			>
-				{isPropertyModified(tweakEntry()) && (
-					<ResetIconButton
-						class={styles.resetButton}
-						onClick={handleReset}
-						disabled={disabled()}
-						size={18}
-					/>
-				)}
-			</div>
-
-			{/* Color input cell */}
-			<div
-				class={styles.colorCell}
-				classList={{ [styles.inactive]: disabled() }}
-			>
-				<input
-					type="color"
-					value={colord(getDisplayValue(tweakEntry())).toHex()}
-					disabled={disabled()}
-					onInput={handleInput}
-				/>
-			</div>
-
-			{/* Toggle checkbox cell */}
-			<div
-				class={styles.toggleCell}
-				classList={{ [styles.inactive]: areTweaksOff() }}
-			>
-				<input
-					type="checkbox"
-					class="checkbox checkbox-neutral"
-					checked={tweakEntry()?.enabled ?? true}
-					disabled={areTweaksOff()}
-					onChange={handleToggle}
-					title="Enable this color tweak"
-				/>
-			</div>
-		</>
+		<input
+			type="color"
+			class={styles.colorInput}
+			value={colord(getDisplayValue(tweakEntry())).toHex()}
+			disabled={props.disabled}
+			onInput={handleInput}
+		/>
 	);
 }
 
@@ -125,13 +48,4 @@ function getDisplayValue(entry: TweakEntry | undefined): string {
 	return entry.enabled && entry.value !== null
 		? entry.value
 		: entry.initialValue;
-}
-
-/**
- * Checks if a property has been modified from its initial value
- */
-function isPropertyModified(entry: TweakEntry | undefined): boolean {
-	if (!entry) return false;
-
-	return entry.value !== null && entry.value !== entry.initialValue;
 }

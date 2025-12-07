@@ -1,29 +1,32 @@
 import { For } from "solid-js";
 import { PROPERTIES } from "@/constants/properties";
-import { ColorPicker } from "./ColorPicker";
-import styles from "./PickersContainer.module.css";
 import { ResetButton } from "./ResetButton";
 import { ThemeToggle } from "./ThemeToggle";
+import { TweakEntryRow } from "./TweakEntryRow";
 
 export function PickersContainer() {
 	return (
-		<div class={styles.container}>
-			{/* Header row */}
-			<div class={styles.headerCell} />
-			<div class={styles.headerCell}>
-				<ResetButton />
-			</div>
-			<div class={styles.headerCell} />
-			<div class={styles.headerCell}>
-				<ThemeToggle />
-			</div>
+		<table class="table">
+			<thead>
+				<tr>
+					<th></th>
+					<th>
+						<ResetButton />
+					</th>
+					<th></th>
+					<th>
+						<ThemeToggle />
+					</th>
+				</tr>
+			</thead>
 
-			{/* Picker rows */}
-			<For each={PROPERTIES}>
-				{({ label, propertyName }) => (
-					<ColorPicker label={label} propertyName={propertyName} />
-				)}
-			</For>
-		</div>
+			<tbody>
+				<For each={PROPERTIES}>
+					{({ label, propertyName }) => (
+						<TweakEntryRow label={label} propertyName={propertyName} />
+					)}
+				</For>
+			</tbody>
+		</table>
 	);
 }

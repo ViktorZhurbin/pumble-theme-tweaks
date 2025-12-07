@@ -19,7 +19,7 @@ export function ThemeToggle() {
 	return (
 		<input
 			type="checkbox"
-			class="checkbox checkbox-primary"
+			class="checkbox checkbox-primary checkbox-sm"
 			title="Toggle all"
 			disabled={false}
 			checked={ctx.store.tweaksOn}
