@@ -17,7 +17,9 @@ export function Dropdown(props: DropdownProps) {
 		}
 	};
 
-	const position = () => props.position ?? "end";
+	const positionX = () => props.positionX ?? "start";
+	const position = () => props.position ?? "bottom";
+
 	const menuWidth = () => props.menuWidth ?? "w-36";
 
 	return (
@@ -34,7 +36,7 @@ export function Dropdown(props: DropdownProps) {
 
 			<ul
 				ref={popoverRef}
-				class={`dropdown dropdown-${position()} menu bg-base-100 shadow-sm rounded-box ${menuWidth()} ${props.menuClass ?? ""}`.trim()}
+				class={`dropdown dropdown-${position()} dropdown-${positionX()} menu bg-base-100 shadow-sm ${menuWidth()} ${props.menuClass ?? ""}`.trim()}
 				popover="auto"
 				id={popoverId}
 				style={{ "position-anchor": anchorName }}

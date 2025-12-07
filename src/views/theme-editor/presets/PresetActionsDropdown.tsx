@@ -207,7 +207,7 @@ export function PresetActionsDropdown() {
 					disabled: disabled(),
 				}}
 				items={items()}
-				position="end"
+				positionX="end"
 			/>
 
 			{deleteDialog.Dialog()}

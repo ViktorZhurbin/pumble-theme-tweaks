@@ -28,7 +28,8 @@ export interface DropdownProps {
 	/** Trigger button configuration */
 	trigger: DropdownTrigger;
 	/** Popover position relative to trigger */
-	position?: "end" | "start";
+	positionX?: "end" | "start" | "center";
+	position?: "top" | "bottom" | "left" | "right";
 	/** Additional CSS classes for the menu */
 	menuClass?: string;
 	/** Fixed width for the menu (e.g., "w-36", "w-48") */
