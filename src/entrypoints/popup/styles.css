@@ -8,10 +8,6 @@
 	font-weight: 400;
 	font-size: 16px;
 
-	--radius-sm: 8px;
-	--radius-md: 14px;
-	--radius-lg: 24px;
-
 	/* Border colors */
 	--color-border-subtle: hsl(0, 0%, 100%, 0.04);
 	--color-border-light: hsl(0, 0%, 100%, 0.08);

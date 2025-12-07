@@ -103,11 +103,13 @@ export function ThemeEditor() {
 				</Show>
 
 				<Show when={error()}>
-					<p class={`${styles.error} text-error text-wrap text-sm`}>error()</p>
+					<p class={`${styles.error} text-error text-wrap text-sm rounded-xl`}>
+						error()
+					</p>
 				</Show>
 
 				<Show when={isReady() && !error()}>
-					<div class={`${styles.tweaksContainer} bg-base-100`}>
+					<div class={`${styles.tweaksContainer} bg-base-100 rounded-3xl`}>
 						<div class={styles.presetSection}>
 							<PresetSelector />
 							<div class={styles.presetButtons}>
