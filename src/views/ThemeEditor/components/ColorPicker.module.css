@@ -1,5 +1,6 @@
 .labelCell {
 	--padding-block: var(--spacing-lg);
+	--picker-background: var(--overlay-white-subtle);
 
 	font-weight: 600;
 	display: flex;
@@ -7,9 +8,7 @@
 	background: var(--picker-background);
 	padding: var(--padding-block) var(--picker-padding-inline);
 	border-bottom: var(--picker-border);
-	transition:
-		background 0.25s ease,
-		opacity 0.25s ease;
+	transition: background 0.25s ease, opacity 0.25s ease;
 }
 
 .labelCell.inactive {
@@ -31,9 +30,7 @@
 	background: var(--picker-background);
 	padding: var(--padding-block) 0;
 	border-bottom: var(--picker-border);
-	transition:
-		background 0.25s ease,
-		opacity 0.25s ease;
+	transition: background 0.25s ease, opacity 0.25s ease;
 }
 
 .resetCell.inactive,
@@ -51,8 +48,7 @@
 	border-radius: 50%;
 	background: none;
 	flex-shrink: 0;
-	transition:
-		transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+	transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
 		border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
 		box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 	box-shadow: var(--shadow-md);

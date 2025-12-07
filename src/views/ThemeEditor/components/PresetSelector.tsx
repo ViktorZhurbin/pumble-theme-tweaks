@@ -65,7 +65,7 @@ export function PresetSelector() {
 			<fieldset class="fieldset w-full">
 				<legend class="fieldset-legend">Preset</legend>
 				<select
-					class="select select-sm"
+					class="select"
 					value={ctx.store.selectedPreset ?? ""}
 					onChange={handleChange}
 					disabled={disabled()}

@@ -1,6 +1,5 @@
 import { colord } from "colord";
 import { ResetIconButton } from "@/components/ResetIconButton";
-import { Typography } from "@/components/Typography/Typography";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
@@ -63,12 +62,12 @@ export function ColorPicker(props: ColorPickerProps) {
 	return (
 		<>
 			{/* Label cell */}
-			<Typography
-				class={styles.labelCell}
+			<p
+				class={`${styles.labelCell} text-sm`}
 				classList={{ [styles.inactive]: disabled() }}
 			>
 				{props.label}
-			</Typography>
+			</p>
 
 			{/* Reset button cell */}
 			<div

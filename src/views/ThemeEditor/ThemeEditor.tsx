@@ -1,6 +1,5 @@
 import { createMemo, createSignal, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { Typography } from "@/components/Typography/Typography";
 import { ThemeEditorContext } from "@/context/ThemeEditorContext";
 import { Background } from "@/entrypoints/background/messenger";
 import { initialState } from "@/entrypoints/content/theme-state";
@@ -104,21 +103,11 @@ export function ThemeEditor() {
 				</Show>
 
 				<Show when={error()}>
-					<Typography as="p" class={styles.error}>
-						{error()}
-					</Typography>
+					<p class={`${styles.error} text-error text-wrap text-sm`}>error()</p>
 				</Show>
 
 				<Show when={isReady() && !error()}>
-					<div class={styles.tweaksContainer}>
-						<Show when={store.themeName}>
-							{(themeName) => (
-								<Typography as="p" variant="caption" class={styles.themeName}>
-									THEME: {themeName()}
-								</Typography>
-							)}
-						</Show>
-
+					<div class={`${styles.tweaksContainer} bg-base-100`}>
 						<div class={styles.presetSection}>
 							<PresetSelector />
 							<div class={styles.presetButtons}>

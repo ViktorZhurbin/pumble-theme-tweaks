@@ -11,57 +11,16 @@
 
 ### General Rules
 - **Never use `transition: all`** - always specify individual properties (e.g., `transition: background 0.2s ease, opacity 0.2s ease`)
-- **Never set font-size in CSS** - use the Typography component with appropriate variants (`caption`, `default`, `body`, `title`, etc.)
-- **Use px for all sizing/spacing** - only Typography component uses rem internally
-- **Always use CSS variables** for colors - never use hard-coded hex, rgb, or rgba values
-- **Always use HSL format** for all colors - `hsl(hue, saturation%, lightness%)`
+- Use Tailwind's and daisyUI classes
 
 ### Color System
 All colors are defined in `src/entrypoints/popup/styles.css` using HSL format for easy adjustment.
-
-**Accent Colors:**
-- `--color-accent-purple`: Primary purple (258, 70%, 55%)
-- `--color-accent-purple-hover`: Hover state (258, 70%, 60%)
-- `--color-accent-purple-light`: Lighter variant (258, 70%, 65%)
-- `--color-accent-blue`: Blue accent (213, 70%, 60%)
-- `--color-accent-teal`: Teal accent (172, 60%, 45%)
-- `--color-accent-red`: Red accent (0, 80%, 60%)
-
-**Semantic Colors:**
-- `--color-primary`: Main brand color (purple)
-- `--color-primary-hover`: Primary hover state
-- `--color-error`: Error states (red)
-- `--color-error-hover`: Error hover state
-
-**Text Colors:**
-- `--color-text-primary`: Main text (92% lightness)
-- `--color-text-secondary`: Secondary text (85% lightness)
-- `--color-text-tertiary`: Tertiary text (50% lightness)
-- `--color-text-disabled`: Disabled text (30% lightness)
-- `--color-text-placeholder`: Placeholder text (55% lightness)
 
 **Border Colors:**
 - `--color-border-subtle`: 4% white opacity
 - `--color-border-light`: 8% white opacity
 - `--color-border-medium`: 10% white opacity
 - `--color-border-strong`: 12% white opacity
-
-**Shadows:**
-- `--shadow-sm`: Small shadow for subtle elevation
-- `--shadow-md`: Medium shadow for cards
-- `--shadow-lg`: Large shadow for modals
-- `--shadow-purple`: Purple accent shadow
-- `--shadow-purple-hover`: Purple hover shadow
-- `--shadow-blue`: Blue accent shadow
-- `--shadow-teal`: Teal accent shadow
-- `--shadow-red`: Red accent shadow
-
-**Overlays:**
-- `--overlay-white-subtle`: 1.5% white
-- `--overlay-white-light`: 6% white
-- `--overlay-white-medium`: 8% white
-- `--overlay-black-subtle`: 8% black
-- `--overlay-black-medium`: 25% black
 
 **Usage Examples:**
 ```css
@@ -80,13 +39,6 @@ All colors are defined in `src/entrypoints/popup/styles.css` using HSL format fo
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 ```
-
-## Typography Component
-- Use `<Typography variant="caption">` for small text (0.8125rem)
-- Use `<Typography>` or `<Typography variant="default">` for normal text (0.875rem)
-- Use `<Typography variant="body">` for body text (1rem)
-- Never pass `variant="default"` - it's the default value
-- Wrap button text, labels, and UI text in Typography components
 
 ##
 
@@ -164,51 +116,6 @@ All colors are defined in `src/entrypoints/popup/styles.css` using HSL format fo
    - Runs in extension service worker context
    - Routes messages between popup and content
    - Updates extension badge (ON/OFF indicator)
-
-### Folder Structure
-
-```
-src/
-├── entrypoints/              # Extension entry points
-│   ├── popup/                # Popup UI (color picker interface)
-│   │   └── main.tsx
-│   ├── content/              # Content script (injected into Pumble)
-│   │   ├── index.ts          # Main content script entry
-│   │   ├── protocol.ts       # Message types TO content script
-│   │   ├── messenger.ts      # Message handler setup
-│   │   ├── theme-state.ts    # Core state manager & DOM controller
-│   │   ├── theme-watcher.ts  # MutationObserver for theme changes
-│   │   └── dom-utils.ts      # DOM manipulation utilities
-│   └── background/           # Background service worker
-│       ├── index.ts          # Badge updates & message routing
-│       ├── protocol.ts       # Message types FROM background
-│       └── messenger.ts      # Message handler setup
-├── components/               # SolidJS reusable components
-│   ├── App.tsx              # Root component
-│   ├── ThemeEditor/         # Main UI orchestrator
-│   ├── Button/              # Reusable button component
-│   ├── Checkbox/            # Toggle checkbox component
-│   ├── Typography/          # Text component with variants
-│   └── CopyButton/          # Base copy-to-clipboard component
-├── lib/                     # Shared utilities
-│   ├── messages/            # Type-safe messaging
-│   ├── storage.ts           # Browser storage operations
-│   ├── color-derivation.ts  # Derived color generation
-│   ├── utils.ts             # debounce, wait helpers
-│   ├── logger.ts            # Debug logging
-│   ├── browser-utils.ts     # Browser API wrappers
-│   └── url.ts               # URL utilities
-├── types/                   # TypeScript interfaces
-│   ├── tweaks.ts            # Color tweak data structures
-│   └── runtime.ts           # Runtime state types
-├── constants/               # Configuration
-│   ├── properties.ts        # Customizable CSS properties
-│   ├── derived-colors.ts    # Color derivation rules
-│   └── pumble-urls.ts       # Target URLs
-└── app/
-    ├── index.tsx            # Popup HTML renderer
-    └── shared.css           # Global styles & CSS variables
-```
 
 ### Core Patterns
 

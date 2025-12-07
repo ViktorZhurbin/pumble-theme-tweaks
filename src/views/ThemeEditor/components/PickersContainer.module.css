@@ -5,7 +5,6 @@
 
 	/* Picker component shared values */
 	--picker-padding-inline: var(--spacing-md);
-	--picker-background: var(--overlay-white-subtle);
 	--picker-border: 1px solid var(--color-border-subtle);
 }
 

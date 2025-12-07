@@ -13,7 +13,6 @@
 }
 
 .error {
-	color: var(--color-error);
 	text-align: center;
 	padding: var(--spacing-md);
 	border-radius: var(--radius-md);
@@ -26,21 +25,10 @@
 	flex-direction: column;
 	border-radius: var(--radius-lg);
 	border: 1px solid var(--color-border-light);
-	background: var(--color-bg-secondary);
 	padding: 0;
 	overflow: hidden;
 	box-shadow: var(--shadow-sm), var(--shadow-lg);
 	backdrop-filter: blur(20px);
-}
-
-.themeName {
-	letter-spacing: 0.08em;
-	font-weight: 700;
-	color: var(--color-text-accent);
-	text-align: start;
-	padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md)
-		var(--spacing-lg);
-	text-transform: uppercase;
 }
 
 .controlsContainer {
