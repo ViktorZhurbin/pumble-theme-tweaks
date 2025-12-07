@@ -1,5 +1,5 @@
-import { createSignal, For, Show } from "solid-js";
-import { Typography } from "@/components/Typography/Typography";
+import { For, Show } from "solid-js";
+import { useConfirmDialog } from "@/components/Dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
@@ -7,9 +7,7 @@ import styles from "./PresetSelector.module.css";
 
 export function PresetSelector() {
 	const ctx = useThemeEditorContext();
-	const [pendingValue, setPendingValue] = createSignal<string | null>(null);
-
-	let confirmDialog!: HTMLDialogElement;
+	const confirmDialog = useConfirmDialog();
 
 	const disabled = () => !ctx.store.tweaksOn;
 
@@ -26,8 +24,14 @@ export function PresetSelector() {
 		// Check for unsaved changes
 		if (ctx.store.hasUnsavedChanges) {
 			// Show confirmation dialog
-			setPendingValue(value);
-			confirmDialog.showModal();
+			confirmDialog.open({
+				title: "You have unsaved changes. Switch preset anyway?",
+				confirmText: "Switch",
+				confirmType: "primary",
+				onConfirm: async () => {
+					await loadPreset(value, currentTabId);
+				},
+			});
 			// Reset select to current value (will update after confirmation)
 			select.value = ctx.store.selectedPreset ?? "";
 			return;
@@ -35,17 +39,6 @@ export function PresetSelector() {
 
 		// No unsaved changes, proceed with load
 		await loadPreset(value, currentTabId);
-	};
-
-	const handleConfirmSwitch = async () => {
-		const value = pendingValue();
-		const currentTabId = ctx.tabId();
-
-		if (value === null || !currentTabId) return;
-
-		confirmDialog.close();
-		await loadPreset(value, currentTabId);
-		setPendingValue(null);
 	};
 
 	const loadPreset = async (value: string, currentTabId: number) => {
@@ -97,26 +90,7 @@ export function PresetSelector() {
 				</Show>
 			</div>
 
-			{/* Unsaved changes confirmation dialog */}
-			<dialog class="modal" ref={confirmDialog}>
-				<div class="modal-box">
-					<Typography variant="caption">
-						You have unsaved changes. Switch preset anyway?
-					</Typography>
-					<div class="modal-action">
-						<form method="dialog">
-							<button class="btn btn-soft btn-secondary">Cancel</button>
-							<button
-								type="button"
-								class="btn btn-soft btn-primary"
-								onClick={handleConfirmSwitch}
-							>
-								Switch
-							</button>
-						</form>
-					</div>
-				</div>
-			</dialog>
+			{confirmDialog.Dialog()}
 		</div>
 	);
 }
