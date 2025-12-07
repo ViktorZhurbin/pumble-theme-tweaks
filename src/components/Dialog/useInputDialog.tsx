@@ -1,10 +1,11 @@
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { DialogActions } from "./DialogActions";
 import { DialogContent } from "./DialogContent";
 import { DialogHeader } from "./DialogHeader";
 import { DialogWrapper } from "./DialogWrapper";
 
 interface InputDialogProps {
+	type?: "input" | "textarea";
 	title: string;
 	placeholder?: string;
 	defaultValue?: string;
@@ -17,6 +18,7 @@ interface InputDialogProps {
 export function useInputDialog() {
 	let dialogRef!: HTMLDialogElement;
 	let inputRef: HTMLInputElement | undefined;
+	let textAreaRef: HTMLTextAreaElement | undefined;
 	const [props, setProps] = createSignal<InputDialogProps | null>(null);
 	const [value, setValue] = createSignal("");
 	const [error, setError] = createSignal<string | null>(null);
@@ -85,17 +87,33 @@ export function useInputDialog() {
 				<DialogHeader>{currentProps.title}</DialogHeader>
 
 				<DialogContent>
-					<input
-						ref={inputRef}
-						type="text"
-						class="input input-primary w-full mt-4"
-						placeholder={currentProps.placeholder ?? ""}
-						value={value()}
-						onInput={handleInput}
-						onKeyDown={handleKeyDown}
-					/>
+					<fieldset class="fieldset mt-2">
+						<Show when={!currentProps.type || currentProps.type === "input"}>
+							<input
+								ref={inputRef}
+								type="text"
+								class="input input-primary w-full"
+								placeholder={currentProps.placeholder ?? ""}
+								value={value()}
+								onInput={handleInput}
+								onKeyDown={handleKeyDown}
+							/>
+						</Show>
+						<Show when={currentProps.type === "textarea"}>
+							<textarea
+								ref={textAreaRef}
+								class="textarea h-40"
+								placeholder={currentProps.placeholder ?? ""}
+								value={value()}
+								onInput={handleInput}
+								onKeyDown={handleKeyDown}
+							/>
+						</Show>
 
-					{error() && <p class="text-error mt-2">{error()}</p>}
+						<Show when={error()}>
+							<p class="label text-error text-wrap">{error()}</p>
+						</Show>
+					</fieldset>
 				</DialogContent>
 
 				<DialogActions

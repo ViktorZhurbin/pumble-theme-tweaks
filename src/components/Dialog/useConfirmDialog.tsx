@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, type JSX } from "solid-js";
 import { DialogActions } from "./DialogActions";
 import { DialogContent } from "./DialogContent";
 import { DialogHeader } from "./DialogHeader";
@@ -6,9 +6,10 @@ import { DialogWrapper } from "./DialogWrapper";
 
 interface ConfirmDialogProps {
 	title: string;
-	message?: string;
+	content?: JSX.Element;
 	confirmText?: string;
 	cancelText?: string;
+	confirmDisabled?: boolean;
 	confirmType?: "primary" | "error" | "secondary";
 	onConfirm: () => void | Promise<void>;
 }
@@ -48,13 +49,14 @@ export function useConfirmDialog() {
 			<DialogWrapper ref={dialogRef}>
 				<DialogHeader>{currentProps.title}</DialogHeader>
 
-				{currentProps.message && (
-					<DialogContent>{currentProps.message}</DialogContent>
+				{currentProps.content && (
+					<DialogContent>{currentProps.content}</DialogContent>
 				)}
 
 				<DialogActions
 					confirmText={currentProps.confirmText}
 					confirmType={currentProps.confirmType}
+					confirmDisabled={currentProps.confirmDisabled}
 					onConfirm={handleConfirm}
 				/>
 			</DialogWrapper>

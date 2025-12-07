@@ -1,64 +1,52 @@
 import { colord } from "colord";
 import { createSignal } from "solid-js";
-import { Typography } from "@/components/Typography/Typography";
+import { useInputDialog } from "@/components/Dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
-import styles from "./ImportButton.module.css";
 
 const ERROR_MESSAGES = {
 	EMPTY: "Please paste JSON with valid theme variables to import",
 	INVALID_FORMAT:
-		"Invalid theme format. Expected JSON object with property names and hex colors",
+		"Invalid theme format. Expected JSON object with property names and colors",
 	GENERIC: "Failed to import theme colors",
 };
 
 export function ImportButton() {
 	const ctx = useThemeEditorContext();
-	const [showImport, setShowImport] = createSignal(false);
-	const [importValue, setImportValue] = createSignal("");
-	const [error, setError] = createSignal<string | null>(null);
 	const [importing, setImporting] = createSignal(false);
 
 	const disabled = () => !ctx.store.tweaksOn;
 
-	const handleClick = () => {
-		if (disabled()) return;
-		setShowImport(true);
-		setImportValue("");
-		setError(null);
-	};
+	const importDialog = useInputDialog();
 
-	const handleCancel = () => {
-		setShowImport(false);
-		setImportValue("");
-		setError(null);
-	};
-
-	const handleImport = async () => {
-		const input = importValue().trim();
+	const validate = (value: string) => {
+		const input = value.trim();
 
 		// Validate empty input
 		if (!input) {
-			setError(ERROR_MESSAGES.EMPTY);
-			return;
+			return ERROR_MESSAGES.EMPTY;
 		}
 
 		// Parse and validate
 		const parsed = parseImportJSON(input);
 		if (!parsed) {
-			setError(ERROR_MESSAGES.INVALID_FORMAT);
-			return;
+			return ERROR_MESSAGES.INVALID_FORMAT;
 		}
 
 		// Validate at least one property
 		if (Object.keys(parsed).length === 0) {
-			setError(ERROR_MESSAGES.EMPTY);
-			return;
+			return ERROR_MESSAGES.EMPTY;
 		}
 
+		return null;
+	};
+
+	const handleImport = async (value: string) => {
+		// already validated
+		const parsed = parseImportJSON(value) as Record<string, string>;
+
 		setImporting(true);
-		setError(null);
 
 		try {
 			const currentTabId = ctx.tabId();
@@ -66,10 +54,6 @@ export function ImportButton() {
 				logger.warn("ImportButton: No tab ID available");
 				return;
 			}
-
-			// Close modal and reset state
-			setShowImport(false);
-			setImportValue("");
 
 			// Import by updating each property individually
 			for (const [propertyName, value] of Object.entries(parsed)) {
@@ -84,60 +68,39 @@ export function ImportButton() {
 				count: Object.keys(parsed).length,
 			});
 		} catch (err) {
-			setError(ERROR_MESSAGES.GENERIC);
 			logger.error("ImportButton: Import failed", err);
 		} finally {
 			setImporting(false);
 		}
 	};
 
+	const openImportDialog = () => {
+		if (disabled()) return;
+
+		importDialog.open({
+			type: "textarea",
+			title: "Import preset",
+			placeholder:
+				'Paste theme JSON (e.g., {"--palette-primary-main":"#FF5733"})',
+			confirmText: importing() ? "Importing..." : "Import",
+			onConfirm: handleImport,
+			validate,
+		});
+	};
+
 	return (
-		<div class={styles.container}>
-			{!showImport() ? (
-				<button
-					class={`${styles.importBtn} btn btn-outline btn-wide`}
-					onClick={handleClick}
-					disabled={disabled()}
-					title={disabled() ? "Enable tweaks to import" : "Import theme colors"}
-				>
-					Import
-				</button>
-			) : (
-				<div class={styles.importContainer}>
-					<textarea
-						class={styles.textarea}
-						placeholder='Paste theme JSON (e.g., {"--palette-primary-main":"#FF5733"})'
-						value={importValue()}
-						onInput={(e) => {
-							setImportValue(e.currentTarget.value);
-							setError(null);
-						}}
-						autofocus
-					/>
-					<div class={styles.buttons}>
-						<button
-							class="btn btn-soft"
-							onClick={handleCancel}
-							disabled={importing()}
-						>
-							Cancel
-						</button>
-						<button
-							class="btn btn-primary"
-							onClick={handleImport}
-							disabled={importing()}
-						>
-							{importing() ? "Importing..." : "Import"}
-						</button>
-					</div>
-					{error() && (
-						<Typography variant="caption" class={styles.error}>
-							{error()}
-						</Typography>
-					)}
-				</div>
-			)}
-		</div>
+		<>
+			<button
+				class="btn btn-outline btn-wide"
+				onClick={openImportDialog}
+				disabled={disabled()}
+				title={disabled() ? "Enable tweaks to import" : "Import theme colors"}
+			>
+				Import
+			</button>
+
+			{importDialog.Dialog()}
+		</>
 	);
 }
 
@@ -164,7 +127,7 @@ function parseImportJSON(input: string): Record<string, string> | null {
 				typeof value !== "string" ||
 				!colord(value).isValid()
 			) {
-				return null;
+				delete parsed[key];
 			}
 		}
 
