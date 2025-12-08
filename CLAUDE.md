@@ -304,6 +304,26 @@ const name = await dialogs.input({
 });
 ```
 
+### Notification System
+Location: `src/components/notification/`
+
+Fire-and-forget toast notifications with auto-dismiss (5s default). Bottom-right positioning, supports stacking.
+
+```typescript
+const notifications = useNotifications();
+
+// Show notifications (auto-dismiss after 5 seconds)
+notifications.success("Preset copied to clipboard!");
+notifications.error("Failed to save preset");
+notifications.info("Loading data...");
+notifications.warning("Unsaved changes");
+
+// Custom duration (milliseconds)
+notifications.success("Message", 3000);
+```
+
+**Pattern**: Follows DialogProvider architecture (context provider + hook). Unlike dialogs, notifications are non-blocking and don't return promises.
+
 ### Dropdown Component
 Location: `src/components/Dropdown/`
 

@@ -1,10 +1,13 @@
 import { ThemeEditor } from "@/views/theme-editor/ThemeEditor";
 import { DialogProvider } from "./dialog";
+import { NotificationProvider } from "./notification";
 
 export const App = () => {
 	return (
 		<DialogProvider>
-			<ThemeEditor />
+			<NotificationProvider>
+				<ThemeEditor />
+			</NotificationProvider>
 		</DialogProvider>
 	);
 };

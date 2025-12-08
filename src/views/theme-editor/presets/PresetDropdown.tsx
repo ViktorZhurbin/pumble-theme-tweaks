@@ -1,6 +1,7 @@
 import type { DropdownItem } from "@/components/Dropdown";
 import { Dropdown } from "@/components/Dropdown";
 import { useDialogs } from "@/components/dialog";
+import { useNotifications } from "@/components/notification";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import {
@@ -16,6 +17,7 @@ import { useHandleSaveAs } from "./useHandleSaveAs";
 export const PresetDropdown = () => {
 	const ctx = useThemeEditorContext();
 	const dialogs = useDialogs();
+	const notifications = useNotifications();
 
 	const disabled = () => !ctx.tabId() || !ctx.store.tweaksOn;
 
@@ -25,12 +27,17 @@ export const PresetDropdown = () => {
 		const json = getExportJson(ctx.store.workingTweaks);
 
 		navigator.clipboard.writeText(json);
+		notifications.success("Preset copied to clipboard. You can share it now!");
 	};
 
 	const handleCopyScript = () => {
 		const script = getScriptString(ctx.store.workingTweaks);
 
 		navigator.clipboard.writeText(script);
+		notifications.success(
+			"Script copied to clipboard! Paste and run it in the DevTools console of Pumble desktop app",
+			7000,
+		);
 	};
 
 	// === Preset Management ===
@@ -154,7 +161,7 @@ export const PresetDropdown = () => {
 		// Import/Export
 		{
 			type: "item",
-			label: "Copy",
+			label: "Share",
 			onClick: handleExport,
 		},
 		{
