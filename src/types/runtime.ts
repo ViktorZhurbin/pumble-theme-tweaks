@@ -6,7 +6,6 @@ import type { WorkingTweaks } from "./tweaks";
  * This is the single source of truth for theme tweaks state
  */
 export interface RuntimeState {
-	themeName: string | null; // Pumble theme (for display only)
 	tweaksOn: boolean; // Are tweaks enabled?
 	workingTweaks: WorkingTweaks; // Current working state (may have unsaved changes)
 	selectedPreset: string | null; // Selected preset name (null = no preset selected)

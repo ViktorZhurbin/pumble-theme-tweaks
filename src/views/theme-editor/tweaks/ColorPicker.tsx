@@ -18,7 +18,7 @@ export const ColorPicker = (props: {
 		const value = (e.target as HTMLInputElement).value;
 		const currentTabId = ctx.tabId();
 
-		if (!currentTabId || !ctx.store.themeName) return;
+		if (!ctx.isReady() || !currentTabId) return;
 
 		ContentScript.sendMessage(
 			"updateWorkingProperty",

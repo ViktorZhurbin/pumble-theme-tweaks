@@ -8,7 +8,6 @@ import { Background } from "../background/messenger";
 import { DomUtils } from "./dom-utils";
 
 const initialState: RuntimeState = {
-	themeName: null,
 	tweaksOn: true,
 	workingTweaks: { cssProperties: {} },
 	selectedPreset: null,
@@ -59,7 +58,6 @@ class ThemeStateManager {
 		const storedWorkingTweaks = await Storage.getWorkingTweaks();
 		const selectedPreset = await Storage.getSelectedPreset();
 		const savedPresets = await Storage.getAllPresets();
-		const themeName = DomUtils.getCurrentTheme();
 
 		// Clear DOM first
 		DomUtils.resetCSSTweaks();
@@ -90,7 +88,6 @@ class ThemeStateManager {
 
 		// Update state
 		this.currentState = {
-			themeName,
 			tweaksOn,
 			workingTweaks,
 			selectedPreset,
@@ -157,22 +154,6 @@ class ThemeStateManager {
 		};
 
 		// Broadcast
-		Background.sendMessage("stateChanged", {
-			state: this.currentState,
-			tabId: this.tabId,
-		});
-	}
-
-	/**
-	 * Updates the detected Pumble theme (for display only)
-	 * Does NOT reload tweaks
-	 */
-	updateDetectedTheme(themeName: string) {
-		logger.debug("ThemeState: Theme detected", { themeName });
-
-		this.currentState.themeName = themeName;
-
-		// Broadcast (working tweaks stay the same)
 		Background.sendMessage("stateChanged", {
 			state: this.currentState,
 			tabId: this.tabId,

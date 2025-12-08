@@ -147,7 +147,7 @@ interface RuntimeState {
 - **Save Preset**: Updates selected preset → `hasUnsavedChanges = false`
 - **Load Preset**: Loads into working state → Applies to DOM → `hasUnsavedChanges = false`
 - **Reset**: Context-aware (revert to preset OR clear to defaults)
-- **Theme Detection**: Updates display name only - tweaks persist
+- **Theme Detection**: Auto-disables tweaks when Pumble theme changes
 - **Multi-Tab Sync**: Write to storage → All tabs receive `onChanged` → Re-apply
 
 ---
