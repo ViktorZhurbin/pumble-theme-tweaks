@@ -11,7 +11,7 @@ export const Dropdown = (props: DropdownProps) => {
 	let popoverRef!: HTMLUListElement;
 
 	const handleItemClick = (item: DropdownItem) => {
-		if (!item.disabled) {
+		if (item.type === "item" && !item.disabled) {
 			item.onClick();
 			popoverRef.hidePopover();
 		}
@@ -39,17 +39,23 @@ export const Dropdown = (props: DropdownProps) => {
 				style={{ "position-anchor": anchorName }}
 			>
 				<For each={props.items}>
-					{(item) => (
-						<li
-							classList={{
-								"menu-disabled": item.disabled ?? false,
-								"text-error": item.variant === "error" && !item.disabled,
-							}}
-							onClick={() => handleItemClick(item)}
-						>
-							<button disabled={item.disabled}>{item.label}</button>
-						</li>
-					)}
+					{(item) => {
+						if (item.type === "divider") {
+							return <span class="divider m-0" />;
+						}
+
+						return (
+							<li
+								classList={{
+									"menu-disabled": item.disabled ?? false,
+									"text-error": item.variant === "error" && !item.disabled,
+								}}
+								onClick={() => handleItemClick(item)}
+							>
+								<button disabled={item.disabled}>{item.label}</button>
+							</li>
+						);
+					}}
 				</For>
 			</ul>
 		</div>

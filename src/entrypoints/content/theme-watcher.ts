@@ -20,6 +20,8 @@ export const watchThemeChanges = (): MutationObserver => {
 
 			if (newTheme) {
 				ThemeState.updateDetectedTheme(newTheme);
+				// Auto-disable tweaks so user can see the actual Pumble theme
+				ThemeState.setTweaksOn(false);
 			}
 		}
 	});

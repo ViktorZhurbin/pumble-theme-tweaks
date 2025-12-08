@@ -208,6 +208,9 @@ await sendMessage("updateProperty", { propertyName, value, enabled });
 - `createSignal` - Simple values: `const [count, setCount] = createSignal(0);` Access with `count()`
 - `createStore` - Nested objects: `setStore("path", "to", "property", value);` Property-level reactivity
 - `createMemo` - Derived values: `const doubled = createMemo(() => count() * 2);` Auto-updates on dependencies
+  - **When to use**: Only for expensive computations or when value is used as dependency in other computations
+  - **When NOT to use**: Simple store property access is already reactive - no memo needed
+  - Example: `const isModified = () => ctx.store.value !== baseValue;` (✅ reactive, no memo needed)
 - **Context** - Use `createContext` for prop drilling avoidance (see `src/context/ThemeEditorContext.tsx`)
 
 **Context Pattern in This Project:**
@@ -229,6 +232,10 @@ const { store, setStore, tabId, isReady } = useThemeEditorContext();
 - Signals must be called as functions: `loading()` not `loading`
 - Use `class` not `className` for JSX attributes
 - Store updates via path notation, never direct mutation
+- **Naming**: Only use "use" prefix for context hooks (e.g., `useThemeEditorContext()`), not for regular helper functions
+  - ✅ `const ctx = useThemeEditorContext();` (context hook)
+  - ✅ `function getBaseValue(...) { ... }` (helper function)
+  - ❌ `function useIsPropertyModified(...) { ... }` (not a context hook, don't use "use" prefix)
 
 ---
 

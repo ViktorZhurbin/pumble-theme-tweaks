@@ -1,6 +1,8 @@
 import type { JSX } from "solid-js";
 
-export interface DropdownItem {
+export interface DropdownMenuItem {
+	/** Type discriminator */
+	type: "item";
 	/** Label text for the menu item */
 	label: string;
 	/** Click handler for the item */
@@ -10,6 +12,13 @@ export interface DropdownItem {
 	/** Visual variant - "error" for destructive actions */
 	variant?: "default" | "error";
 }
+
+export interface DropdownDivider {
+	/** Type discriminator */
+	type: "divider";
+}
+
+export type DropdownItem = DropdownMenuItem | DropdownDivider;
 
 export interface DropdownTrigger {
 	/** Content inside the trigger button (text or JSX) */

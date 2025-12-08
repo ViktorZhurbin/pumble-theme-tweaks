@@ -4,7 +4,6 @@ import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import { PresetDropdown } from "./PresetDropdown";
-import { SaveButton } from "./SaveButton";
 
 export const PresetSelector = () => {
 	const ctx = useThemeEditorContext();
@@ -65,33 +64,32 @@ export const PresetSelector = () => {
 	const presetNames = () => Object.keys(ctx.store.savedPresets).sort();
 
 	return (
-		<div class="w-full px-6 py-4">
-			<fieldset class="fieldset ">
-				<legend class="fieldset-legend">Preset</legend>
-				<div class="flex items-center gap-2">
-					<select
-						class="select bg-base-300"
-						value={ctx.store.selectedPreset ?? ""}
-						onChange={handleChange}
-						disabled={disabled()}
-					>
-						<option value="">No Preset Selected</option>
-						<For each={presetNames()}>
-							{(presetName) => (
-								<option
-									value={presetName}
-									selected={presetName === ctx.store.selectedPreset}
-								>
-									{presetName}
-								</option>
-							)}
-						</For>
-					</select>
+		<fieldset class="fieldset ">
+			<legend class="fieldset-legend">Preset</legend>
+			<div class="flex items-center gap-2">
+				<select
+					class="select bg-base-300"
+					value={ctx.store.selectedPreset ?? ""}
+					onChange={handleChange}
+					disabled={disabled()}
+				>
+					<option value="" class="opacity-50">
+						None
+					</option>
+					<For each={presetNames()}>
+						{(presetName) => (
+							<option
+								value={presetName}
+								selected={presetName === ctx.store.selectedPreset}
+							>
+								{presetName}
+							</option>
+						)}
+					</For>
+				</select>
 
-					<SaveButton />
-					<PresetDropdown />
-				</div>
-			</fieldset>
-		</div>
+				<PresetDropdown />
+			</div>
+		</fieldset>
 	);
 };

@@ -12,7 +12,7 @@ import {
 	injectContentScript,
 	isConnectionError,
 } from "./helpers";
-import { PresetSelector } from "./presets/PresetSelector";
+import { PresetsContainer } from "./presets";
 import { TweaksContainer } from "./tweaks";
 
 export const ThemeEditor = () => {
@@ -103,8 +103,8 @@ export const ThemeEditor = () => {
 
 				<Show when={isReady() && !error()}>
 					<div class="flex-col bg-base-100 rounded-3xl border border-neutral-700">
-						<PresetSelector />
-						<div class="divider" />
+						<PresetsContainer />
+						<div class="divider my-1" />
 						<TweaksContainer />
 					</div>
 				</Show>

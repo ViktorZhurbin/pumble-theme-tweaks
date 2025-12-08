@@ -1,7 +1,7 @@
 import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
-import type { TweakEntry } from "@/types/tweaks";
+import type { StoredPreset } from "@/types/storage";
 import { ColorPicker } from "./ColorPicker";
 
 interface TweakEntryRowProps {
@@ -19,16 +19,41 @@ export const TweakEntryRow = (props: TweakEntryRowProps) => {
 	const areTweaksOff = () => !ctx.store.tweaksOn;
 	const disabled = () => areTweaksOff() || !tweakEntry()?.enabled;
 
+	const baseValue = () =>
+		getBaseValue(
+			props.propertyName,
+			ctx.store.selectedPreset,
+			ctx.store.savedPresets,
+			tweakEntry()?.initialValue,
+		);
+
+	const isModified = () => {
+		const workingTweak = tweakEntry();
+		if (!workingTweak) return false;
+
+		return workingTweak.value !== null && workingTweak.value !== baseValue();
+	};
+
+	const getResetTooltip = () => {
+		if (areTweaksOff()) return "Enable tweaks to reset";
+		if (!tweakEntry()?.enabled) return "Enable this property to reset";
+		if (!isModified()) {
+			return "No changes to reset";
+		}
+		return ctx.store.selectedPreset
+			? "Reset to saved preset value"
+			: "Reset to Pumble default";
+	};
+
 	const handleReset = (e: MouseEvent) => {
 		e.preventDefault();
 		const currentTabId = ctx.tabId();
-		const entry = tweakEntry();
-		if (!currentTabId || !entry) return;
+		const workingTweak = tweakEntry();
+		if (!currentTabId || !workingTweak) return;
 
-		// Reset to initial value by updating working property
 		ContentScript.sendMessage(
 			"updateWorkingProperty",
-			{ propertyName: props.propertyName, value: entry.initialValue },
+			{ propertyName: props.propertyName, value: baseValue() },
 			currentTabId,
 		);
 	};
@@ -53,15 +78,14 @@ export const TweakEntryRow = (props: TweakEntryRowProps) => {
 			<td class={`${inactiveClass()}`.trim()}>{props.label}</td>
 
 			<td class={inactiveClass()}>
-				{isPropertyModified(tweakEntry()) && (
-					<button
-						class="btn btn-sm btn-neutral btn-circle"
-						onClick={handleReset}
-						disabled={disabled()}
-					>
-						<ResetIcon size={18} />
-					</button>
-				)}
+				<button
+					class="btn btn-xs btn-ghost btn-circle"
+					onClick={handleReset}
+					disabled={disabled() || !isModified()}
+					title={getResetTooltip()}
+				>
+					<ResetIcon size={16} />
+				</button>
 			</td>
 
 			<td class={inactiveClass()}>
@@ -83,10 +107,21 @@ export const TweakEntryRow = (props: TweakEntryRowProps) => {
 };
 
 /**
- * Checks if a property has been modified from its initial value
+ * Helper: Gets the base value for a property (preset value if selected, otherwise Pumble's initial value)
+ * This is the value that "reset" will revert to and what we compare against to determine if modified.
  */
-function isPropertyModified(entry: TweakEntry | undefined): boolean {
-	if (!entry) return false;
+function getBaseValue(
+	propertyName: string,
+	selectedPreset: string | null,
+	savedPresets: Record<string, StoredPreset>,
+	initialValue: string,
+): string {
+	if (!selectedPreset) {
+		// No preset selected - base is Pumble's original value
+		return initialValue;
+	}
 
-	return entry.value !== null && entry.value !== entry.initialValue;
+	// Get value from saved preset (fallback to initial if not in preset)
+	const savedTweak = savedPresets[selectedPreset]?.cssProperties[propertyName];
+	return savedTweak?.value ?? initialValue;
 }

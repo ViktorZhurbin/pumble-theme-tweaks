@@ -1,4 +1,3 @@
-import { Show } from "solid-js";
 import { useDialogs } from "@/components/dialog";
 import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
@@ -8,36 +7,34 @@ export const ResetButton = () => {
 	const ctx = useThemeEditorContext();
 	const dialogs = useDialogs();
 
-	const hasModifications = () => {
-		const properties = Object.values(
-			ctx.store.workingTweaks?.cssProperties ?? {},
-		);
-
-		return properties.some(
-			(prop) => prop.value !== null && prop.value !== prop.initialValue,
-		);
-	};
-
-	const disabled = () => !ctx.store.tweaksOn;
-
 	const handleConfirm = () => {
 		const currentTabId = ctx.tabId();
-
 		if (!currentTabId) return;
 
-		// Optimistic update for responsive UI
-		ctx.setStore("workingTweaks", { cssProperties: {} });
-		ctx.setStore("selectedPreset", null);
-		ctx.setStore("hasUnsavedChanges", false);
-
-		ContentScript.sendMessage("resetWorkingTweaks", undefined, currentTabId);
+		// Context-aware reset: reload preset if selected, otherwise clear
+		if (ctx.store.selectedPreset) {
+			// Reload the selected preset (revert to saved values)
+			ContentScript.sendMessage(
+				"loadPreset",
+				{ presetName: ctx.store.selectedPreset },
+				currentTabId,
+			);
+		} else {
+			// No preset selected - clear everything (Pumble defaults)
+			ContentScript.sendMessage("resetWorkingTweaks", undefined, currentTabId);
+		}
 	};
 
-	const title = "Reset theme to defaults";
+	const getTitle = () => {
+		if (ctx.store.selectedPreset) {
+			return `Reset to "${ctx.store.selectedPreset}" preset values`;
+		}
+		return "Reset all colors to Pumble defaults";
+	};
 
 	const handleReset = async () => {
 		const confirmed = await dialogs.confirm({
-			title,
+			title: getTitle(),
 			confirmText: "Reset",
 			confirmType: "error",
 		});
@@ -47,16 +44,20 @@ export const ResetButton = () => {
 		}
 	};
 
+	const getTooltip = () => {
+		if (!ctx.store.tweaksOn) return "Enable tweaks to reset colors";
+		if (!ctx.store.hasUnsavedChanges) return "No changes to reset";
+		return getTitle();
+	};
+
 	return (
-		<Show when={hasModifications()}>
-			<button
-				class="btn btn-xs btn-neutral btn-circle"
-				onClick={handleReset}
-				disabled={disabled()}
-				title={disabled() ? "Tweaks disabled" : title}
-			>
-				<ResetIcon />
-			</button>
-		</Show>
+		<button
+			class="btn btn-xs btn-ghost btn-circle"
+			onClick={handleReset}
+			disabled={!ctx.store.tweaksOn || !ctx.store.hasUnsavedChanges}
+			title={getTooltip()}
+		>
+			<ResetIcon />
+		</button>
 	);
 };

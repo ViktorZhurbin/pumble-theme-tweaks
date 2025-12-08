@@ -160,28 +160,39 @@ export const PresetDropdown = () => {
 	// === Menu Items ===
 
 	const items = (): DropdownItem[] => [
+		// Preset Management
 		{
-			label: "Rename",
-			onClick: handleRename,
-			disabled: !ctx.store.selectedPreset,
-		},
-		{
-			label: "Copy",
-			onClick: handleExport,
-		},
-		{
-			label: "Copy Script",
-			onClick: handleCopyScript,
-		},
-		{
-			label: "Import",
-			onClick: handleImportDialog,
-		},
-		{
+			type: "item",
 			label: "Save As",
 			onClick: handleSaveAs,
 		},
 		{
+			type: "item",
+			label: "Rename",
+			onClick: handleRename,
+			disabled: !ctx.store.selectedPreset,
+		},
+		{ type: "divider" },
+		// Import/Export
+		{
+			type: "item",
+			label: "Copy",
+			onClick: handleExport,
+		},
+		{
+			type: "item",
+			label: "Copy Script",
+			onClick: handleCopyScript,
+		},
+		{
+			type: "item",
+			label: "Import",
+			onClick: handleImportDialog,
+		},
+		{ type: "divider" },
+		// Destructive Actions
+		{
+			type: "item",
 			label: "Delete",
 			onClick: handleDelete,
 			disabled: !ctx.store.selectedPreset,
