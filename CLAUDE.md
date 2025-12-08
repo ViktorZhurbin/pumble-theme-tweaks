@@ -1,65 +1,80 @@
-# Instructions
+# Pumble Tweaks - Development Guide
 
-## General
-
-- when applying changes, make sure to update CLAUDE.md as needed
-
-## SolidJS
-- Use arrow functions to define components (NOT function notation)
-
-## CSS
-
-### General Rules
-- **Never use `transition: all`** - always specify individual properties (e.g., `transition: background 0.2s ease, opacity 0.2s ease`)
-- Use Tailwind's and daisyUI classes
-
-# Pumble Tweaks - Architecture
-
-> Concise architectural reference for the Pumble Tweaks browser extension.
+> Quick reference for AI assistants working on the Pumble Tweaks browser extension.
 
 ## Table of Contents
 
-1. [Project Overview](#project-overview)
-2. [Architecture & Structure](#architecture--structure)
-3. [Key Files Reference](#key-files-reference)
-4. [State Management](#state-management)
-5. [Messaging System](#messaging-system)
-6. [Component Patterns (SolidJS)](#component-patterns-solidjs)
-7. [Styling](#styling)
-8. [Build System](#build-system)
-9. [Code Quality & Conventions](#code-quality--conventions)
+1. [Coding Rules & Conventions](#coding-rules--conventions)
+2. [Project Overview](#project-overview)
+3. [Architecture](#architecture)
+4. [Key Files](#key-files)
+5. [State Management](#state-management)
+6. [User Flows](#user-flows)
+7. [Messaging System](#messaging-system)
+8. [Component Patterns (SolidJS)](#component-patterns-solidjs)
+9. [Reusable Systems](#reusable-systems)
 10. [Quick Reference](#quick-reference)
+
+---
+
+## Coding Rules & Conventions
+
+### SolidJS (NOT React!)
+- **Components run ONCE** - no re-renders, fine-grained reactivity
+- Use arrow functions: `export const MyComponent = () => { ... }`
+- Signals are functions: `loading()` not `loading`
+- Use `class` not `className` in JSX
+- Store updates via path notation: `setStore("path", "to", "property", value)`
+- **createMemo**: Only for expensive computations - simple store access is already reactive
+  - ✅ `const value = () => ctx.store.property` (reactive, no memo needed)
+  - ❌ `const value = createMemo(() => ctx.store.property)` (unnecessary)
+- **Naming**: "use" prefix ONLY for context hooks
+  - ✅ `useThemeEditorContext()` (context hook)
+  - ✅ `getBaseValue(...)` (helper function)
+  - ❌ `useBaseValue(...)` (not a context hook)
+
+### TypeScript & General
+- No non-null assertions: `value?.property ?? fallback` not `value!.property`
+- No `createElement` - use JSX only
+- Use interfaces for props
+- Always update CLAUDE.md when making architectural changes
+- Run `npm run format` before committing (Biome)
+
+### Styling
+- **Primary**: Tailwind CSS + daisyUI classes
+- **Never** use `transition: all` - specify properties: `transition: background 0.2s ease`
+- Prefer Tailwind utilities over custom CSS
 
 ---
 
 ## Project Overview
 
-**Pumble Tweaks** is a browser extension that enables real-time customization of the Pumble web application's appearance through CSS color property modifications.
+**Pumble Tweaks** - Browser extension for real-time customization of Pumble web app colors.
 
-### What It Does
-- Customizes CSS color properties in real-time
-- Automatically derives related color variants (darker/lighter versions)
-- **Preset-based color management** - save/load/switch between named color schemes
-- **Global tweaks** - color values apply regardless of Pumble theme (color scheme)
-- **Unsaved changes tracking** - visual indicator when working state differs from saved preset
+### Features
+- Real-time CSS color customization
+- Auto-derived color variants (darker/lighter)
+- **Preset-based management** - save/load/switch named color schemes
+- **Global tweaks** - colors persist across Pumble theme changes
+- **Unsaved changes tracking** - visual indicator for working state
 - Master enable/disable toggle
-- Import/export color configurations
-- Multi-tab synchronization via browser storage sync
-- Instant live preview with debounced persistence
+- Import/export configurations
+- Multi-tab synchronization
+- Live preview with debounced persistence (500ms)
 
 ### Tech Stack
-- **Framework:** SolidJS
+- **Framework:** SolidJS (fine-grained reactivity)
 - **Language:** TypeScript
-- **Extension Framework:** WXT (Vite-based cross-browser extension wrapper)
-- **Styling:** Tailwind CSS + daisyUI components, CSS Modules with CSS custom properties
-- **Color Manipulation:** colord
-- **Code Quality:** Biome v2
+- **Build:** WXT (Vite-based extension framework)
+- **Styling:** Tailwind CSS + daisyUI
+- **Color:** colord
+- **Quality:** Biome v2
 
 ---
 
-## Architecture & Structure
+## Architecture
 
-### Three-Process Extension Architecture
+### Three-Process Extension
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
@@ -67,297 +82,261 @@
 │ (extension UI)  │◀────│   (router/badge) │◀────│  (Pumble page)  │
 └─────────────────┘     └──────────────────┘     └─────────────────┘
       │                                                    │
-      │                                                    │
       └────────────── Type-safe Messages ─────────────────┘
 ```
 
-1. **Content Script** (`src/entrypoints/content/`)
-   - Runs in Pumble page context
-   - Manages DOM manipulation and theme state
-   - Single source of truth for runtime state
-   - Watches for theme changes via MutationObserver
+**Content Script** - Single source of truth
+- Runs in Pumble page context
+- Manages DOM manipulation and state
+- Watches theme changes (MutationObserver)
 
-2. **Popup Script** (`src/entrypoints/popup/`)
-   - Runs in extension UI context
-   - Displays color picker interface
-   - Sends commands to content script
-   - Listens for state changes and updates reactively
+**Popup Script** - User interface
+- Extension UI with color pickers
+- Sends commands, listens for state changes
 
-3. **Background Script** (`src/entrypoints/background/`)
-   - Runs in extension service worker context
-   - Routes messages between popup and content
-   - Updates extension badge (ON/OFF indicator)
+**Background Script** - Message router
+- Routes messages between popup/content
+- Updates badge (ON/OFF)
 
 ### Core Patterns
-
-- **Type-Safe Messaging**: `createMessenger<Protocol>()` factory for strongly-typed communication between extension contexts
-- **Single Source of Truth**: `ThemeState` class in content script owns runtime state, broadcasts changes to popup
-- **Preset-Based Storage**: Browser sync storage with named presets (global tweaks independent of Pumble theme), debounced writes (500ms), unsaved changes tracking
+- **Type-Safe Messaging**: `createMessenger<Protocol>()` for strongly-typed IPC
+- **Single Source of Truth**: `ThemeState` in content script
+- **Preset Storage**: Browser sync storage, debounced writes (500ms)
 
 ---
 
-## Key Files Reference
+## Key Files
 
 | File | Purpose | When to Modify |
 |------|---------|----------------|
-| `src/entrypoints/content/theme-state.ts` | Core state manager. Single instance controls all DOM changes, storage sync, and state broadcasting | Adding state logic, changing how tweaks are applied |
-| `src/entrypoints/content/theme-watcher.ts` | MutationObserver watching for theme changes in DOM | Changing theme detection logic |
-| `src/views/theme-editor/ThemeEditor.tsx` | Popup UI root. Initializes connection, syncs state, provides ThemeEditorContext | Changing popup UI structure or initialization |
-| `src/views/theme-editor/helpers.ts` | Popup initialization helpers (getContentScriptState, initializeTab, injectContentScript) | Changing popup startup logic or error handling |
-| `src/context/ThemeEditorContext.tsx` | SolidJS context providing shared state access (`store`, `setStore`, `tabId`, `isReady`) to all theme editor components | Adding or modifying shared UI state |
-| `src/lib/messages/createMessenger.ts` | Generic type-safe message handler factory | Changing message passing infrastructure |
-| `src/lib/storage.ts` | Storage operations facade. Handles persistence, migration, CRUD | Adding storage operations or changing storage format |
-| `src/lib/import-export.ts` | Import/export utilities for color configurations | Adding import/export functionality |
-| `src/lib/logger.ts` | Logging utility with dev/prod filtering | Debugging and monitoring |
-| `src/lib/url.ts` | URL validation utilities (isPumbleUrl) | Validating Pumble URLs |
-| `src/entrypoints/content/dom-utils.ts` | DOM manipulation (applyCSSProperty, resetCSSTweaks, getCurrentTheme) | Changing how CSS is applied or theme detection |
-| `src/constants/properties.ts` | Defines which CSS properties are customizable. Source of truth for property list | **Adding or removing customizable properties** |
-| `src/constants/derived-colors.ts` | Registry mapping base colors to derived colors with computation functions | Adding automatic color derivations |
-| `wxt.config.ts` | Extension manifest, permissions, URL patterns, dev server config | Changing browser permissions or target URLs |
-| `tsconfig.json` | TypeScript + SolidJS JSX configuration | Changing TypeScript compiler settings |
-| `biome.json` | Code quality (Biome formatter + linter for SolidJS) | Changing code style rules |
+| `src/entrypoints/content/theme-state.ts` | Core state manager - DOM, storage, broadcasting | State logic, application |
+| `src/entrypoints/content/theme-watcher.ts` | MutationObserver for theme detection | Theme detection |
+| `src/entrypoints/content/dom-utils.ts` | DOM manipulation (CSS apply/reset) | CSS methods |
+| `src/views/theme-editor/ThemeEditor.tsx` | Popup UI root | UI structure |
+| `src/context/ThemeEditorContext.tsx` | SolidJS context provider | Shared UI state |
+| `src/components/dialog/` | Dialog system | Dialog behavior |
+| `src/lib/storage.ts` | Storage facade | Storage operations |
+| `src/lib/import-export.ts` | Import/export utilities | Import/export features |
+| `src/lib/messages/createMessenger.ts` | Message factory | IPC infrastructure |
+| `src/constants/properties.ts` | **Customizable CSS properties** | **Add/remove properties** |
+| `src/constants/derived-colors.ts` | Color derivation rules | Auto-derivation |
 
 ---
 
 ## State Management
 
-**Runtime State** (lives in content script):
+### Runtime State (Content Script)
 ```typescript
 interface RuntimeState {
-  themeName: string | null;          // "wednesday_dark" | "picklejar_light" (display only)
-  tweaksOn: boolean;                 // Master toggle for all tweaks
-  workingTweaks: WorkingTweaks;      // Current working state (may have unsaved changes)
-  selectedPreset: string | null;     // Currently selected preset (null = no preset)
-  savedPresets: Record<string, StoredPreset>;  // All saved presets
-  hasUnsavedChanges: boolean;        // Working state differs from selected preset?
+  tweaksOn: boolean;                 // Master toggle
+  workingTweaks: WorkingTweaks;      // Current unsaved state
+  selectedPreset: string | null;     // Active preset
+  savedPresets: Record<string, StoredPreset>;
+  hasUnsavedChanges: boolean;        // Working ≠ saved?
 }
 ```
 
-**Storage Format** (`browser.storage.sync`):
-```typescript
-{
-  working_tweaks: {                  // Active working state (current unsaved changes)
-    cssProperties: { [propertyName]: { value, enabled } }
-  },
-  selected_preset: string | null,    // Selected preset name
-  saved_presets: {                   // Named presets registry
-    [presetName]: {
-      name: string,
-      cssProperties: { [propertyName]: { value, enabled } },
-      createdAt: string,
-      updatedAt: string
-    }
-  },
-  tweaks_on: boolean,                // Global master switch
-  last_update_tab_id: number         // For multi-tab sync coordination
-}
-```
+### Key Concepts
+- **Global Tweaks**: Colors NOT tied to Pumble theme - persist across theme switches
+- **Working State**: Unsaved modifications with live preview
+- **Presets**: Named snapshots for save/load/switch
+- **Unsaved Changes**: Automatic tracking via comparison
 
-**Key Concepts:**
-- **Global Tweaks**: Color values are NOT tied to Pumble color theme - same colors apply regardless
-- **Working State**: Current unsaved modifications being previewed in real-time
-- **Presets**: Named snapshots of color configurations users can save/load/switch between
-- **Unsaved Changes**: Tracked by comparing working state to selected preset
+### Technical Data Flow
+- **Color Change**: Popup → Content applies CSS + derives colors → Broadcasts → Debounced write (500ms)
+- **Save Preset**: Updates selected preset → `hasUnsavedChanges = false`
+- **Load Preset**: Loads into working state → Applies to DOM → `hasUnsavedChanges = false`
+- **Reset**: Context-aware (revert to preset OR clear to defaults)
+- **Theme Detection**: Updates display name only - tweaks persist
+- **Multi-Tab Sync**: Write to storage → All tabs receive `onChanged` → Re-apply
 
-**Data Flows:**
-- **Color Change**: Popup sends message → Content script applies CSS + derived colors → Updates working state → Broadcasts to popup → Debounced storage write (500ms)
-- **Save Preset**: User clicks Save → Updates selected preset with current working state → Sets `hasUnsavedChanges = false`
-- **Load Preset**: User selects preset → Loads preset values into working state → Applies to DOM → Sets `hasUnsavedChanges = false`
-- **Reset**: User clicks Reset → Clears working state → Deselects preset → Removes all CSS overrides (shows Pumble defaults)
-- **Theme Detection**: Page loads → Detects theme name for display → Does NOT reload tweaks (working state persists)
-- **Multi-Tab Sync**: Change in Tab 1 → Write to `browser.storage.sync` → All tabs receive `onChanged` event → Re-apply working state
+---
+
+## User Flows
+
+### 1. First-Time User Creates Preset
+1. Opens extension → "No Preset Selected" + Pumble defaults
+2. Adjusts colors → live preview + "Unsaved changes" indicator
+3. Clicks "+ New" → clears working state
+4. Clicks "Save As" → names preset → saved and selected
+
+### 2. Switch Between Presets
+1. Has "Dark Blue" selected + unsaved changes
+2. Selects "High Contrast" from dropdown
+3. Confirmation: "Unsaved changes - switch anyway?"
+4. Confirms → loads High Contrast, unsaved lost
+
+### 3. Edit and Save Existing Preset
+1. Selects "Dark Blue" preset
+2. Tweaks sidebar color → amber "Save Changes" dot appears
+3. Clicks "Save Changes" → preset updated, dot disappears
+
+### 4. Test Pumble Themes
+1. Has custom colors applied (tweaks ON)
+2. Switches Pumble theme (light → dark)
+3. **Extension auto-disables tweaks** (badge: "OFF")
+4. User sees actual Pumble theme
+5. Re-enables tweaks → custom colors reapply
+
+### 5. Context-Aware Reset
+**Preset selected**: Reset reverts to saved preset values
+**No preset**: Reset clears to Pumble defaults
+
+Example:
+- Loads "Dark Blue" preset (sidebar: #334455)
+- Changes to #FF0000
+- Clicks reset → reverts to #334455 (NOT Pumble default)
 
 ---
 
 ## Messaging System
 
-Type-safe message passing between extension contexts using `createMessenger<Protocol>()` factory.
+Type-safe IPC using `createMessenger<Protocol>()`.
 
-**Protocol Pattern:**
 ```typescript
-// Define protocol interface
+// Protocol definition
 interface ContentProtocol {
-  updateProperty: { propertyName: string; value: string; enabled: boolean };
+  updateProperty: { propertyName: string; value: string };
   getState: void;
 }
 
 // Usage
-const { sendMessage, onMessage } = createMessenger<ContentProtocol>();
-await sendMessage("updateProperty", { propertyName, value, enabled });
+await ContentScript.sendMessage("updateProperty", { propertyName, value }, tabId);
 ```
 
-**Message Flow:**
-- Popup → Content Script: Direct via `ContentScript.sendMessage("method", data, tabId)`
-  - Methods: `updateWorkingProperty`, `toggleWorkingProperty`, `loadPreset`, `savePreset`, `savePresetAs`, `deletePreset`, `renamePreset`, etc.
-- Content Script → Popup: Broadcast via `Background.sendMessage("stateChanged", { state, tabId })`
-- Popup listens via: `Background.onMessage("stateChanged", handler)`
+**Message Flow**:
+- Popup → Content: `ContentScript.sendMessage(method, data, tabId)`
+- Content → Popup: `Background.sendMessage("stateChanged", { state, tabId })`
+- Popup listens: `Background.onMessage("stateChanged", handler)`
 
 ---
 
 ## Component Patterns (SolidJS)
 
-**Fine-Grained Reactivity** - Components run once, no re-renders:
+### Reactivity Model
 
 | Concept | SolidJS | React |
 |---------|---------|-------|
-| **Component execution** | Runs **once** | Re-runs on every state change |
-| **Re-rendering** | **No re-renders** | Full component re-render |
-| **Reactivity** | Property-level tracking | Component-level tracking |
+| **Component execution** | **Once** | Every update |
+| **Re-rendering** | **No re-renders** | Full re-render |
+| **Reactivity** | Property-level | Component-level |
 
-**State Primitives:**
-- `createSignal` - Simple values: `const [count, setCount] = createSignal(0);` Access with `count()`
-- `createStore` - Nested objects: `setStore("path", "to", "property", value);` Property-level reactivity
-- `createMemo` - Derived values: `const doubled = createMemo(() => count() * 2);` Auto-updates on dependencies
-  - **When to use**: Only for expensive computations or when value is used as dependency in other computations
-  - **When NOT to use**: Simple store property access is already reactive - no memo needed
-  - Example: `const isModified = () => ctx.store.value !== baseValue;` (✅ reactive, no memo needed)
-- **Context** - Use `createContext` for prop drilling avoidance (see `src/context/ThemeEditorContext.tsx`)
-
-**Context Pattern in This Project:**
+### State Primitives
 ```typescript
-// Create context (src/context/ThemeEditorContext.tsx)
-const ThemeEditorContext = createContext<ThemeEditorContextValue>();
+// Signals
+const [count, setCount] = createSignal(0);
+count() // Access as function
 
-// Provide context (src/views/theme-editor/ThemeEditor.tsx)
+// Stores
+const [store, setStore] = createStore({ user: { name: "Alice" } });
+setStore("user", "name", "Bob"); // Path notation
+
+// Memos (use sparingly!)
+const doubled = createMemo(() => count() * 2); // Only for expensive ops
+const value = () => ctx.store.property; // ✅ Simple - no memo needed
+
+// Context
+const ctx = useThemeEditorContext();
+// ctx.store (store), ctx.tabId() (signal), ctx.isReady() (signal)
+```
+
+### Common Patterns
+```typescript
+// ✅ Reactive accessor (no memo needed)
+const isModified = () => {
+  const entry = ctx.store.workingTweaks?.cssProperties[props.name];
+  return entry?.value !== entry?.initialValue;
+};
+
+// ✅ Pure helper function
+function getBaseValue(name, preset, presets, initial) {
+  if (!preset) return initial;
+  return presets[preset]?.cssProperties[name]?.value ?? initial;
+}
+
+// ✅ Combining both
+const baseValue = () => getBaseValue(
+  props.name,
+  ctx.store.selectedPreset,
+  ctx.store.savedPresets,
+  entry()?.initialValue
+);
+```
+
+### Context Pattern
+```typescript
+// Create context
+const ThemeEditorContext = createContext<Value>();
+
+// Provide
 <ThemeEditorContext.Provider value={{ store, setStore, tabId, isReady }}>
   {props.children}
 </ThemeEditorContext.Provider>
 
-// Consume context in any child component
-const { store, setStore, tabId, isReady } = useThemeEditorContext();
-// Note: tabId and isReady are Accessor functions (signals), call with tabId(), isReady()
+// Consume
+const ctx = useThemeEditorContext();
 ```
 
-**Key Conventions:**
-- Signals must be called as functions: `loading()` not `loading`
-- Use `class` not `className` for JSX attributes
-- Store updates via path notation, never direct mutation
-- **Naming**: Only use "use" prefix for context hooks (e.g., `useThemeEditorContext()`), not for regular helper functions
-  - ✅ `const ctx = useThemeEditorContext();` (context hook)
-  - ✅ `function getBaseValue(...) { ... }` (helper function)
-  - ❌ `function useIsPropertyModified(...) { ... }` (not a context hook, don't use "use" prefix)
-
 ---
 
-## Styling
-
-- **Primary**: Tailwind CSS + daisyUI component classes
-- **CSS Modules**: Legacy approach, mostly removed (only `ColorPicker.module.css` remains)
-- **CSS Variables**: Defined in `src/entrypoints/popup/styles.css` for root-level design tokens
-- Always prefer Tailwind utility classes over custom CSS
-- Specify individual transition properties (never `transition: all`)
-
----
-
-## Reusable Component Systems
+## Reusable Systems
 
 ### Dialog System
-Located in `src/components/dialog/`, provides:
-- `useDialogs()` hook for confirm and input dialogs
-- `<DialogProvider>` wrapper (used in App.tsx)
-- Standardized dialog UI with `DialogWrapper`, `DialogHeader`, `DialogContent`, `DialogActions`
+Location: `src/components/dialog/`
 
-**Usage:**
 ```typescript
 const dialogs = useDialogs();
 
-// Confirm dialog
-const confirmed = await dialogs.confirm({
-  title: "Delete Preset?",
-  message: "This action cannot be undone."
+// Confirm
+const ok = await dialogs.confirm({
+  title: "Delete?",
+  message: "Cannot undo",
+  confirmText: "Delete",
+  confirmType: "error"
 });
 
-// Input dialog
-const input = await dialogs.input({
-  title: "Rename Preset",
-  placeholder: "Enter new name",
-  initialValue: currentName
+// Input
+const name = await dialogs.input({
+  title: "Rename",
+  placeholder: "Name",
+  defaultValue: current,
+  validate: (v) => v ? null : "Required"
 });
 ```
 
+### Dropdown Component
+Location: `src/components/Dropdown/`
 
-## Build System
+```typescript
+<Dropdown
+  trigger={{ content: "•••", class: "btn btn-sm" }}
+  items={[
+    { type: "item", label: "Edit", onClick: handleEdit },
+    { type: "divider" },
+    { type: "item", label: "Delete", onClick: handleDelete, variant: "error" }
+  ]}
+/>
+```
 
-**WXT Configuration** (`wxt.config.ts`): Defines extension manifest, permissions, and host URLs
-
-
-## Code Quality & Conventions
-
-**Critical Constraints:**
-
-1. **No createElement** - Use JSX only: `<div>Content</div>` not `document.createElement("div")`
-2. **No non-null assertions** - Use `tweaks?.disabled ?? false` not `tweaks!.disabled`
-3. **Always call signals as functions** - `if (loading())` not `if (loading)`
-4. **Use `class` not `className`** - `<div class={styles.container}>`
-5. **Store updates** - Use path notation: `setStore("themeTweaks", "cssProperties", propertyName, "value", color)`
-
-**Code Quality:**
-- Run `npm run format` before committing (Biome formatter)
-- Use interfaces for props, explicit return types for complex functions
-- Use `as const` for literal type arrays
-
+---
 
 ## Quick Reference
 
-### Most Common Tasks
-
+### Commands
 ```bash
-# Development
-npm run dev              # Start dev server
-
-# Code Quality
-npm run format           # Format code before commit
-npm run compile          # Type-check
+npm run dev       # Start dev server
+npm run build     # Build extension
+npm run format    # Format (Biome)
+npm run compile   # Type-check
 ```
 
-### Key File Locations
+### Critical Files
+- **Add property**: `src/constants/properties.ts`
+- **Add derivation**: `src/constants/derived-colors.ts`
+- **State logic**: `src/entrypoints/content/theme-state.ts`
+- **UI root**: `src/views/theme-editor/ThemeEditor.tsx`
+- **Storage**: `src/lib/storage.ts`
 
-- **State management:** `src/entrypoints/content/theme-state.ts`
-- **DOM manipulation:** `src/entrypoints/content/dom-utils.ts`
-- **Popup UI root:** `src/views/theme-editor/ThemeEditor.tsx`
-- **Popup helpers:** `src/views/theme-editor/helpers.ts`
-- **UI Context:** `src/context/ThemeEditorContext.tsx`
-- **Dialog system:** `src/components/dialog/`
-- **Storage operations:** `src/lib/storage.ts`
-- **Import/Export:** `src/lib/import-export.ts`
-- **Logger:** `src/lib/logger.ts`
-- **Add properties:** `src/constants/properties.ts`
-- **Add derivations:** `src/constants/derived-colors.ts`
-- **Message protocols:** `src/entrypoints/*/protocol.ts`
-
-### Directory Organization
-
-```
-src/
-├── components/
-│   ├── dialog/          # Dialog system (confirm, input dialogs)
-│   ├── Dropdown/        # Dropdown select component
-│   ├── icons/           # SVG icon components
-│   └── App.tsx          # Root app component
-├── context/             # SolidJS context providers
-│   └── ThemeEditorContext.tsx
-├── views/               # Feature-specific view components
-│   └── theme-editor/    # Theme editor UI
-│       ├── presets/     # Preset management components
-│       ├── tweaks/      # Color picker and tweak components
-│       └── helpers.ts   # Initialization and connection helpers
-├── entrypoints/         # Extension entry points
-│   ├── content/         # Content script (runs in Pumble page)
-│   ├── popup/           # Popup UI entry point
-│   └── background/      # Background service worker
-├── lib/                 # Utility libraries and helpers
-│   ├── messages/        # Message passing utilities
-│   ├── storage.ts       # Browser storage facade
-│   ├── import-export.ts # Config import/export
-│   ├── logger.ts        # Logging utility
-│   ├── url.ts           # URL utilities
-│   └── utils.ts         # General utilities
-├── constants/           # Configuration constants
-│   ├── properties.ts    # Customizable CSS properties
-│   ├── derived-colors.ts # Color derivation rules
-│   └── pumble-urls.ts   # URL patterns
-└── types/               # TypeScript type definitions
-    ├── runtime.ts       # Runtime state types
-    └── tweaks.ts        # Tweak and preset types
-```
-
+### Message Protocols
+- `src/entrypoints/content/protocol.ts`
+- `src/entrypoints/background/protocol.ts`
