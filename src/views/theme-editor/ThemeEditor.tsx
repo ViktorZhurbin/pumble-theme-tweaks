@@ -15,7 +15,7 @@ import {
 import { PresetSelector } from "./presets/PresetSelector";
 import { TweaksContainer } from "./tweaks";
 
-export function ThemeEditor() {
+export const ThemeEditor = () => {
 	// Use createStore for runtime state (reactive view of content script state)
 	const [store, setStore] = createStore<RuntimeState>(initialState);
 
@@ -111,4 +111,4 @@ export function ThemeEditor() {
 			</div>
 		</ThemeEditorContext.Provider>
 	);
-}
+};

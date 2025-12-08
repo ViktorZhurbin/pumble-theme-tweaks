@@ -3,7 +3,7 @@ import type { DropdownItem, DropdownProps } from "./types";
 
 let dropdownCounter = 0;
 
-export function Dropdown(props: DropdownProps) {
+export const Dropdown = (props: DropdownProps) => {
 	const id = `dropdown-${++dropdownCounter}`;
 	const popoverId = `${id}-popover`;
 	const anchorName = `--anchor-${id}`;
@@ -54,4 +54,4 @@ export function Dropdown(props: DropdownProps) {
 			</ul>
 		</div>
 	);
-}
+};

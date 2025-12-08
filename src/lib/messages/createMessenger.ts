@@ -54,29 +54,29 @@ interface ResponseEnvelope {
 /**
  * Creates a type-safe messenger for a given protocol
  */
-export function createMessenger<P>() {
+export const createMessenger = <P>() => {
 	// Store handlers for each message type
 	const handlers: Partial<Record<keyof P, Handler<P, any>>> = {};
 
 	/**
 	 * Sets up the single root browser listener that routes to registered handlers
 	 */
-	function setupRootListener() {
+	const setupRootListener = () => {
 		// Only setup once
 		if (browser.runtime.onMessage.hasListener(handleMessage)) return;
 
 		browser.runtime.onMessage.addListener(handleMessage);
-	}
+	};
 
 	/**
 	 * Root message handler
 	 * Returns true to indicate async response via sendResponse callback
 	 */
-	function handleMessage(
+	const handleMessage = (
 		msg: any,
 		sender: Browser.runtime.MessageSender,
 		sendResponse: (response?: any) => void,
-	): true | void {
+	): true | void => {
 		// Validate message format
 		if (!msg?.type || typeof msg.type !== "string") return;
 
@@ -100,33 +100,33 @@ export function createMessenger<P>() {
 
 		// Return true to indicate we will send a response asynchronously
 		return true;
-	}
+	};
 
 	/**
 	 * Registers a handler for a specific message type
 	 * @returns Cleanup function to remove the handler
 	 */
-	function onMessage<K extends keyof P>(
+	const onMessage = <K extends keyof P>(
 		type: K,
 		handler: Handler<P, K>,
-	): () => void {
+	): (() => void) => {
 		setupRootListener();
 		handlers[type] = handler;
 
 		return () => {
 			delete handlers[type];
 		};
-	}
+	};
 
 	/**
 	 * Sends a message to the background script or a specific tab
 	 */
-	async function sendMessage<K extends keyof P>(
+	const sendMessage = async <K extends keyof P>(
 		type: K,
 		...args: GetDataType<P[K]> extends undefined
 			? [data?: undefined, tabId?: number]
 			: [data: GetDataType<P[K]>, tabId?: number]
-	): Promise<GetReturnType<P[K]>> {
+	): Promise<GetReturnType<P[K]>> => {
 		const data = args[0];
 		const tabId = args[1];
 
@@ -146,7 +146,7 @@ export function createMessenger<P>() {
 		}
 
 		return response?.res;
-	}
+	};
 
 	return { onMessage, sendMessage };
-}
+};

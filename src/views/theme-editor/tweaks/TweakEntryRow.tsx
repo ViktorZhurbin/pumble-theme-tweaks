@@ -9,7 +9,7 @@ interface TweakEntryRowProps {
 	propertyName: string;
 }
 
-export function TweakEntryRow(props: TweakEntryRowProps) {
+export const TweakEntryRow = (props: TweakEntryRowProps) => {
 	const ctx = useThemeEditorContext();
 
 	// Derive from context instead of props
@@ -80,7 +80,7 @@ export function TweakEntryRow(props: TweakEntryRowProps) {
 			</td>
 		</tr>
 	);
-}
+};
 
 /**
  * Checks if a property has been modified from its initial value

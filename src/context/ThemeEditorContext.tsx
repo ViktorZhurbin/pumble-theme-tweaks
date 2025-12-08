@@ -27,7 +27,7 @@ export interface ThemeEditorContextValue {
 
 const ThemeEditorContext = createContext<ThemeEditorContextValue>();
 
-export function useThemeEditorContext() {
+export const useThemeEditorContext = () => {
 	const context = useContext(ThemeEditorContext);
 	if (!context) {
 		throw new Error(
@@ -35,6 +35,6 @@ export function useThemeEditorContext() {
 		);
 	}
 	return context;
-}
+};
 
 export { ThemeEditorContext };

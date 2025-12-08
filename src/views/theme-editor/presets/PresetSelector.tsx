@@ -6,7 +6,7 @@ import { logger } from "@/lib/logger";
 import { PresetDropdown } from "./PresetDropdown";
 import { SaveButton } from "./SaveButton";
 
-export function PresetSelector() {
+export const PresetSelector = () => {
 	const ctx = useThemeEditorContext();
 	const dialogs = useDialogs();
 
@@ -94,4 +94,4 @@ export function PresetSelector() {
 			</fieldset>
 		</div>
 	);
-}
+};

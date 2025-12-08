@@ -4,7 +4,7 @@ import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 
-export function ResetButton() {
+export const ResetButton = () => {
 	const ctx = useThemeEditorContext();
 	const dialogs = useDialogs();
 
@@ -59,4 +59,4 @@ export function ResetButton() {
 			</button>
 		</Show>
 	);
-}
+};

@@ -4,10 +4,10 @@ import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
 import styles from "./ColorPicker.module.css";
 
-export function ColorPicker(props: {
+export const ColorPicker = (props: {
 	propertyName: string;
 	disabled: boolean;
-}) {
+}) => {
 	const ctx = useThemeEditorContext();
 
 	// Derive from context instead of props
@@ -36,7 +36,7 @@ export function ColorPicker(props: {
 			onInput={handleInput}
 		/>
 	);
-}
+};
 
 /**
  * Gets the display value for a color picker
