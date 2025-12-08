@@ -50,9 +50,9 @@ export function TweakEntryRow(props: TweakEntryRowProps) {
 
 	return (
 		<tr class="hover:bg-base-300">
-			<th class={`text-sm ${inactiveClass()}`.trim()}>{props.label}</th>
+			<td class={`${inactiveClass()}`.trim()}>{props.label}</td>
 
-			<th class={inactiveClass()}>
+			<td class={inactiveClass()}>
 				{isPropertyModified(tweakEntry()) && (
 					<button
 						class="btn btn-sm btn-neutral btn-circle"
@@ -62,13 +62,13 @@ export function TweakEntryRow(props: TweakEntryRowProps) {
 						<ResetIcon size={18} />
 					</button>
 				)}
-			</th>
+			</td>
 
-			<th class={inactiveClass()}>
+			<td class={inactiveClass()}>
 				<ColorPicker disabled={disabled()} propertyName={props.propertyName} />
-			</th>
+			</td>
 
-			<th class={areTweaksOff() ? disabledClasses : ""}>
+			<td class={areTweaksOff() ? disabledClasses : ""}>
 				<input
 					type="checkbox"
 					class="checkbox checkbox-primary checkbox-sm"
@@ -77,7 +77,7 @@ export function TweakEntryRow(props: TweakEntryRowProps) {
 					onChange={handleToggle}
 					title="Enable this color tweak"
 				/>
-			</th>
+			</td>
 		</tr>
 	);
 }
