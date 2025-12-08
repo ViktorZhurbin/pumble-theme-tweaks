@@ -33,7 +33,7 @@ export function Dropdown(props: DropdownProps) {
 
 			<ul
 				ref={popoverRef}
-				class={`dropdown dropdown-bottom dropdown-end menu bg-base-100 shadow-sm ${menuWidth()} ${props.menuClass ?? ""}`.trim()}
+				class={`dropdown dropdown-bottom dropdown-end menu bg-base-300 shadow-sm ${menuWidth()} ${props.menuClass ?? ""}`.trim()}
 				popover="auto"
 				id={popoverId}
 				style={{ "position-anchor": anchorName }}

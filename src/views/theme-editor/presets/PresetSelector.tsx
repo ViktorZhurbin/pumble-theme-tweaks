@@ -70,7 +70,7 @@ export function PresetSelector() {
 				<legend class="fieldset-legend">Preset</legend>
 				<div class="flex items-center gap-2">
 					<select
-						class="select"
+						class="select bg-base-300"
 						value={ctx.store.selectedPreset ?? ""}
 						onChange={handleChange}
 						disabled={disabled()}
