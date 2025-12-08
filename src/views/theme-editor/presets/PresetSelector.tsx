@@ -68,13 +68,14 @@ export const PresetSelector = () => {
 			<legend class="fieldset-legend">Preset</legend>
 			<div class="flex items-center gap-2.5">
 				<select
-					class="select bg-base-300"
+					class="select bg-base-300 cursor-pointer"
+					// classList={{ "opacity-50": !ctx.store.selectedPreset }}
 					value={ctx.store.selectedPreset ?? ""}
 					onChange={handleChange}
 					disabled={disabled()}
 				>
 					<option value="" class="opacity-50">
-						None
+						No selection
 					</option>
 					<For each={presetNames()}>
 						{(presetName) => (
