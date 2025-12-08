@@ -103,10 +103,14 @@
 | `src/entrypoints/content/theme-state.ts` | Core state manager. Single instance controls all DOM changes, storage sync, and state broadcasting | Adding state logic, changing how tweaks are applied |
 | `src/entrypoints/content/theme-watcher.ts` | MutationObserver watching for theme changes in DOM | Changing theme detection logic |
 | `src/views/theme-editor/ThemeEditor.tsx` | Popup UI root. Initializes connection, syncs state, provides ThemeEditorContext | Changing popup UI structure or initialization |
+| `src/views/theme-editor/helpers.ts` | Popup initialization helpers (getContentScriptState, initializeTab, injectContentScript) | Changing popup startup logic or error handling |
 | `src/context/ThemeEditorContext.tsx` | SolidJS context providing shared state access (`store`, `setStore`, `tabId`, `isReady`) to all theme editor components | Adding or modifying shared UI state |
 | `src/lib/messages/createMessenger.ts` | Generic type-safe message handler factory | Changing message passing infrastructure |
 | `src/lib/storage.ts` | Storage operations facade. Handles persistence, migration, CRUD | Adding storage operations or changing storage format |
 | `src/lib/import-export.ts` | Import/export utilities for color configurations | Adding import/export functionality |
+| `src/lib/logger.ts` | Logging utility with dev/prod filtering | Debugging and monitoring |
+| `src/lib/url.ts` | URL validation utilities (isPumbleUrl) | Validating Pumble URLs |
+| `src/entrypoints/content/dom-utils.ts` | DOM manipulation (applyCSSProperty, resetCSSTweaks, getCurrentTheme) | Changing how CSS is applied or theme detection |
 | `src/constants/properties.ts` | Defines which CSS properties are customizable. Source of truth for property list | **Adding or removing customizable properties** |
 | `src/constants/derived-colors.ts` | Registry mapping base colors to derived colors with computation functions | Adding automatic color derivations |
 | `wxt.config.ts` | Extension manifest, permissions, URL patterns, dev server config | Changing browser permissions or target URLs |
@@ -124,7 +128,7 @@ interface RuntimeState {
   tweaksOn: boolean;                 // Master toggle for all tweaks
   workingTweaks: WorkingTweaks;      // Current working state (may have unsaved changes)
   selectedPreset: string | null;     // Currently selected preset (null = no preset)
-  savedPresets: Record<string, PresetData>;  // All saved presets
+  savedPresets: Record<string, StoredPreset>;  // All saved presets
   hasUnsavedChanges: boolean;        // Working state differs from selected preset?
 }
 ```
@@ -183,8 +187,10 @@ await sendMessage("updateProperty", { propertyName, value, enabled });
 ```
 
 **Message Flow:**
-- Popup → Content Script: Direct via `sendToContent()`
-- Content Script → Popup: Broadcast via background using `broadcast("stateChanged", runtimeState)`
+- Popup → Content Script: Direct via `ContentScript.sendMessage("method", data, tabId)`
+  - Methods: `updateWorkingProperty`, `toggleWorkingProperty`, `loadPreset`, `savePreset`, `savePresetAs`, `deletePreset`, `renamePreset`, etc.
+- Content Script → Popup: Broadcast via `Background.sendMessage("stateChanged", { state, tabId })`
+- Popup listens via: `Background.onMessage("stateChanged", handler)`
 
 ---
 
@@ -216,6 +222,7 @@ const ThemeEditorContext = createContext<ThemeEditorContextValue>();
 
 // Consume context in any child component
 const { store, setStore, tabId, isReady } = useThemeEditorContext();
+// Note: tabId and isReady are Accessor functions (signals), call with tabId(), isReady()
 ```
 
 **Key Conventions:**
@@ -232,6 +239,34 @@ const { store, setStore, tabId, isReady } = useThemeEditorContext();
 - **CSS Variables**: Defined in `src/entrypoints/popup/styles.css` for root-level design tokens
 - Always prefer Tailwind utility classes over custom CSS
 - Specify individual transition properties (never `transition: all`)
+
+---
+
+## Reusable Component Systems
+
+### Dialog System
+Located in `src/components/dialog/`, provides:
+- `useDialogs()` hook for confirm and input dialogs
+- `<DialogProvider>` wrapper (used in App.tsx)
+- Standardized dialog UI with `DialogWrapper`, `DialogHeader`, `DialogContent`, `DialogActions`
+
+**Usage:**
+```typescript
+const dialogs = useDialogs();
+
+// Confirm dialog
+const confirmed = await dialogs.confirm({
+  title: "Delete Preset?",
+  message: "This action cannot be undone."
+});
+
+// Input dialog
+const input = await dialogs.input({
+  title: "Rename Preset",
+  placeholder: "Enter new name",
+  initialValue: currentName
+});
+```
 
 
 ## Build System
@@ -271,10 +306,14 @@ npm run compile          # Type-check
 ### Key File Locations
 
 - **State management:** `src/entrypoints/content/theme-state.ts`
+- **DOM manipulation:** `src/entrypoints/content/dom-utils.ts`
 - **Popup UI root:** `src/views/theme-editor/ThemeEditor.tsx`
+- **Popup helpers:** `src/views/theme-editor/helpers.ts`
 - **UI Context:** `src/context/ThemeEditorContext.tsx`
+- **Dialog system:** `src/components/dialog/`
 - **Storage operations:** `src/lib/storage.ts`
 - **Import/Export:** `src/lib/import-export.ts`
+- **Logger:** `src/lib/logger.ts`
 - **Add properties:** `src/constants/properties.ts`
 - **Add derivations:** `src/constants/derived-colors.ts`
 - **Message protocols:** `src/entrypoints/*/protocol.ts`
@@ -283,15 +322,35 @@ npm run compile          # Type-check
 
 ```
 src/
-├── components/          # Reusable UI components (Dialog, Dropdown, icons)
+├── components/
+│   ├── dialog/          # Dialog system (confirm, input dialogs)
+│   ├── Dropdown/        # Dropdown select component
+│   ├── icons/           # SVG icon components
+│   └── App.tsx          # Root app component
 ├── context/             # SolidJS context providers
+│   └── ThemeEditorContext.tsx
 ├── views/               # Feature-specific view components
 │   └── theme-editor/    # Theme editor UI
 │       ├── presets/     # Preset management components
-│       └── tweaks/      # Color picker and tweak components
-├── entrypoints/         # Extension entry points (content, popup, background)
+│       ├── tweaks/      # Color picker and tweak components
+│       └── helpers.ts   # Initialization and connection helpers
+├── entrypoints/         # Extension entry points
+│   ├── content/         # Content script (runs in Pumble page)
+│   ├── popup/           # Popup UI entry point
+│   └── background/      # Background service worker
 ├── lib/                 # Utility libraries and helpers
+│   ├── messages/        # Message passing utilities
+│   ├── storage.ts       # Browser storage facade
+│   ├── import-export.ts # Config import/export
+│   ├── logger.ts        # Logging utility
+│   ├── url.ts           # URL utilities
+│   └── utils.ts         # General utilities
 ├── constants/           # Configuration constants
+│   ├── properties.ts    # Customizable CSS properties
+│   ├── derived-colors.ts # Color derivation rules
+│   └── pumble-urls.ts   # URL patterns
 └── types/               # TypeScript type definitions
+    ├── runtime.ts       # Runtime state types
+    └── tweaks.ts        # Tweak and preset types
 ```
 
