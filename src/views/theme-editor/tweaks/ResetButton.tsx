@@ -1,11 +1,12 @@
 import { Show } from "solid-js";
-import { useConfirmDialog } from "@/components/Dialog";
+import { useDialogs } from "@/components/dialog";
 import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 
 export function ResetButton() {
 	const ctx = useThemeEditorContext();
+	const dialogs = useDialogs();
 
 	const hasModifications = () => {
 		const properties = Object.values(
@@ -34,29 +35,28 @@ export function ResetButton() {
 
 	const title = "Reset theme to defaults";
 
-	const resetDialog = useConfirmDialog();
-
-	const openResetDialog = () => {
-		resetDialog.open({
+	const handleReset = async () => {
+		const confirmed = await dialogs.confirm({
 			title,
 			confirmText: "Reset",
 			confirmType: "error",
-			onConfirm: handleConfirm,
 		});
+
+		if (confirmed) {
+			handleConfirm();
+		}
 	};
 
 	return (
 		<Show when={hasModifications()}>
 			<button
 				class="btn btn-xs btn-neutral btn-circle"
-				onClick={openResetDialog}
+				onClick={handleReset}
 				disabled={disabled()}
 				title={disabled() ? "Tweaks disabled" : title}
 			>
 				<ResetIcon />
 			</button>
-
-			{resetDialog.Dialog()}
 		</Show>
 	);
 }

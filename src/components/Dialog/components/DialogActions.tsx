@@ -3,6 +3,7 @@ export const DialogActions = (props: {
 	confirmText?: string;
 	confirmType?: "primary" | "error" | "secondary";
 	confirmDisabled?: boolean;
+	onCancel: () => void | Promise<void>;
 	onConfirm: () => void | Promise<void>;
 }) => {
 	return (

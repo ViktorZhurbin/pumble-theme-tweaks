@@ -1,2 +1,2 @@
-export { useConfirmDialog } from "./useConfirmDialog";
-export { useInputDialog } from "./useInputDialog";
+export { DialogProvider } from "./DialogProvider";
+export { useDialogs } from "./useDialogs";

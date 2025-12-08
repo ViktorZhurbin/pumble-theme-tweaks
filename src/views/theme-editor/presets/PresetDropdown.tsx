@@ -1,6 +1,6 @@
-import { useConfirmDialog, useInputDialog } from "@/components/Dialog";
 import type { DropdownItem } from "@/components/Dropdown";
 import { Dropdown } from "@/components/Dropdown";
+import { useDialogs } from "@/components/dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import {
@@ -13,11 +13,7 @@ import { logger } from "@/lib/logger";
 
 export const PresetDropdown = () => {
 	const ctx = useThemeEditorContext();
-
-	const deleteDialog = useConfirmDialog();
-	const renameDialog = useInputDialog();
-	const saveAsDialog = useInputDialog();
-	const importDialog = useInputDialog();
+	const dialogs = useDialogs();
 
 	const disabled = () => !ctx.tabId() || !ctx.store.tweaksOn;
 
@@ -37,89 +33,84 @@ export const PresetDropdown = () => {
 
 	// === Preset Management ===
 
-	const openDeleteDialog = () => {
+	const handleDelete = async () => {
 		const presetName = ctx.store.selectedPreset;
-		if (!presetName) return;
+		const currentTabId = ctx.tabId();
 
-		deleteDialog.open({
+		if (!currentTabId || !presetName) {
+			logger.warn("PresetDropdown: Cannot delete without tab ID or preset");
+			return;
+		}
+
+		const confirmed = await dialogs.confirm({
 			title: `Delete "${presetName}"?`,
 			confirmText: "Delete",
 			confirmType: "error",
-			onConfirm: async () => {
-				const currentTabId = ctx.tabId();
-				if (!currentTabId || !presetName) {
-					logger.warn(
-						"PresetDropdown: Cannot delete without tab ID or preset",
-					);
-					return;
-				}
-
-				try {
-					await ContentScript.sendMessage(
-						"deletePreset",
-						{ presetName },
-						currentTabId,
-					);
-				} catch (err) {
-					logger.error("PresetDropdown: Failed to delete preset", err);
-					throw err;
-				}
-			},
 		});
+
+		if (confirmed) {
+			try {
+				await ContentScript.sendMessage(
+					"deletePreset",
+					{ presetName },
+					currentTabId,
+				);
+			} catch (err) {
+				logger.error("PresetDropdown: Failed to delete preset", err);
+			}
+		}
 	};
 
-	const openRenameDialog = () => {
+	const handleRename = async () => {
 		const currentTabId = ctx.tabId();
 		const oldName = ctx.store.selectedPreset;
 
 		if (!currentTabId || !oldName) return;
 
-		renameDialog.open({
+		const newName = await dialogs.input({
 			title: `Rename "${oldName}"`,
 			placeholder: "Enter new name",
 			defaultValue: oldName,
 			confirmText: "Rename",
 			validate: (value) =>
 				validatePresetName(value, ctx.store.savedPresets, oldName),
-			onConfirm: async (newName) => {
-				if (newName === oldName) return;
-
-				try {
-					await ContentScript.sendMessage(
-						"renamePreset",
-						{ oldName, newName },
-						currentTabId,
-					);
-				} catch (err) {
-					logger.error("PresetDropdown: Failed to rename preset", err);
-					throw err;
-				}
-			},
 		});
+
+		if (newName && newName !== oldName) {
+			try {
+				await ContentScript.sendMessage(
+					"renamePreset",
+					{ oldName, newName },
+					currentTabId,
+				);
+			} catch (err) {
+				logger.error("PresetDropdown: Failed to rename preset", err);
+			}
+		}
 	};
 
-	const openSaveAsDialog = () => {
+	const handleSaveAs = async () => {
 		const currentTabId = ctx.tabId();
 		if (!currentTabId) return;
 
-		saveAsDialog.open({
+		const name = await dialogs.input({
 			title: "Save Preset As",
 			placeholder: "Enter preset name",
 			confirmText: "Save",
 			validate: (value) => validatePresetName(value, ctx.store.savedPresets),
-			onConfirm: async (name) => {
-				try {
-					await ContentScript.sendMessage(
-						"savePresetAs",
-						{ presetName: name },
-						currentTabId,
-					);
-				} catch (err) {
-					logger.error("PresetDropdown: Failed to save preset", err);
-					throw err;
-				}
-			},
 		});
+
+		if (name) {
+			try {
+				await ContentScript.sendMessage(
+					"savePresetAs",
+					{ presetName: name },
+					currentTabId,
+				);
+			} catch (err) {
+				logger.error("PresetDropdown: Failed to save preset", err);
+			}
+		}
 	};
 
 	// === Import Handlers ===
@@ -151,16 +142,19 @@ export const PresetDropdown = () => {
 		}
 	};
 
-	const openImportDialog = () => {
-		importDialog.open({
+	const handleImportDialog = async () => {
+		const value = await dialogs.input({
 			type: "textarea",
 			title: "Import preset",
 			placeholder:
 				'Paste theme JSON (e.g., {"--palette-primary-main":"#FF5733"})',
 			confirmText: "Import",
-			onConfirm: handleImport,
 			validate: validateImport,
 		});
+
+		if (value) {
+			await handleImport(value);
+		}
 	};
 
 	// === Menu Items ===
@@ -168,7 +162,7 @@ export const PresetDropdown = () => {
 	const items = (): DropdownItem[] => [
 		{
 			label: "Rename",
-			onClick: openRenameDialog,
+			onClick: handleRename,
 			disabled: !ctx.store.selectedPreset,
 		},
 		{
@@ -181,37 +175,30 @@ export const PresetDropdown = () => {
 		},
 		{
 			label: "Import",
-			onClick: openImportDialog,
+			onClick: handleImportDialog,
 		},
 		{
 			label: "Save As",
-			onClick: openSaveAsDialog,
+			onClick: handleSaveAs,
 		},
 		{
 			label: "Delete",
-			onClick: openDeleteDialog,
+			onClick: handleDelete,
 			disabled: !ctx.store.selectedPreset,
 			variant: "error",
 		},
 	];
 
 	return (
-		<>
-			<Dropdown
-				trigger={{
-					content: "•••",
-					class: "btn btn-square btn-soft btn-sm",
-					disabled: disabled(),
-				}}
-				items={items()}
-				positionX="end"
-			/>
-
-			{deleteDialog.Dialog()}
-			{renameDialog.Dialog()}
-			{saveAsDialog.Dialog()}
-			{importDialog.Dialog()}
-		</>
+		<Dropdown
+			trigger={{
+				content: "•••",
+				class: "btn btn-square btn-soft btn-sm",
+				disabled: disabled(),
+			}}
+			items={items()}
+			positionX="end"
+		/>
 	);
 };
 

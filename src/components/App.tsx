@@ -1,5 +1,10 @@
 import { ThemeEditor } from "@/views/theme-editor/ThemeEditor";
+import { DialogProvider } from "./dialog";
 
 export function App() {
-	return <ThemeEditor />;
+	return (
+		<DialogProvider>
+			<ThemeEditor />
+		</DialogProvider>
+	);
 }

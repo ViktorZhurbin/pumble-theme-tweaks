@@ -1,5 +1,5 @@
 import { For } from "solid-js";
-import { useConfirmDialog } from "@/components/Dialog";
+import { useDialogs } from "@/components/dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
@@ -8,7 +8,7 @@ import { SaveButton } from "./SaveButton";
 
 export function PresetSelector() {
 	const ctx = useThemeEditorContext();
-	const confirmDialog = useConfirmDialog();
+	const dialogs = useDialogs();
 
 	const disabled = () => !ctx.store.tweaksOn;
 
@@ -24,17 +24,19 @@ export function PresetSelector() {
 
 		// Check for unsaved changes
 		if (ctx.store.hasUnsavedChanges) {
+			// Reset select to current value first (will update after confirmation)
+			select.value = ctx.store.selectedPreset ?? "";
+
 			// Show confirmation dialog
-			confirmDialog.open({
+			const confirmed = await dialogs.confirm({
 				title: "You have unsaved changes. Switch preset anyway?",
 				confirmText: "Switch",
 				confirmType: "primary",
-				onConfirm: async () => {
-					await loadPreset(value, currentTabId);
-				},
 			});
-			// Reset select to current value (will update after confirmation)
-			select.value = ctx.store.selectedPreset ?? "";
+
+			if (confirmed) {
+				await loadPreset(value, currentTabId);
+			}
 			return;
 		}
 
@@ -63,37 +65,33 @@ export function PresetSelector() {
 	const presetNames = () => Object.keys(ctx.store.savedPresets).sort();
 
 	return (
-		<>
-			<div class="w-full px-6 py-4">
-				<fieldset class="fieldset ">
-					<legend class="fieldset-legend">Preset</legend>
-					<div class="flex items-center gap-2">
-						<select
-							class="select"
-							value={ctx.store.selectedPreset ?? ""}
-							onChange={handleChange}
-							disabled={disabled()}
-						>
-							<option value="">No Preset Selected</option>
-							<For each={presetNames()}>
-								{(presetName) => (
-									<option
-										value={presetName}
-										selected={presetName === ctx.store.selectedPreset}
-									>
-										{presetName}
-									</option>
-								)}
-							</For>
-						</select>
+		<div class="w-full px-6 py-4">
+			<fieldset class="fieldset ">
+				<legend class="fieldset-legend">Preset</legend>
+				<div class="flex items-center gap-2">
+					<select
+						class="select"
+						value={ctx.store.selectedPreset ?? ""}
+						onChange={handleChange}
+						disabled={disabled()}
+					>
+						<option value="">No Preset Selected</option>
+						<For each={presetNames()}>
+							{(presetName) => (
+								<option
+									value={presetName}
+									selected={presetName === ctx.store.selectedPreset}
+								>
+									{presetName}
+								</option>
+							)}
+						</For>
+					</select>
 
-						<SaveButton />
-						<PresetDropdown />
-					</div>
-				</fieldset>
-			</div>
-
-			{confirmDialog.Dialog()}
-		</>
+					<SaveButton />
+					<PresetDropdown />
+				</div>
+			</fieldset>
+		</div>
 	);
 }
