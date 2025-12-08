@@ -19,6 +19,14 @@ export default defineConfig({
 		},
 	},
 	webExt: {
+		chromiumPort: 9222,
+		startUrls: ["https://app.pumble.com"],
+		openDevtools: true,
+		openConsole: true,
+		binaries: {
+			chrome:
+				"/Applications/Google Chrome Beta.app/Contents/MacOS/Google Chrome Beta",
+		},
 		chromiumArgs: ["--user-data-dir=./.wxt/chrome-data"],
 	},
 	dev: {
