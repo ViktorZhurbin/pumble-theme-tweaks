@@ -1,12 +1,4 @@
 /**
- * Configuration for a CSS property that can be customized
- */
-export interface PropertyItem {
-	label: string;
-	propertyName: string;
-}
-
-/**
  * Runtime tweak entry (includes computed initialValue from DOM)
  */
 export interface TweakEntry {
@@ -22,48 +14,3 @@ export interface TweakEntry {
 export interface WorkingTweaks {
 	cssProperties: Record<string, TweakEntry>;
 }
-
-/**
- * Stored tweak entry (persisted to browser.storage)
- * Does not include initialValue, which is computed from DOM at runtime
- */
-export interface StoredTweakEntry {
-	value: string;
-	enabled: boolean;
-}
-
-/**
- * Preset data (persisted to browser.storage)
- */
-export interface PresetData {
-	name: string;
-	cssProperties: Record<string, StoredTweakEntry>;
-	createdAt: string;
-	updatedAt: string;
-}
-
-/**
- * Storage data structure (preset-based format)
- */
-export interface StorageData {
-	working_tweaks?: {
-		cssProperties: Record<string, StoredTweakEntry>;
-	};
-	selected_preset?: string | null;
-	saved_presets?: Record<string, PresetData>;
-	tweaks_on?: boolean;
-	last_update_tab_id?: number;
-}
-
-/**
- * Configuration for a derived color
- */
-export type DerivedColorConfig = {
-	propertyName: string;
-	derive: (baseColor: string) => string;
-};
-
-/**
- * Registry mapping base property names to their derived colors
- */
-export type DerivedColorRegistry = Record<string, DerivedColorConfig[]>;

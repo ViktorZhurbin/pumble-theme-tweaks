@@ -1,4 +1,4 @@
-import type { PropertyItem } from "@/types/tweaks";
+import type { PropertyItem } from "@/types/properties";
 
 /**
  * Configuration for CSS properties that can be customized

@@ -1,5 +1,5 @@
 import { colord } from "colord";
-import type { DerivedColorRegistry } from "@/types/tweaks";
+import type { DerivedColorRegistry } from "@/types/properties";
 
 /**
  * Registry defining which base color properties generate derived colors

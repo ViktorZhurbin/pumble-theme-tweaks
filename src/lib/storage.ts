@@ -1,6 +1,10 @@
 import { browser } from "wxt/browser";
 import { logger } from "@/lib/logger";
-import type { PresetData, StorageData, StoredTweakEntry } from "@/types/tweaks";
+import type {
+	StorageData,
+	StoredPreset,
+	StoredTweakEntry,
+} from "@/types/storage";
 import { Utils } from "./utils";
 
 /**
@@ -145,7 +149,7 @@ const setSelectedPreset = async (presetName: string | null, tabId?: number) => {
 /**
  * Gets all presets
  */
-const getAllPresets = async (): Promise<Record<string, PresetData>> => {
+const getAllPresets = async (): Promise<Record<string, StoredPreset>> => {
 	try {
 		const result = (await browser.storage.sync.get(
 			"saved_presets",
@@ -160,7 +164,7 @@ const getAllPresets = async (): Promise<Record<string, PresetData>> => {
 /**
  * Gets a single preset by name
  */
-const getPreset = async (name: string): Promise<PresetData | undefined> => {
+const getPreset = async (name: string): Promise<StoredPreset | undefined> => {
 	const allPresets = await getAllPresets();
 	return allPresets[name];
 };

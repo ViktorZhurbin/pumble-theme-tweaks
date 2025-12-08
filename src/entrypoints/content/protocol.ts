@@ -1,5 +1,5 @@
 import type { RuntimeState } from "@/types/runtime";
-import type { PresetData } from "@/types/tweaks";
+import type { StoredPreset } from "@/types/storage";
 
 /**
  * Messages that can be sent TO content scripts
@@ -19,5 +19,5 @@ export interface ContentScriptProtocol {
 	savePresetAs(data: { presetName: string }): void;
 	deletePreset(data: { presetName: string }): void;
 	renamePreset(data: { oldName: string; newName: string }): void;
-	getAllPresets(): Record<string, PresetData>;
+	getAllPresets(): Record<string, StoredPreset>;
 }

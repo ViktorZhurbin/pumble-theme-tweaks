@@ -2,12 +2,8 @@ import { PROPERTY_NAMES } from "@/constants/properties";
 import { logger } from "@/lib/logger";
 import { Storage } from "@/lib/storage";
 import type { RuntimeState } from "@/types/runtime";
-import type {
-	PresetData,
-	StoredTweakEntry,
-	TweakEntry,
-	WorkingTweaks,
-} from "@/types/tweaks";
+import type { StoredPreset, StoredTweakEntry } from "@/types/storage";
+import type { TweakEntry, WorkingTweaks } from "@/types/tweaks";
 import { Background } from "../background/messenger";
 import { DomUtils } from "./dom-utils";
 
@@ -279,7 +275,7 @@ class ThemeStateManager {
 	private computeUnsavedChanges(
 		workingTweaks: WorkingTweaks,
 		selectedPreset: string | null,
-		savedPresets: Record<string, PresetData>,
+		savedPresets: Record<string, StoredPreset>,
 	): boolean {
 		if (!selectedPreset) return false;
 
