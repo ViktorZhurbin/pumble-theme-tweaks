@@ -197,7 +197,6 @@ export const PresetDropdown = () => {
 				disabled: disabled(),
 			}}
 			items={items()}
-			positionX="end"
 		/>
 	);
 };
