@@ -25,11 +25,10 @@ export const SaveButton = () => {
 		}
 	};
 
-	const getTitle = () => {
-		if (!ctx.store.tweaksOn) return "Enable tweaks to save";
-		if (!ctx.store.hasUnsavedChanges) return "No unsaved changes";
-		return `Save changes to "${ctx.store.selectedPreset}"`;
-	};
+	const getTooltip = () =>
+		ctx.store.selectedPreset
+			? `Save changes to "${ctx.store.selectedPreset}"`
+			: "";
 
 	return (
 		<div class="indicator">
@@ -37,14 +36,15 @@ export const SaveButton = () => {
 				<span class="indicator-item status status-warning"></span>
 			</Show>
 
-			<button
-				class="btn btn-xs btn-soft btn-warning"
-				onClick={handleClick}
-				disabled={disabled()}
-				title={getTitle()}
-			>
-				Save Changes
-			</button>
+			<div class="tooltip" data-tip={getTooltip()}>
+				<button
+					class="btn btn-xs btn-soft btn-warning"
+					onClick={handleClick}
+					disabled={disabled()}
+				>
+					Save Changes
+				</button>
+			</div>
 		</div>
 	);
 };

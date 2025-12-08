@@ -25,16 +25,11 @@ export const ResetButton = () => {
 		}
 	};
 
-	const getTitle = () => {
-		if (ctx.store.selectedPreset) {
-			return `Reset to "${ctx.store.selectedPreset}" preset values`;
-		}
-		return "Reset all colors to Pumble defaults";
-	};
+	const title = "Reset unsaved changes";
 
 	const handleReset = async () => {
 		const confirmed = await dialogs.confirm({
-			title: getTitle(),
+			title: `${title}?`,
 			confirmText: "Reset",
 			confirmType: "error",
 		});
@@ -44,20 +39,15 @@ export const ResetButton = () => {
 		}
 	};
 
-	const getTooltip = () => {
-		if (!ctx.store.tweaksOn) return "Enable tweaks to reset colors";
-		if (!ctx.store.hasUnsavedChanges) return "No changes to reset";
-		return getTitle();
-	};
-
 	return (
-		<button
-			class="btn btn-xs btn-ghost btn-circle"
-			onClick={handleReset}
-			disabled={!ctx.store.tweaksOn || !ctx.store.hasUnsavedChanges}
-			title={getTooltip()}
-		>
-			<ResetIcon />
-		</button>
+		<div class="tooltip" data-tip={title}>
+			<button
+				class="btn btn-xs btn-ghost btn-circle"
+				onClick={handleReset}
+				disabled={!ctx.store.tweaksOn || !ctx.store.hasUnsavedChanges}
+			>
+				<ResetIcon />
+			</button>
+		</div>
 	);
 };

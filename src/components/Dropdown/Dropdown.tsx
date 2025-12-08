@@ -21,15 +21,16 @@ export const Dropdown = (props: DropdownProps) => {
 
 	return (
 		<div>
-			<button
-				class={props.trigger.class ?? "btn"}
-				popoverTarget={popoverId}
-				style={{ "anchor-name": anchorName }}
-				disabled={props.trigger.disabled}
-				title={props.trigger.title}
-			>
-				{props.trigger.content}
-			</button>
+			<div class="tooltip" data-tip={props.trigger.title}>
+				<button
+					class={props.trigger.class ?? "btn"}
+					popoverTarget={popoverId}
+					style={{ "anchor-name": anchorName }}
+					disabled={props.trigger.disabled}
+				>
+					{props.trigger.content}
+				</button>
+			</div>
 
 			<ul
 				ref={popoverRef}

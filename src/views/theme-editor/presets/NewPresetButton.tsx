@@ -36,18 +36,17 @@ export const NewPresetButton = () => {
 		);
 	};
 
+	const tooltip = () => (disabled() ? "" : "Create a new preset");
+
 	return (
-		<button
-			class="btn btn-xs btn-soft btn-primary"
-			onClick={handleNewPreset}
-			disabled={disabled()}
-			title={
-				disabled()
-					? "Enable tweaks to create a new preset"
-					: "Start a new preset from scratch"
-			}
-		>
-			+ New
-		</button>
+		<div class="tooltip" data-tip={tooltip()}>
+			<button
+				class="btn btn-xs btn-soft btn-primary"
+				onClick={handleNewPreset}
+				disabled={disabled()}
+			>
+				+ New
+			</button>
+		</div>
 	);
 };

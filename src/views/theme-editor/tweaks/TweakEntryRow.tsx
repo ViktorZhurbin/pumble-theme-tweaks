@@ -35,14 +35,13 @@ export const TweakEntryRow = (props: TweakEntryRowProps) => {
 	};
 
 	const getResetTooltip = () => {
-		if (areTweaksOff()) return "Enable tweaks to reset";
-		if (!tweakEntry()?.enabled) return "Enable this property to reset";
 		if (!isModified()) {
-			return "No changes to reset";
+			return "";
 		}
+
 		return ctx.store.selectedPreset
-			? "Reset to saved preset value"
-			: "Reset to Pumble default";
+			? "Reset to latest saved color"
+			: "Reset to Pumble theme color";
 	};
 
 	const handleReset = (e: MouseEvent) => {
@@ -78,29 +77,36 @@ export const TweakEntryRow = (props: TweakEntryRowProps) => {
 			<td class={`${inactiveClass()}`.trim()}>{props.label}</td>
 
 			<td class={inactiveClass()}>
-				<button
-					class="btn btn-xs btn-ghost btn-circle"
-					onClick={handleReset}
-					disabled={disabled() || !isModified()}
-					title={getResetTooltip()}
-				>
-					<ResetIcon size={16} />
-				</button>
+				<div class="tooltip" data-tip={getResetTooltip()}>
+					<button
+						class="btn btn-xs btn-ghost btn-circle"
+						onClick={handleReset}
+						disabled={disabled() || !isModified()}
+					>
+						<ResetIcon size={16} />
+					</button>
+				</div>
 			</td>
 
 			<td class={inactiveClass()}>
-				<ColorPicker disabled={disabled()} propertyName={props.propertyName} />
+				<div class="tooltip" data-tip="Pick a color">
+					<ColorPicker
+						disabled={disabled()}
+						propertyName={props.propertyName}
+					/>
+				</div>
 			</td>
 
 			<td class={areTweaksOff() ? disabledClasses : ""}>
-				<input
-					type="checkbox"
-					class="checkbox checkbox-primary checkbox-sm"
-					checked={tweakEntry()?.enabled ?? true}
-					disabled={areTweaksOff()}
-					onChange={handleToggle}
-					title="Enable this color tweak"
-				/>
+				<div class="tooltip" data-tip="Toggle">
+					<input
+						type="checkbox"
+						class="checkbox checkbox-primary checkbox-sm"
+						checked={tweakEntry()?.enabled ?? true}
+						disabled={areTweaksOff()}
+						onChange={handleToggle}
+					/>
+				</div>
 			</td>
 		</tr>
 	);

@@ -17,13 +17,14 @@ export const TweaksToggle = () => {
 	};
 
 	return (
-		<input
-			type="checkbox"
-			class="checkbox checkbox-primary checkbox-sm"
-			title="Toggle all"
-			disabled={false}
-			checked={ctx.store.tweaksOn}
-			onChange={handleChange}
-		/>
+		<div class="tooltip" data-tip="Toggle all">
+			<input
+				type="checkbox"
+				class="checkbox checkbox-primary checkbox-sm"
+				disabled={false}
+				checked={ctx.store.tweaksOn}
+				onChange={handleChange}
+			/>
+		</div>
 	);
 };
