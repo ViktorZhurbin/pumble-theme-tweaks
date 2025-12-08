@@ -322,7 +322,7 @@ class ThemeStateManager {
 	}
 
 	/**
-	 * Resets working tweaks and deselects preset (NEW preset-based)
+	 * Resets working tweaks and deselects preset
 	 */
 	async resetWorkingTweaks() {
 		logger.info("ThemeState: Resetting working tweaks");
@@ -337,7 +337,7 @@ class ThemeStateManager {
 	}
 
 	/**
-	 * Updates a single CSS property in working state (NEW preset-based)
+	 * Updates a single CSS property in working state
 	 */
 	updateWorkingProperty(propertyName: string, value: string) {
 		logger.debug("ThemeState: Updating working property", {

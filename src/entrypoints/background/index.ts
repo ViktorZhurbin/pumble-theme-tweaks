@@ -1,6 +1,6 @@
-import { logger } from "@/lib/logger";
 import { browser } from "wxt/browser";
 import { defineBackground } from "wxt/utils/define-background";
+import { logger } from "@/lib/logger";
 import { Background } from "./messenger";
 
 export default defineBackground(() => {
