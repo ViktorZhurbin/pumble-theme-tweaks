@@ -66,7 +66,7 @@ export const PresetSelector = () => {
 	return (
 		<fieldset class="fieldset ">
 			<legend class="fieldset-legend">Preset</legend>
-			<div class="flex items-center gap-2">
+			<div class="flex items-center gap-2.5">
 				<select
 					class="select bg-base-300"
 					value={ctx.store.selectedPreset ?? ""}

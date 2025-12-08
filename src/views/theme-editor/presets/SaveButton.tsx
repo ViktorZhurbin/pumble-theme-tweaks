@@ -1,6 +1,7 @@
 import { Show } from "solid-js";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
+import { buttonClass } from "./classes";
 import { useHandleSaveAs } from "./useHandleSaveAs";
 
 export const SaveButton = () => {
@@ -33,16 +34,16 @@ export const SaveButton = () => {
 	return (
 		<div class="indicator">
 			<Show when={!disabled()}>
-				<span class="indicator-item status status-warning"></span>
+				<span class="indicator-item status status-warning w-1.5 h-1.5"></span>
 			</Show>
 
 			<div class="tooltip" data-tip={getTooltip()}>
 				<button
-					class="btn btn-xs btn-soft btn-warning"
+					class={`${buttonClass} btn-warning`}
 					onClick={handleClick}
 					disabled={disabled()}
 				>
-					Save Changes
+					Save
 				</button>
 			</div>
 		</div>

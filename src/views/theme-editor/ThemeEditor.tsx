@@ -102,9 +102,9 @@ export const ThemeEditor = () => {
 				</Show>
 
 				<Show when={isReady() && !error()}>
-					<div class="flex-col bg-base-100 rounded-3xl border border-neutral-700">
+					<div class="flex-col bg-base-100 rounded-lg border border-neutral-700">
 						<PresetsContainer />
-						<div class="divider my-1" />
+						<div class="divider my-0 h-0.5" />
 						<TweaksContainer />
 					</div>
 				</Show>

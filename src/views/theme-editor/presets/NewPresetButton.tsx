@@ -2,6 +2,7 @@ import { useDialogs } from "@/components/dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
+import { buttonClass } from "./classes";
 
 export const NewPresetButton = () => {
 	const ctx = useThemeEditorContext();
@@ -41,7 +42,7 @@ export const NewPresetButton = () => {
 	return (
 		<div class="tooltip" data-tip={tooltip()}>
 			<button
-				class="btn btn-xs btn-soft btn-primary"
+				class={`${buttonClass} btn-primary`}
 				onClick={handleNewPreset}
 				disabled={disabled()}
 			>

@@ -1,7 +1,7 @@
 import { useDialogs } from "@/components/dialog";
-import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
+import { buttonClass } from "./classes";
 
 export const ResetButton = () => {
 	const ctx = useThemeEditorContext();
@@ -42,11 +42,11 @@ export const ResetButton = () => {
 	return (
 		<div class="tooltip" data-tip={title}>
 			<button
-				class="btn btn-xs btn-ghost btn-circle"
+				class={`${buttonClass} btn-error`}
 				onClick={handleReset}
 				disabled={!ctx.store.tweaksOn || !ctx.store.hasUnsavedChanges}
 			>
-				<ResetIcon />
+				Reset
 			</button>
 		</div>
 	);
