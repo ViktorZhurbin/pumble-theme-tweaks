@@ -258,10 +258,15 @@ class ThemeStateManager {
 		selectedPreset: string | null,
 		savedPresets: Record<string, StoredPreset>,
 	): boolean {
-		if (!selectedPreset) return false;
+		// No preset selected, check if user has changed some colors
+		if (!selectedPreset || !savedPresets[selectedPreset]) {
+			console.log("workingTweaks.cssProperties", workingTweaks.cssProperties);
+			return Object.values(workingTweaks.cssProperties).some(
+				(entry) => entry.value !== null && entry.value !== entry.initialValue,
+			);
+		}
 
 		const preset = savedPresets[selectedPreset];
-		if (!preset) return false;
 
 		// Compare working tweaks to preset
 		const workingProps = workingTweaks.cssProperties;
@@ -329,6 +334,8 @@ class ThemeStateManager {
 
 		// Clear working tweaks from storage
 		await Storage.clearWorkingTweaks(this.tabId);
+
+		Background.sendMessage("updateBadge", { badgeState: "DEFAULT" });
 
 		// Deselect preset
 		await Storage.setSelectedPreset(null, this.tabId);

@@ -20,7 +20,7 @@ export const NewPresetButton = () => {
 		// Check for unsaved changes before clearing
 		if (ctx.store.hasUnsavedChanges) {
 			const confirmed = await dialogs.confirm({
-				title: "You have unsaved changes. Start a new preset anyway?",
+				title: "You have unsaved changes. Start from scratch anyway?",
 				confirmText: "Start New",
 				confirmType: "primary",
 			});

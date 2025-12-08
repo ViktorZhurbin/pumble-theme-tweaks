@@ -10,6 +10,8 @@ import {
 	validateImport,
 } from "@/lib/import-export";
 import { logger } from "@/lib/logger";
+import { validatePresetName } from "@/lib/validate";
+import { useHandleSaveAs } from "./useHandleSaveAs";
 
 export const PresetDropdown = () => {
 	const ctx = useThemeEditorContext();
@@ -89,32 +91,6 @@ export const PresetDropdown = () => {
 		}
 	};
 
-	const handleSaveAs = async () => {
-		const currentTabId = ctx.tabId();
-		if (!currentTabId) return;
-
-		const name = await dialogs.input({
-			title: "Save Preset As",
-			placeholder: "Enter preset name",
-			confirmText: "Save",
-			validate: (value) => validatePresetName(value, ctx.store.savedPresets),
-		});
-
-		if (name) {
-			try {
-				await ContentScript.sendMessage(
-					"savePresetAs",
-					{ presetName: name },
-					currentTabId,
-				);
-			} catch (err) {
-				logger.error("PresetDropdown: Failed to save preset", err);
-			}
-		}
-	};
-
-	// === Import Handlers ===
-
 	const handleImport = async (value: string) => {
 		const parsed = parseImportJSON(value) as Record<string, string>;
 
@@ -156,6 +132,8 @@ export const PresetDropdown = () => {
 			await handleImport(value);
 		}
 	};
+
+	const handleSaveAs = useHandleSaveAs();
 
 	// === Menu Items ===
 
@@ -211,16 +189,3 @@ export const PresetDropdown = () => {
 		/>
 	);
 };
-
-// === Helpers ===
-
-function validatePresetName(
-	name: string,
-	savedPresets: Record<string, unknown>,
-	existingName?: string,
-): string | null {
-	if (!name.trim()) return "Preset name cannot be empty";
-	if (existingName && name === existingName) return null;
-	if (savedPresets[name]) return `Preset "${name}" already exists`;
-	return null;
-}
