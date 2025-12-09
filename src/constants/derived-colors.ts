@@ -39,19 +39,19 @@ export const DERIVED_COLORS: DerivedColorRegistry = {
 		},
 		{
 			propertyName: "--left-nav-hover",
-			derive: (baseColor) => colord(baseColor).alpha(0.12).toRgbString(),
+			derive: (baseColor) => colord(baseColor).alpha(0.32).toRgbString(),
 		},
 		{
 			propertyName: "--left-nav-selected",
-			derive: (baseColor) => colord(baseColor).alpha(0.24).toRgbString(),
+			derive: (baseColor) => colord(baseColor).alpha(0.44).toRgbString(),
 		},
 		{
 			propertyName: "--left-nav-icons",
-			derive: (baseColor) => colord(baseColor).alpha(0.54).toRgbString(),
+			derive: (baseColor) => colord(baseColor).alpha(0.74).toRgbString(),
 		},
 		{
 			propertyName: "--left-nav-text-medium",
-			derive: (baseColor) => colord(baseColor).alpha(0.6).toRgbString(),
+			derive: (baseColor) => colord(baseColor).alpha(0.8).toRgbString(),
 		},
 		{
 			propertyName: "--left-nav-text-high",
