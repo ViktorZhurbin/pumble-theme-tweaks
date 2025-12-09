@@ -128,12 +128,18 @@ export default defineContentScript({
 			if (areaName !== "sync") return;
 
 			// Preset-based system
-			if (
-				changes.working_tweaks ||
-				changes.selected_preset ||
-				changes.saved_presets ||
-				changes.tweaks_on
-			) {
+			const changedKeys = Object.keys(changes);
+			const relevantKeys = [
+				"working_tweaks",
+				"selected_preset",
+				"saved_presets",
+				"tweaks_on",
+			];
+			const hasRelevantChanges = changedKeys.some((key) =>
+				relevantKeys.includes(key),
+			);
+
+			if (hasRelevantChanges) {
 				logger.debug("Storage changed, re-applying tweaks");
 				ThemeState.reloadWorkingState();
 			}

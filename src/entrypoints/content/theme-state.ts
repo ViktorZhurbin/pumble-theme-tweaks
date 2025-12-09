@@ -43,8 +43,11 @@ class ThemeStateManager {
 	}
 
 	/**
-	 * NEW PRESET-BASED METHODS
+	 * Returns current runtime state snapshot
 	 */
+	getCurrentState(): RuntimeState {
+		return { ...this.currentState };
+	}
 
 	/**
 	 * Initializes the preset-based system
@@ -67,16 +70,13 @@ class ThemeStateManager {
 			storedWorkingTweaks.cssProperties,
 		);
 
-		// Apply working tweaks to DOM if enabled
 		if (tweaksOn) {
+			// Apply to DOM
 			for (const [key, prop] of Object.entries(workingTweaks.cssProperties)) {
 				if (prop.enabled && prop.value !== null) {
 					DomUtils.applyCSSProperty(key, prop.value);
 				}
 			}
-			Background.sendMessage("updateBadge", { badgeState: "ON" });
-		} else {
-			Background.sendMessage("updateBadge", { badgeState: "OFF" });
 		}
 
 		// Compute unsaved changes
@@ -85,6 +85,14 @@ class ThemeStateManager {
 			selectedPreset,
 			savedPresets,
 		);
+
+		if (!tweaksOn) {
+			Background.sendMessage("updateBadge", { badgeState: "OFF" });
+		} else if (tweaksOn && !selectedPreset && !hasUnsavedChanges) {
+			Background.sendMessage("updateBadge", { badgeState: "DEFAULT" });
+		} else {
+			Background.sendMessage("updateBadge", { badgeState: "ON" });
+		}
 
 		// Update state
 		this.currentState = {
@@ -124,24 +132,29 @@ class ThemeStateManager {
 			storedWorkingTweaks.cssProperties,
 		);
 
-		// Apply to DOM
-		if (tweaksOn) {
-			for (const [key, prop] of Object.entries(workingTweaks.cssProperties)) {
-				if (prop.enabled && prop.value !== null) {
-					DomUtils.applyCSSProperty(key, prop.value);
-				}
-			}
-			Background.sendMessage("updateBadge", { badgeState: "ON" });
-		} else {
-			Background.sendMessage("updateBadge", { badgeState: "OFF" });
-		}
-
 		// Compute unsaved changes
 		const hasUnsavedChanges = this.computeUnsavedChanges(
 			workingTweaks,
 			selectedPreset,
 			savedPresets,
 		);
+
+		if (tweaksOn) {
+			// Apply to DOM
+			for (const [key, prop] of Object.entries(workingTweaks.cssProperties)) {
+				if (prop.enabled && prop.value !== null) {
+					DomUtils.applyCSSProperty(key, prop.value);
+				}
+			}
+		}
+
+		if (!tweaksOn) {
+			Background.sendMessage("updateBadge", { badgeState: "OFF" });
+		} else if (tweaksOn && !selectedPreset && !hasUnsavedChanges) {
+			Background.sendMessage("updateBadge", { badgeState: "DEFAULT" });
+		} else {
+			Background.sendMessage("updateBadge", { badgeState: "ON" });
+		}
 
 		// Update state
 		this.currentState = {
@@ -176,8 +189,6 @@ class ThemeStateManager {
 		// Set working tweaks to preset values
 		await Storage.setWorkingTweaks(preset.cssProperties, this.tabId);
 		await Storage.setSelectedPreset(presetName, this.tabId);
-
-		// Re-apply will be triggered by storage.onChanged listener
 	}
 
 	/**
@@ -186,10 +197,8 @@ class ThemeStateManager {
 	async importPreset(cssProperties: StoredPreset["cssProperties"]) {
 		logger.info("ThemeState: Importing preset");
 
-		// Set working tweaks to preset values
+		// Set imported preset values as working tweaks
 		await Storage.setWorkingTweaks(cssProperties, this.tabId);
-
-		// Re-apply will be triggered by storage.onChanged listener
 	}
 
 	/**
@@ -212,8 +221,6 @@ class ThemeStateManager {
 			cssProperties,
 			this.tabId,
 		);
-
-		// Re-apply will be triggered by storage.onChanged listener
 	}
 
 	/**
@@ -226,8 +233,6 @@ class ThemeStateManager {
 
 		await Storage.createPreset(presetName, cssProperties, this.tabId);
 		await Storage.setSelectedPreset(presetName, this.tabId);
-
-		// Re-apply will be triggered by storage.onChanged listener
 	}
 
 	/**
@@ -242,8 +247,63 @@ class ThemeStateManager {
 		if (this.currentState.selectedPreset === presetName) {
 			await Storage.setSelectedPreset(null, this.tabId);
 		}
+	}
 
-		// Re-apply will be triggered by storage.onChanged listener
+	/**
+	 * Toggles tweaks on/off
+	 */
+	async setTweaksOn(enabled: boolean) {
+		logger.info("ThemeState: Toggling tweaks", { enabled });
+
+		// Update tweaks enabled state
+		await Storage.setTweaksOn(enabled, this.tabId);
+	}
+
+	/**
+	 * Resets working tweaks and deselects preset
+	 */
+	async resetWorkingTweaks() {
+		logger.info("ThemeState: Resetting working tweaks");
+
+		// Clear working tweaks from storage
+		await Storage.clearWorkingTweaks(this.tabId);
+
+		// Deselect preset
+		await Storage.setSelectedPreset(null, this.tabId);
+	}
+
+	/**
+	 * Updates a single CSS property in working state
+	 */
+	updateWorkingProperty(propertyName: string, value: string) {
+		logger.debug("ThemeState: Updating working property", {
+			propertyName,
+			value,
+		});
+
+		// Apply to DOM immediately for instant feedback
+		DomUtils.applyCSSProperty(propertyName, value);
+
+		// Save to storage in background (debounced)
+		Storage.saveWorkingPropertyDebounced(propertyName, value, this.tabId);
+	}
+
+	/**
+	 * Toggles a working property's enabled state
+	 */
+	toggleWorkingProperty(propertyName: string, enabled: boolean) {
+		logger.debug("ThemeState: Toggling working property", {
+			propertyName,
+			enabled,
+		});
+
+		const cssProperties = this.buildStoredCssProperties();
+
+		if (cssProperties[propertyName]) {
+			cssProperties[propertyName].enabled = enabled;
+		}
+
+		Storage.setWorkingTweaks(cssProperties, this.tabId);
 	}
 
 	/**
@@ -312,148 +372,18 @@ class ThemeStateManager {
 		const cssProperties: Record<string, TweakEntry> = {};
 
 		for (const propertyName of PROPERTY_NAMES) {
-			const initialValue = currentDOMValues[propertyName] || "";
 			const stored = storedProps[propertyName];
+			const value = stored?.value ?? null;
+			const initialValue = currentDOMValues[propertyName] ?? value ?? "";
 
 			cssProperties[propertyName] = {
-				value: stored?.value ?? null,
+				value,
 				initialValue,
 				enabled: stored?.enabled ?? true,
 			};
 		}
 
 		return { cssProperties };
-	}
-
-	/**
-	 * Toggles tweaks on/off
-	 */
-	async setTweaksOn(enabled: boolean) {
-		logger.info("ThemeState: Toggling tweaks", { enabled });
-
-		// Update tweaks enabled state
-		await Storage.setTweaksOn(enabled, this.tabId);
-
-		// Re-apply will be triggered by storage.onChanged listener
-	}
-
-	/**
-	 * Resets working tweaks and deselects preset
-	 */
-	async resetWorkingTweaks() {
-		logger.info("ThemeState: Resetting working tweaks");
-
-		// Clear working tweaks from storage
-		await Storage.clearWorkingTweaks(this.tabId);
-
-		Background.sendMessage("updateBadge", { badgeState: "DEFAULT" });
-
-		// Deselect preset
-		await Storage.setSelectedPreset(null, this.tabId);
-
-		// Re-apply will be triggered by storage.onChanged listener
-	}
-
-	/**
-	 * Updates a single CSS property in working state
-	 */
-	updateWorkingProperty(propertyName: string, value: string) {
-		logger.debug("ThemeState: Updating working property", {
-			propertyName,
-			value,
-		});
-
-		// Apply to DOM immediately for instant feedback
-		DomUtils.applyCSSProperty(propertyName, value);
-
-		// Update internal state immediately
-		const existing =
-			this.currentState.workingTweaks.cssProperties[propertyName];
-		this.currentState.workingTweaks.cssProperties[propertyName] = {
-			value,
-			initialValue: existing?.initialValue ?? "",
-			enabled: existing?.enabled ?? true,
-		};
-
-		// Recompute unsaved changes
-		this.currentState.hasUnsavedChanges = this.computeUnsavedChanges(
-			this.currentState.workingTweaks,
-			this.currentState.selectedPreset,
-			this.currentState.savedPresets,
-		);
-
-		// Update badge to show tweaks are active
-		Background.sendMessage("updateBadge", { badgeState: "ON" });
-
-		// Broadcast updated state to popup immediately
-		Background.sendMessage("stateChanged", {
-			state: this.currentState,
-			tabId: this.tabId,
-		});
-
-		// Save to storage in background (debounced)
-		Storage.saveWorkingPropertyDebounced(propertyName, value, this.tabId);
-	}
-
-	/**
-	 * Toggles a working property's enabled state
-	 */
-	toggleWorkingProperty(propertyName: string, enabled: boolean) {
-		logger.debug("ThemeState: Toggling working property", {
-			propertyName,
-			enabled,
-		});
-
-		const existing =
-			this.currentState.workingTweaks.cssProperties[propertyName];
-		if (!existing) return;
-
-		// Update enabled state
-		this.currentState.workingTweaks.cssProperties[propertyName] = {
-			...existing,
-			enabled,
-		};
-
-		// Apply or remove from DOM based on enabled state
-		if (enabled && existing.value !== null) {
-			DomUtils.applyCSSProperty(propertyName, existing.value);
-		} else {
-			DomUtils.removeCSSProperty(propertyName);
-		}
-
-		// Recompute unsaved changes
-		this.currentState.hasUnsavedChanges = this.computeUnsavedChanges(
-			this.currentState.workingTweaks,
-			this.currentState.selectedPreset,
-			this.currentState.savedPresets,
-		);
-
-		// Broadcast updated state to popup
-		Background.sendMessage("stateChanged", {
-			state: this.currentState,
-			tabId: this.tabId,
-		});
-
-		// Save to storage
-		const cssProperties: Record<string, StoredTweakEntry> = {};
-		for (const [key, entry] of Object.entries(
-			this.currentState.workingTweaks.cssProperties,
-		)) {
-			if (entry.value !== null) {
-				cssProperties[key] = {
-					value: entry.value,
-					enabled: entry.enabled,
-				};
-			}
-		}
-		Storage.setWorkingTweaks(cssProperties, this.tabId);
-	}
-
-	/**
-	 * Returns current runtime state snapshot
-	 */
-	getCurrentState(): RuntimeState {
-		return { ...this.currentState };
 	}
 }
 
