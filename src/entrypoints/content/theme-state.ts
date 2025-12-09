@@ -25,7 +25,7 @@ class ThemeStateManager {
 	/**
 	 * Initializes the tab ID by requesting it from the background script
 	 */
-	async initialize() {
+	async initializeTabId() {
 		if (this.tabId === undefined) {
 			this.tabId = await Background.sendMessage("getTabId", undefined);
 
@@ -50,11 +50,11 @@ class ThemeStateManager {
 	}
 
 	/**
-	 * Initializes the preset-based system
-	 * Loads working tweaks, presets, and applies to DOM
+	 * Reloads state from storage and re-applies
+	 * Called when storage changes (multi-tab sync)
 	 */
-	async initializePresetSystem() {
-		logger.debug("ThemeState: Initializing preset system");
+	async reloadState() {
+		logger.debug("ThemeState: Reloading state");
 
 		// Load state from storage
 		const tweaksOn = await Storage.getTweaksOn();
@@ -86,68 +86,7 @@ class ThemeStateManager {
 			savedPresets,
 		);
 
-		if (!tweaksOn) {
-			Background.sendMessage("updateBadge", { badgeState: "OFF" });
-		} else if (tweaksOn && !selectedPreset && !hasUnsavedChanges) {
-			Background.sendMessage("updateBadge", { badgeState: "DEFAULT" });
-		} else {
-			Background.sendMessage("updateBadge", { badgeState: "ON" });
-		}
-
-		// Update state
-		this.currentState = {
-			tweaksOn,
-			workingTweaks,
-			selectedPreset,
-			savedPresets,
-			hasUnsavedChanges,
-		};
-
-		// Broadcast
-		Background.sendMessage("stateChanged", {
-			state: this.currentState,
-			tabId: this.tabId,
-		});
-
-		logger.debug("ThemeState: Preset system initialized", this.currentState);
-	}
-
-	/**
-	 * Reloads working state from storage and re-applies
-	 * Called when storage changes (multi-tab sync)
-	 */
-	async reloadWorkingState() {
-		logger.debug("ThemeState: Reloading working state");
-
-		const tweaksOn = await Storage.getTweaksOn();
-		const storedWorkingTweaks = await Storage.getWorkingTweaks();
-		const selectedPreset = await Storage.getSelectedPreset();
-		const savedPresets = await Storage.getAllPresets();
-
-		// Clear DOM first
-		DomUtils.resetCSSTweaks();
-
-		// Build working tweaks with initial values
-		const workingTweaks = this.buildWorkingTweaksWithInitialValues(
-			storedWorkingTweaks.cssProperties,
-		);
-
-		// Compute unsaved changes
-		const hasUnsavedChanges = this.computeUnsavedChanges(
-			workingTweaks,
-			selectedPreset,
-			savedPresets,
-		);
-
-		if (tweaksOn) {
-			// Apply to DOM
-			for (const [key, prop] of Object.entries(workingTweaks.cssProperties)) {
-				if (prop.enabled && prop.value !== null) {
-					DomUtils.applyCSSProperty(key, prop.value);
-				}
-			}
-		}
-
+		// update badge
 		if (!tweaksOn) {
 			Background.sendMessage("updateBadge", { badgeState: "OFF" });
 		} else if (tweaksOn && !selectedPreset && !hasUnsavedChanges) {
@@ -166,7 +105,7 @@ class ThemeStateManager {
 			hasUnsavedChanges,
 		};
 
-		// Broadcast
+		// Broadcast change to popup
 		Background.sendMessage("stateChanged", {
 			state: this.currentState,
 			tabId: this.tabId,

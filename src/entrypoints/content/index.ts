@@ -23,8 +23,8 @@ export default defineContentScript({
 
 		// Initialize: Apply saved tweaks on page load
 		const initializeTheme = async () => {
-			await ThemeState.initialize();
-			await ThemeState.initializePresetSystem();
+			await ThemeState.initializeTabId();
+			await ThemeState.reloadState();
 
 			themeObserver = watchThemeChanges();
 		};
@@ -127,21 +127,18 @@ export default defineContentScript({
 		) => {
 			if (areaName !== "sync") return;
 
-			// Preset-based system
-			const changedKeys = Object.keys(changes);
-			const relevantKeys = [
-				"working_tweaks",
-				"selected_preset",
-				"saved_presets",
-				"tweaks_on",
-			];
-			const hasRelevantChanges = changedKeys.some((key) =>
-				relevantKeys.includes(key),
+			const hasRelevantChanges = Object.keys(changes).some((key) =>
+				[
+					"working_tweaks",
+					"selected_preset",
+					"saved_presets",
+					"tweaks_on",
+				].includes(key),
 			);
 
 			if (hasRelevantChanges) {
 				logger.debug("Storage changed, re-applying tweaks");
-				ThemeState.reloadWorkingState();
+				ThemeState.reloadState();
 			}
 		};
 		browser.storage.onChanged.addListener(storageListener);
