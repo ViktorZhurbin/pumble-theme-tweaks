@@ -99,14 +99,14 @@ export const PresetDropdown = () => {
 	};
 
 	const handleImport = async (value: string) => {
-		const cssProperties = parseImportJSON(value);
-
 		try {
 			const currentTabId = ctx.tabId();
 			if (!currentTabId) {
 				logger.warn("PresetDropdown: No tab ID available");
 				return;
 			}
+
+			const cssProperties = parseImportJSON(value);
 
 			if (!cssProperties) {
 				logger.warn("PresetDropdown: Import failed");
