@@ -9,12 +9,12 @@ export const PROPERTIES: PropertyItem[] = [
 		propertyName: "--palette-secondary-main",
 	},
 	{
-		label: "Create button",
-		propertyName: "--palette-primary-main",
-	},
-	{
 		label: "Sidebar text",
 		propertyName: "--left-nav-text",
+	},
+	{
+		label: "Create button",
+		propertyName: "--palette-primary-main",
 	},
 	// {
 	// 	label: "Logo color",
