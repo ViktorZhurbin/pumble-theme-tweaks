@@ -18,10 +18,15 @@ export default defineContentScript({
 			timestamp: new Date().toISOString(),
 		});
 
+		// Watch for theme changes and handle accordingly
+		let themeObserver: MutationObserver;
+
 		// Initialize: Apply saved tweaks on page load
 		const initializeTheme = async () => {
 			await ThemeState.initialize();
 			await ThemeState.initializePresetSystem();
+
+			themeObserver = watchThemeChanges();
 		};
 
 		// Wait for DOM to be ready before initializing
@@ -115,9 +120,6 @@ export default defineContentScript({
 			return await Storage.getAllPresets();
 		});
 
-		// Watch for theme changes and handle accordingly
-		const themeObserver = watchThemeChanges();
-
 		// Listen for storage changes and re-apply tweaks - use ctx for automatic cleanup
 		const storageListener = (
 			changes: Record<string, Browser.storage.StorageChange>,
@@ -141,7 +143,7 @@ export default defineContentScript({
 		// Cleanup: disconnect observer when page hides - use ctx for automatic cleanup
 		ctx.addEventListener(window, "pagehide", () => {
 			logger.debug("Page hiding, disconnecting observer");
-			themeObserver.disconnect();
+			themeObserver?.disconnect();
 			browser.storage.onChanged.removeListener(storageListener);
 		});
 	},

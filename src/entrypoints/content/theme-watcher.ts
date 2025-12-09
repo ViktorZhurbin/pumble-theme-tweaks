@@ -12,7 +12,7 @@ export const watchThemeChanges = (): MutationObserver => {
 	const observer = new MutationObserver(() => {
 		const newTheme = DomUtils.getCurrentTheme();
 
-		if (newTheme !== currentTheme) {
+		if (currentTheme && newTheme !== currentTheme) {
 			const oldTheme = currentTheme;
 			currentTheme = newTheme;
 
