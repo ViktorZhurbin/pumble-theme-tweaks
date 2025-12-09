@@ -11,7 +11,6 @@ import {
 	validateImport,
 } from "@/lib/import-export";
 import { logger } from "@/lib/logger";
-import { validatePresetName } from "@/lib/validate";
 
 export const PresetMenu = () => {
 	const ctx = useThemeEditorContext();
@@ -69,34 +68,6 @@ export const PresetMenu = () => {
 		}
 	};
 
-	const handleRename = async () => {
-		const currentTabId = ctx.tabId();
-		const oldName = ctx.store.selectedPreset;
-
-		if (!currentTabId || !oldName) return;
-
-		const newName = await dialogs.input({
-			title: `Rename "${oldName}"`,
-			placeholder: "Enter new name",
-			defaultValue: oldName,
-			confirmText: "Rename",
-			validate: (value) =>
-				validatePresetName(value, ctx.store.savedPresets, oldName),
-		});
-
-		if (newName && newName !== oldName) {
-			try {
-				await ContentScript.sendMessage(
-					"renamePreset",
-					{ oldName, newName },
-					currentTabId,
-				);
-			} catch (err) {
-				logger.error("PresetDropdown: Failed to rename preset", err);
-			}
-		}
-	};
-
 	const handleImport = async (value: string) => {
 		try {
 			const currentTabId = ctx.tabId();
@@ -145,14 +116,6 @@ export const PresetMenu = () => {
 	// === Menu Items ===
 
 	const items = (): DropdownItem[] => [
-		// Preset Management
-		{
-			type: "item",
-			label: "Rename",
-			onClick: handleRename,
-			disabled: !ctx.store.selectedPreset,
-		},
-		{ type: "divider" },
 		// Import/Export
 		{
 			type: "item",
