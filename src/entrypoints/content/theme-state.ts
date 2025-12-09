@@ -181,6 +181,18 @@ class ThemeStateManager {
 	}
 
 	/**
+	 * Loads a preset into working state
+	 */
+	async importPreset(cssProperties: StoredPreset["cssProperties"]) {
+		logger.info("ThemeState: Importing preset");
+
+		// Set working tweaks to preset values
+		await Storage.setWorkingTweaks(cssProperties, this.tabId);
+
+		// Re-apply will be triggered by storage.onChanged listener
+	}
+
+	/**
 	 * Saves working state to the currently selected preset
 	 */
 	async savePreset() {
@@ -260,7 +272,6 @@ class ThemeStateManager {
 	): boolean {
 		// No preset selected, check if user has changed some colors
 		if (!selectedPreset || !savedPresets[selectedPreset]) {
-			console.log("workingTweaks.cssProperties", workingTweaks.cssProperties);
 			return Object.values(workingTweaks.cssProperties).some(
 				(entry) => entry.value !== null && entry.value !== entry.initialValue,
 			);

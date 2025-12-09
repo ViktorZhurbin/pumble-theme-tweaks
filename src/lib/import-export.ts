@@ -1,6 +1,7 @@
 import { colord } from "colord";
 import { DERIVED_COLORS } from "@/constants/derived-colors";
 import { PROPERTIES } from "@/constants/properties";
+import type { StoredPreset } from "@/types/storage";
 import type { WorkingTweaks } from "@/types/tweaks";
 
 /**
@@ -54,9 +55,10 @@ export const getScriptString = (workingTweaks: WorkingTweaks) => {
 
 export const parseImportJSON = (
 	input: string,
-): Record<string, string> | null => {
+): StoredPreset["cssProperties"] | null => {
 	try {
-		const parsed = JSON.parse(input);
+		const parsed: Record<string, string> = JSON.parse(input);
+		const cssProperties: StoredPreset["cssProperties"] = {};
 
 		if (
 			typeof parsed !== "object" ||
@@ -74,9 +76,11 @@ export const parseImportJSON = (
 			) {
 				delete parsed[key];
 			}
+
+			cssProperties[key] = { value, enabled: true };
 		}
 
-		return parsed as Record<string, string>;
+		return cssProperties;
 	} catch {
 		return null;
 	}

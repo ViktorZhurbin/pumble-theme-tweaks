@@ -78,6 +78,11 @@ export default defineContentScript({
 			ThemeState.loadPreset(message.data.presetName);
 		});
 
+		ContentScript.onMessage("importPreset", (message) => {
+			logger.debug("Importing preset", { preset: message.data.cssProperties });
+			ThemeState.importPreset(message.data.cssProperties);
+		});
+
 		ContentScript.onMessage("savePreset", () => {
 			logger.debug("Saving preset");
 			ThemeState.savePreset();

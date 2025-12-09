@@ -15,6 +15,7 @@ export interface ContentScriptProtocol {
 	toggleWorkingProperty(data: { propertyName: string; enabled: boolean }): void;
 	resetWorkingTweaks(): void;
 	loadPreset(data: { presetName: string }): void;
+	importPreset(data: { cssProperties: StoredPreset["cssProperties"] }): void;
 	savePreset(): void;
 	savePresetAs(data: { presetName: string }): void;
 	deletePreset(data: { presetName: string }): void;

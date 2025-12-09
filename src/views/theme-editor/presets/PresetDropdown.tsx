@@ -99,7 +99,7 @@ export const PresetDropdown = () => {
 	};
 
 	const handleImport = async (value: string) => {
-		const parsed = parseImportJSON(value) as Record<string, string>;
+		const cssProperties = parseImportJSON(value);
 
 		try {
 			const currentTabId = ctx.tabId();
@@ -108,16 +108,19 @@ export const PresetDropdown = () => {
 				return;
 			}
 
-			for (const [propertyName, value] of Object.entries(parsed)) {
-				await ContentScript.sendMessage(
-					"updateWorkingProperty",
-					{ propertyName, value },
-					currentTabId,
-				);
+			if (!cssProperties) {
+				logger.warn("PresetDropdown: Import failed");
+				return;
 			}
 
+			await ContentScript.sendMessage(
+				"importPreset",
+				{ cssProperties },
+				currentTabId,
+			);
+
 			logger.debug("PresetDropdown: Import successful", {
-				count: Object.keys(parsed).length,
+				count: Object.keys(cssProperties).length,
 			});
 		} catch (err) {
 			logger.error("PresetDropdown: Import failed", err);
