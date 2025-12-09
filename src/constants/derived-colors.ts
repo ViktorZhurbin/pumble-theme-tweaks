@@ -39,11 +39,11 @@ export const DERIVED_COLORS: DerivedColorRegistry = {
 		},
 		{
 			propertyName: "--left-nav-hover",
-			derive: (baseColor) => colord(baseColor).alpha(0.32).toRgbString(),
+			derive: (baseColor) => colord(baseColor).alpha(0.22).toRgbString(),
 		},
 		{
 			propertyName: "--left-nav-selected",
-			derive: (baseColor) => colord(baseColor).alpha(0.44).toRgbString(),
+			derive: (baseColor) => colord(baseColor).alpha(0.34).toRgbString(),
 		},
 		{
 			propertyName: "--left-nav-icons",
