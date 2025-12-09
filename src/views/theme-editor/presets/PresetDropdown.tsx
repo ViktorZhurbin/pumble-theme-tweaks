@@ -12,7 +12,6 @@ import {
 } from "@/lib/import-export";
 import { logger } from "@/lib/logger";
 import { validatePresetName } from "@/lib/validate";
-import { useHandleSaveAs } from "./useHandleSaveAs";
 
 export const PresetDropdown = () => {
 	const ctx = useThemeEditorContext();
@@ -143,17 +142,10 @@ export const PresetDropdown = () => {
 		}
 	};
 
-	const handleSaveAs = useHandleSaveAs();
-
 	// === Menu Items ===
 
 	const items = (): DropdownItem[] => [
 		// Preset Management
-		{
-			type: "item",
-			label: "Save As",
-			onClick: handleSaveAs,
-		},
 		{
 			type: "item",
 			label: "Rename",
