@@ -9,8 +9,6 @@ export const NewPresetButton = () => {
 
 	const dialogs = useDialogs();
 
-	const disabled = () => !ctx.store.tweaksOn;
-
 	const handleNewPreset = async () => {
 		const currentTabId = ctx.tabId();
 		if (!currentTabId) {
@@ -37,15 +35,9 @@ export const NewPresetButton = () => {
 		);
 	};
 
-	const tooltip = () => (disabled() ? "" : "Create a new preset");
-
 	return (
-		<div class="tooltip" data-tip={tooltip()}>
-			<button
-				class={`${buttonClass} btn-primary`}
-				onClick={handleNewPreset}
-				disabled={disabled()}
-			>
+		<div class="tooltip" data-tip="Create a new preset">
+			<button class={`${buttonClass} btn-primary`} onClick={handleNewPreset}>
 				+ New
 			</button>
 		</div>
