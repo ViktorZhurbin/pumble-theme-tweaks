@@ -114,7 +114,7 @@
 | `src/entrypoints/content/dom-utils.ts` | DOM manipulation (CSS apply/reset) | CSS methods |
 | `src/views/theme-editor/ThemeEditor.tsx` | Popup UI root | UI structure |
 | `src/context/ThemeEditorContext.tsx` | SolidJS context provider | Shared UI state |
-| `src/components/dialog/` | Dialog system | Dialog behavior |
+| `src/components/Dialog/` | Dialog system | Dialog behavior |
 | `src/lib/storage.ts` | Storage facade | Storage operations |
 | `src/lib/import-export.ts` | Import/export utilities | Import/export features |
 | `src/lib/messages/createMessenger.ts` | Message factory | IPC infrastructure |
@@ -282,7 +282,7 @@ const ctx = useThemeEditorContext();
 ## Reusable Systems
 
 ### Dialog System
-Location: `src/components/dialog/`
+Location: `src/components/Dialog/`
 
 ```typescript
 const dialogs = useDialogs();

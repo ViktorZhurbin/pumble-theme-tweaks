@@ -1,5 +1,5 @@
 import { For } from "solid-js";
-import { useDialogs } from "@/components/dialog";
+import { useDialogs } from "@/components/Dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";

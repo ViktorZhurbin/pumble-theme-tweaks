@@ -1,6 +1,6 @@
+import { useDialogs } from "@/components/Dialog";
 import type { DropdownItem } from "@/components/Dropdown";
 import { Dropdown } from "@/components/Dropdown";
-import { useDialogs } from "@/components/dialog";
 import { useNotifications } from "@/components/notification";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
