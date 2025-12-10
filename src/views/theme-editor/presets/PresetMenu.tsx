@@ -95,6 +95,8 @@ export const PresetMenu = () => {
 				return;
 			}
 
+			// Start a new preset
+			await ctx.sendToContent("resetWorkingTweaks", undefined);
 			await ctx.sendToContent("importPreset", { cssProperties });
 
 			logger.debug("PresetDropdown: Import successful", {
@@ -119,6 +121,26 @@ export const PresetMenu = () => {
 		if (value) {
 			await handleImport(value);
 		}
+	};
+
+	const handleClickImport = async () => {
+		if (ctx.store.hasUnsavedChanges) {
+			// Show confirmation dialog
+			const confirmed = await dialogs.confirm({
+				title:
+					"You have unsaved changes. Discard them and import preset anyway?",
+				confirmText: "Import Anyway",
+				confirmType: "primary",
+			});
+
+			if (confirmed) {
+				await handleImportDialog();
+			}
+
+			return;
+		}
+
+		await handleImportDialog();
 	};
 
 	// === Menu Items ===
@@ -146,7 +168,7 @@ export const PresetMenu = () => {
 		{
 			type: "item",
 			label: "Import",
-			onClick: handleImportDialog,
+			onClick: handleClickImport,
 		},
 		{ type: "divider" },
 		// Destructive Actions
