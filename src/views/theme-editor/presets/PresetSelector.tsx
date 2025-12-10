@@ -3,7 +3,7 @@ import { useDialogs } from "@/components/dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
-import { PresetDropdown } from "./PresetDropdown";
+import { PresetMenu } from "./PresetMenu";
 
 export const PresetSelector = () => {
 	const ctx = useThemeEditorContext();
@@ -89,7 +89,7 @@ export const PresetSelector = () => {
 					</For>
 				</select>
 
-				<PresetDropdown />
+				<PresetMenu />
 			</div>
 		</fieldset>
 	);

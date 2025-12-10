@@ -13,7 +13,7 @@ import {
 import { logger } from "@/lib/logger";
 import { validatePresetName } from "@/lib/validate";
 
-export const PresetDropdown = () => {
+export const PresetMenu = () => {
 	const ctx = useThemeEditorContext();
 	const dialogs = useDialogs();
 	const notifications = useNotifications();
