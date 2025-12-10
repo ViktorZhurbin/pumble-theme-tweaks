@@ -2,6 +2,7 @@ import { browser } from "wxt/browser";
 import { logger } from "@/lib/logger";
 import type {
 	StorageData,
+	StoredCssProperties,
 	StoredPreset,
 	StoredPresets,
 	StoredWorkingTweaks,
@@ -58,9 +59,7 @@ const getWorkingTweaks = async (): Promise<StoredWorkingTweaks> => {
 /**
  * Sets working tweaks in storage
  */
-const setWorkingTweaks = async (
-	cssProperties: StoredWorkingTweaks["cssProperties"],
-) => {
+const setWorkingTweaks = async (cssProperties: StoredCssProperties) => {
 	try {
 		const dataToSave: StorageData = {
 			working_tweaks: { cssProperties },
@@ -161,7 +160,7 @@ const getPreset = async (name: string): Promise<StoredPreset | undefined> => {
  */
 const createPreset = async (
 	name: string,
-	cssProperties: StoredWorkingTweaks["cssProperties"],
+	cssProperties: StoredCssProperties,
 ) => {
 	const allPresets = await getAllPresets();
 
@@ -192,7 +191,7 @@ const createPreset = async (
  */
 const updatePreset = async (
 	name: string,
-	cssProperties: StoredWorkingTweaks["cssProperties"],
+	cssProperties: StoredCssProperties,
 ) => {
 	const allPresets = await getAllPresets();
 

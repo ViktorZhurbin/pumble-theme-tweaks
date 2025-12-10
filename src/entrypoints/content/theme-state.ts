@@ -2,7 +2,7 @@ import { PROPERTY_NAMES } from "@/constants/properties";
 import { logger } from "@/lib/logger";
 import { Storage } from "@/lib/storage";
 import type { RuntimeState } from "@/types/runtime";
-import type { StoredPreset, StoredTweakEntry } from "@/types/storage";
+import type { StoredCssProperties, StoredPreset } from "@/types/storage";
 import type { TweakEntry, WorkingTweaks } from "@/types/tweaks";
 import { Background } from "../background/messenger";
 import { DomUtils } from "./dom-utils";
@@ -48,6 +48,9 @@ class ThemeStateManager {
 		const workingTweaks = this.buildWorkingTweaksWithInitialValues(
 			storedWorkingTweaks.cssProperties,
 		);
+
+		console.log("workingTweaks", workingTweaks.cssProperties);
+		console.log("storedWorkingTweaks", storedWorkingTweaks.cssProperties);
 
 		if (tweaksOn) {
 			// Apply to DOM
@@ -224,8 +227,8 @@ class ThemeStateManager {
 	/**
 	 * Converts working tweaks to stored format (without initialValue)
 	 */
-	private buildStoredCssProperties(): Record<string, StoredTweakEntry> {
-		const cssProperties: Record<string, StoredTweakEntry> = {};
+	private buildStoredCssProperties(): StoredCssProperties {
+		const cssProperties: StoredCssProperties = {};
 		for (const [key, entry] of Object.entries(
 			this.currentState.workingTweaks.cssProperties,
 		)) {
@@ -280,7 +283,7 @@ class ThemeStateManager {
 	 * Builds working tweaks with initial values from DOM
 	 */
 	private buildWorkingTweaksWithInitialValues(
-		storedProps: Record<string, StoredTweakEntry>,
+		storedProps: StoredCssProperties,
 	): WorkingTweaks {
 		const currentDOMValues = DomUtils.getCSSProperties();
 

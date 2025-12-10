@@ -7,18 +7,20 @@ export interface StoredTweakEntry {
 	enabled: boolean;
 }
 
+export type StoredCssProperties = Record<string, StoredTweakEntry>;
+
 /**
  * Preset data (persisted to browser.storage)
  */
 export interface StoredPreset {
 	name: string;
-	cssProperties: Record<string, StoredTweakEntry>;
+	cssProperties: StoredCssProperties;
 	createdAt: string;
 	updatedAt: string;
 }
 
 export type StoredWorkingTweaks = {
-	cssProperties: Record<string, StoredTweakEntry>;
+	cssProperties: StoredCssProperties;
 };
 
 export type StoredPresets = Record<string, StoredPreset>;
