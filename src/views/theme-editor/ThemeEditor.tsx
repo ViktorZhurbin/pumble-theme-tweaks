@@ -2,6 +2,8 @@ import { createMemo, createSignal, onMount, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { ThemeEditorContext } from "@/context/ThemeEditorContext";
 import { Background } from "@/entrypoints/background/messenger";
+import { ContentScript } from "@/entrypoints/content/messenger";
+import type { ContentScriptProtocol } from "@/entrypoints/content/protocol";
 import { initialState } from "@/entrypoints/content/theme-state";
 import { logger } from "@/lib/logger";
 import { Utils } from "@/lib/utils";
@@ -79,11 +81,25 @@ export const ThemeEditor = () => {
 		}
 	});
 
+	const sendToContent = async <T extends keyof ContentScriptProtocol>(
+		method: T,
+		data: Parameters<ContentScriptProtocol[T]>[0],
+	) => {
+		const currentTabId = tabId();
+		if (currentTabId === null) {
+			logger.error("sendToContent called before tabId is ready");
+			return;
+		}
+		// biome-ignore lint/suspicious/noExplicitAny: types will be inferred
+		await ContentScript.sendMessage(method, data as any, currentTabId);
+	};
+
 	const contextValue = {
 		tabId,
 		store,
 		setStore,
 		isReady,
+		sendToContent,
 	};
 
 	return (

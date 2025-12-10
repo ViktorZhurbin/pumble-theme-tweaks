@@ -1,6 +1,5 @@
 import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
-import { ContentScript } from "@/entrypoints/content/messenger";
 import type { StoredPreset } from "@/types/storage";
 import { ColorPicker } from "./ColorPicker";
 
@@ -46,27 +45,22 @@ export const TweakEntryRow = (props: TweakEntryRowProps) => {
 
 	const handleReset = (e: MouseEvent) => {
 		e.preventDefault();
-		const currentTabId = ctx.tabId();
 		const workingTweak = tweakEntry();
-		if (!currentTabId || !workingTweak) return;
+		if (!workingTweak) return;
 
-		ContentScript.sendMessage(
-			"updateWorkingProperty",
-			{ propertyName: props.propertyName, value: baseValue() },
-			currentTabId,
-		);
+		ctx.sendToContent("updateWorkingProperty", {
+			propertyName: props.propertyName,
+			value: baseValue(),
+		});
 	};
 
 	const handleToggle = (e: Event) => {
 		const enabled = (e.target as HTMLInputElement).checked;
-		const currentTabId = ctx.tabId();
-		if (!currentTabId) return;
 
-		ContentScript.sendMessage(
-			"toggleWorkingProperty",
-			{ propertyName: props.propertyName, enabled },
-			currentTabId,
-		);
+		ctx.sendToContent("toggleWorkingProperty", {
+			propertyName: props.propertyName,
+			enabled,
+		});
 	};
 
 	const disabledClasses = "opacity-25 pointer-events-none";

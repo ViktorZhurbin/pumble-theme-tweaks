@@ -2,7 +2,6 @@ import { Show } from "solid-js";
 import { Dropdown } from "@/components/Dropdown";
 import { CaretDownIcon } from "@/components/icons/CaretDownIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
-import { ContentScript } from "@/entrypoints/content/messenger";
 import { buttonClass } from "./classes";
 import { useHandleSaveAs } from "./useHandleSaveAs";
 
@@ -14,10 +13,7 @@ export const SaveButton = () => {
 	const handleSaveAs = useHandleSaveAs();
 
 	const handleSave = () => {
-		const currentTabId = ctx.tabId();
-		if (!currentTabId) return;
-
-		ContentScript.sendMessage("savePreset", undefined, currentTabId);
+		ctx.sendToContent("savePreset", undefined);
 	};
 
 	const handleClick = () => {

@@ -1,6 +1,7 @@
 import { type Accessor, createContext, useContext } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import type { RuntimeState } from "@/types/runtime";
+import type { ContentScriptProtocol } from "@/entrypoints/content/protocol";
 
 /**
  * Context value for ThemeEditor and its child components.
@@ -23,6 +24,16 @@ export interface ThemeEditorContextValue {
 
 	/** Derived signal (memo) indicating if the editor is ready for interaction. */
 	isReady: Accessor<boolean>;
+
+	/**
+	 * Sends a message to the content script of the current tab.
+	 * Handles tabId internally - no need to check if tabId exists.
+	 * Should only be called when isReady() is true (UI is rendered).
+	 */
+	sendToContent<T extends keyof ContentScriptProtocol>(
+		method: T,
+		data: Parameters<ContentScriptProtocol[T]>[0],
+	): Promise<void>;
 }
 
 const ThemeEditorContext = createContext<ThemeEditorContextValue>();

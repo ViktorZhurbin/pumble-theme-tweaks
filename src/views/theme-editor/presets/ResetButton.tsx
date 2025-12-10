@@ -1,6 +1,5 @@
 import { useDialogs } from "@/components/Dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
-import { ContentScript } from "@/entrypoints/content/messenger";
 import { buttonClass } from "./classes";
 
 export const ResetButton = () => {
@@ -8,20 +7,15 @@ export const ResetButton = () => {
 	const dialogs = useDialogs();
 
 	const handleConfirm = () => {
-		const currentTabId = ctx.tabId();
-		if (!currentTabId) return;
-
 		// Context-aware reset: reload preset if selected, otherwise clear
 		if (ctx.store.selectedPreset) {
 			// Reload the selected preset (revert to saved values)
-			ContentScript.sendMessage(
-				"loadPreset",
-				{ presetName: ctx.store.selectedPreset },
-				currentTabId,
-			);
+			ctx.sendToContent("loadPreset", {
+				presetName: ctx.store.selectedPreset,
+			});
 		} else {
 			// No preset selected - clear everything (Pumble defaults)
-			ContentScript.sendMessage("resetWorkingTweaks", undefined, currentTabId);
+			ctx.sendToContent("resetWorkingTweaks", undefined);
 		}
 	};
 

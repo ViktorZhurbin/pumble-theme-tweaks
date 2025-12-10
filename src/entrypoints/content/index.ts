@@ -23,7 +23,6 @@ export default defineContentScript({
 
 		// Initialize: Apply saved tweaks on page load
 		const initializeTheme = async () => {
-			await ThemeState.initializeTabId();
 			await ThemeState.reloadState();
 
 			themeObserver = watchThemeChanges();
@@ -108,11 +107,7 @@ export default defineContentScript({
 				oldName: message.data.oldName,
 				newName: message.data.newName,
 			});
-			Storage.renamePreset(
-				message.data.oldName,
-				message.data.newName,
-				ThemeState.getTabId(),
-			);
+			Storage.renamePreset(message.data.oldName, message.data.newName);
 		});
 
 		ContentScript.onMessage("getAllPresets", async () => {

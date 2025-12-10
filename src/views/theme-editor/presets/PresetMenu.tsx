@@ -3,7 +3,6 @@ import type { DropdownItem } from "@/components/Dropdown";
 import { Dropdown } from "@/components/Dropdown";
 import { useNotifications } from "@/components/notification";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
-import { ContentScript } from "@/entrypoints/content/messenger";
 import {
 	getExportJson,
 	getScriptString,
@@ -43,10 +42,9 @@ export const PresetMenu = () => {
 
 	const handleDelete = async () => {
 		const presetName = ctx.store.selectedPreset;
-		const currentTabId = ctx.tabId();
 
-		if (!currentTabId || !presetName) {
-			logger.warn("PresetDropdown: Cannot delete without tab ID or preset");
+		if (!presetName) {
+			logger.warn("PresetDropdown: Cannot delete without preset");
 			return;
 		}
 
@@ -58,11 +56,7 @@ export const PresetMenu = () => {
 
 		if (confirmed) {
 			try {
-				await ContentScript.sendMessage(
-					"deletePreset",
-					{ presetName },
-					currentTabId,
-				);
+				await ctx.sendToContent("deletePreset", { presetName });
 			} catch (err) {
 				logger.error("PresetDropdown: Failed to delete preset", err);
 			}
@@ -70,10 +64,9 @@ export const PresetMenu = () => {
 	};
 
 	const handleRename = async () => {
-		const currentTabId = ctx.tabId();
 		const oldName = ctx.store.selectedPreset;
 
-		if (!currentTabId || !oldName) return;
+		if (!oldName) return;
 
 		const newName = await dialogs.input({
 			title: `Rename "${oldName}"`,
@@ -86,11 +79,7 @@ export const PresetMenu = () => {
 
 		if (newName && newName !== oldName) {
 			try {
-				await ContentScript.sendMessage(
-					"renamePreset",
-					{ oldName, newName },
-					currentTabId,
-				);
+				await ctx.sendToContent("renamePreset", { oldName, newName });
 			} catch (err) {
 				logger.error("PresetDropdown: Failed to rename preset", err);
 			}
@@ -99,12 +88,6 @@ export const PresetMenu = () => {
 
 	const handleImport = async (value: string) => {
 		try {
-			const currentTabId = ctx.tabId();
-			if (!currentTabId) {
-				logger.warn("PresetDropdown: No tab ID available");
-				return;
-			}
-
 			const cssProperties = parseImportJSON(value);
 
 			if (!cssProperties) {
@@ -112,11 +95,7 @@ export const PresetMenu = () => {
 				return;
 			}
 
-			await ContentScript.sendMessage(
-				"importPreset",
-				{ cssProperties },
-				currentTabId,
-			);
+			await ctx.sendToContent("importPreset", { cssProperties });
 
 			logger.debug("PresetDropdown: Import successful", {
 				count: Object.keys(cssProperties).length,

@@ -1,6 +1,5 @@
 import { colord } from "colord";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
-import { ContentScript } from "@/entrypoints/content/messenger";
 import type { TweakEntry } from "@/types/tweaks";
 import styles from "./ColorPicker.module.css";
 
@@ -16,15 +15,11 @@ export const ColorPicker = (props: {
 
 	const handleInput = (e: Event) => {
 		const value = (e.target as HTMLInputElement).value;
-		const currentTabId = ctx.tabId();
 
-		if (!ctx.isReady() || !currentTabId) return;
-
-		ContentScript.sendMessage(
-			"updateWorkingProperty",
-			{ propertyName: props.propertyName, value },
-			currentTabId,
-		);
+		ctx.sendToContent("updateWorkingProperty", {
+			propertyName: props.propertyName,
+			value,
+		});
 	};
 
 	return (

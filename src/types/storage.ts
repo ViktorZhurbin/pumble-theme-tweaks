@@ -17,15 +17,18 @@ export interface StoredPreset {
 	updatedAt: string;
 }
 
+export type StoredWorkingTweaks = {
+	cssProperties: Record<string, StoredTweakEntry>;
+};
+
+export type StoredPresets = Record<string, StoredPreset>;
+
 /**
  * Storage data structure (preset-based format)
  */
 export interface StorageData {
-	working_tweaks?: {
-		cssProperties: Record<string, StoredTweakEntry>;
-	};
+	working_tweaks?: StoredWorkingTweaks;
 	selected_preset?: string | null;
-	saved_presets?: Record<string, StoredPreset>;
+	saved_presets?: StoredPresets;
 	tweaks_on?: boolean;
-	last_update_tab_id?: number;
 }

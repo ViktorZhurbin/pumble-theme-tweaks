@@ -20,27 +20,6 @@ const initialState: RuntimeState = {
  */
 class ThemeStateManager {
 	private currentState: RuntimeState = initialState;
-	private tabId: number | undefined = undefined;
-
-	/**
-	 * Initializes the tab ID by requesting it from the background script
-	 */
-	async initializeTabId() {
-		if (this.tabId === undefined) {
-			this.tabId = await Background.sendMessage("getTabId", undefined);
-
-			logger.debug("ThemeState: Initialized with tab ID", {
-				tabId: this.tabId,
-			});
-		}
-	}
-
-	/**
-	 * Returns the current tab ID
-	 */
-	getTabId(): number | undefined {
-		return this.tabId;
-	}
 
 	/**
 	 * Returns current runtime state snapshot
@@ -106,9 +85,10 @@ class ThemeStateManager {
 		};
 
 		// Broadcast change to popup
+		const tabId = await Background.sendMessage("getTabId", undefined);
 		Background.sendMessage("stateChanged", {
 			state: this.currentState,
-			tabId: this.tabId,
+			tabId,
 		});
 	}
 
@@ -126,8 +106,8 @@ class ThemeStateManager {
 		logger.info("ThemeState: Loading preset", { presetName });
 
 		// Set working tweaks to preset values
-		await Storage.setWorkingTweaks(preset.cssProperties, this.tabId);
-		await Storage.setSelectedPreset(presetName, this.tabId);
+		await Storage.setWorkingTweaks(preset.cssProperties);
+		await Storage.setSelectedPreset(presetName);
 	}
 
 	/**
@@ -137,7 +117,7 @@ class ThemeStateManager {
 		logger.info("ThemeState: Importing preset");
 
 		// Set imported preset values as working tweaks
-		await Storage.setWorkingTweaks(cssProperties, this.tabId);
+		await Storage.setWorkingTweaks(cssProperties);
 	}
 
 	/**
@@ -155,11 +135,7 @@ class ThemeStateManager {
 
 		const cssProperties = this.buildStoredCssProperties();
 
-		await Storage.updatePreset(
-			this.currentState.selectedPreset,
-			cssProperties,
-			this.tabId,
-		);
+		await Storage.updatePreset(this.currentState.selectedPreset, cssProperties);
 	}
 
 	/**
@@ -170,8 +146,8 @@ class ThemeStateManager {
 
 		const cssProperties = this.buildStoredCssProperties();
 
-		await Storage.createPreset(presetName, cssProperties, this.tabId);
-		await Storage.setSelectedPreset(presetName, this.tabId);
+		await Storage.createPreset(presetName, cssProperties);
+		await Storage.setSelectedPreset(presetName);
 	}
 
 	/**
@@ -180,11 +156,11 @@ class ThemeStateManager {
 	async deletePreset(presetName: string) {
 		logger.info("ThemeState: Deleting preset", { presetName });
 
-		await Storage.deletePreset(presetName, this.tabId);
+		await Storage.deletePreset(presetName);
 
 		// If deleted preset was selected, deselect
 		if (this.currentState.selectedPreset === presetName) {
-			await Storage.setSelectedPreset(null, this.tabId);
+			await Storage.setSelectedPreset(null);
 		}
 	}
 
@@ -195,7 +171,7 @@ class ThemeStateManager {
 		logger.info("ThemeState: Toggling tweaks", { enabled });
 
 		// Update tweaks enabled state
-		await Storage.setTweaksOn(enabled, this.tabId);
+		await Storage.setTweaksOn(enabled);
 	}
 
 	/**
@@ -205,10 +181,10 @@ class ThemeStateManager {
 		logger.info("ThemeState: Resetting working tweaks");
 
 		// Clear working tweaks from storage
-		await Storage.clearWorkingTweaks(this.tabId);
+		await Storage.clearWorkingTweaks();
 
 		// Deselect preset
-		await Storage.setSelectedPreset(null, this.tabId);
+		await Storage.setSelectedPreset(null);
 	}
 
 	/**
@@ -224,7 +200,7 @@ class ThemeStateManager {
 		DomUtils.applyCSSProperty(propertyName, value);
 
 		// Save to storage in background (debounced)
-		Storage.saveWorkingPropertyDebounced(propertyName, value, this.tabId);
+		Storage.saveWorkingPropertyDebounced(propertyName, value);
 	}
 
 	/**
@@ -242,7 +218,7 @@ class ThemeStateManager {
 			cssProperties[propertyName].enabled = enabled;
 		}
 
-		Storage.setWorkingTweaks(cssProperties, this.tabId);
+		Storage.setWorkingTweaks(cssProperties);
 	}
 
 	/**

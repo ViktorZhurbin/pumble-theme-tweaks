@@ -1,6 +1,5 @@
 import { useDialogs } from "@/components/Dialog";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
-import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import { validatePresetName } from "@/lib/validate";
 
@@ -9,10 +8,6 @@ export const useHandleSaveAs = () => {
 	const ctx = useThemeEditorContext();
 
 	const handleSaveAs = async () => {
-		const currentTabId = ctx.tabId();
-
-		if (!currentTabId) return;
-
 		const name = await dialogs.input({
 			title: "Save Preset As",
 			placeholder: "Enter preset name",
@@ -22,11 +17,7 @@ export const useHandleSaveAs = () => {
 
 		if (name) {
 			try {
-				await ContentScript.sendMessage(
-					"savePresetAs",
-					{ presetName: name },
-					currentTabId,
-				);
+				await ctx.sendToContent("savePresetAs", { presetName: name });
 			} catch (err) {
 				logger.error("SaveButton: Failed to save preset", err);
 			}

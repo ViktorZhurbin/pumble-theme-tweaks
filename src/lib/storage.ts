@@ -3,7 +3,8 @@ import { logger } from "@/lib/logger";
 import type {
 	StorageData,
 	StoredPreset,
-	StoredTweakEntry,
+	StoredPresets,
+	StoredWorkingTweaks,
 } from "@/types/storage";
 import { Utils } from "./utils";
 
@@ -13,6 +14,7 @@ import { Utils } from "./utils";
 const getTweaksOn = async (): Promise<boolean> => {
 	try {
 		const result = (await browser.storage.sync.get("tweaks_on")) as StorageData;
+
 		return result.tweaks_on ?? true; // Default to enabled
 	} catch (err) {
 		logger.error("Storage read error:", err);
@@ -23,15 +25,11 @@ const getTweaksOn = async (): Promise<boolean> => {
 /**
  * Sets the tweaks enabled state
  */
-const setTweaksOn = async (enabled: boolean, tabId?: number) => {
+const setTweaksOn = async (enabled: boolean) => {
 	try {
 		const dataToSave: StorageData = { tweaks_on: enabled };
 
-		if (tabId !== undefined) {
-			dataToSave.last_update_tab_id = tabId;
-		}
-
-		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		await browser.storage.sync.set(dataToSave);
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}
@@ -44,13 +42,12 @@ const setTweaksOn = async (enabled: boolean, tabId?: number) => {
 /**
  * Gets working tweaks from storage
  */
-const getWorkingTweaks = async (): Promise<{
-	cssProperties: Record<string, StoredTweakEntry>;
-}> => {
+const getWorkingTweaks = async (): Promise<StoredWorkingTweaks> => {
 	try {
 		const result = (await browser.storage.sync.get(
 			"working_tweaks",
 		)) as StorageData;
+
 		return result.working_tweaks ?? { cssProperties: {} };
 	} catch (err) {
 		logger.error("Storage read error:", err);
@@ -62,19 +59,14 @@ const getWorkingTweaks = async (): Promise<{
  * Sets working tweaks in storage
  */
 const setWorkingTweaks = async (
-	cssProperties: Record<string, StoredTweakEntry>,
-	tabId?: number,
+	cssProperties: StoredWorkingTweaks["cssProperties"],
 ) => {
 	try {
 		const dataToSave: StorageData = {
 			working_tweaks: { cssProperties },
 		};
 
-		if (tabId !== undefined) {
-			dataToSave.last_update_tab_id = tabId;
-		}
-
-		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		await browser.storage.sync.set(dataToSave);
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}
@@ -83,11 +75,7 @@ const setWorkingTweaks = async (
 /**
  * Saves a single CSS property to working state
  */
-const saveWorkingProperty = async (
-	propertyName: string,
-	value: string,
-	tabId?: number,
-) => {
+const saveWorkingProperty = async (propertyName: string, value: string) => {
 	const workingTweaks = await getWorkingTweaks();
 
 	workingTweaks.cssProperties[propertyName] = {
@@ -95,12 +83,12 @@ const saveWorkingProperty = async (
 		enabled: workingTweaks.cssProperties[propertyName]?.enabled ?? true,
 	};
 
-	await setWorkingTweaks(workingTweaks.cssProperties, tabId);
+	await setWorkingTweaks(workingTweaks.cssProperties);
 };
 
 const saveWorkingPropertyDebounced = Utils.debounce(
-	(propertyName: string, value: string, tabId?: number) => {
-		Storage.saveWorkingProperty(propertyName, value, tabId);
+	(propertyName: string, value: string) => {
+		Storage.saveWorkingProperty(propertyName, value);
 	},
 	500,
 );
@@ -108,8 +96,8 @@ const saveWorkingPropertyDebounced = Utils.debounce(
 /**
  * Clears working tweaks
  */
-const clearWorkingTweaks = async (tabId?: number) => {
-	await setWorkingTweaks({}, tabId);
+const clearWorkingTweaks = async () => {
+	await setWorkingTweaks({});
 };
 
 /**
@@ -120,6 +108,7 @@ const getSelectedPreset = async (): Promise<string | null> => {
 		const result = (await browser.storage.sync.get(
 			"selected_preset",
 		)) as StorageData;
+
 		return result.selected_preset ?? null;
 	} catch (err) {
 		logger.error("Storage read error:", err);
@@ -130,17 +119,13 @@ const getSelectedPreset = async (): Promise<string | null> => {
 /**
  * Sets selected preset name
  */
-const setSelectedPreset = async (presetName: string | null, tabId?: number) => {
+const setSelectedPreset = async (presetName: string | null) => {
 	try {
 		const dataToSave: StorageData = {
 			selected_preset: presetName,
 		};
 
-		if (tabId !== undefined) {
-			dataToSave.last_update_tab_id = tabId;
-		}
-
-		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		await browser.storage.sync.set(dataToSave);
 	} catch (err) {
 		logger.warn("Storage write error:", err);
 	}
@@ -149,11 +134,12 @@ const setSelectedPreset = async (presetName: string | null, tabId?: number) => {
 /**
  * Gets all presets
  */
-const getAllPresets = async (): Promise<Record<string, StoredPreset>> => {
+const getAllPresets = async (): Promise<StoredPresets> => {
 	try {
 		const result = (await browser.storage.sync.get(
 			"saved_presets",
 		)) as StorageData;
+
 		return result.saved_presets ?? {};
 	} catch (err) {
 		logger.error("Storage read error:", err);
@@ -166,6 +152,7 @@ const getAllPresets = async (): Promise<Record<string, StoredPreset>> => {
  */
 const getPreset = async (name: string): Promise<StoredPreset | undefined> => {
 	const allPresets = await getAllPresets();
+
 	return allPresets[name];
 };
 
@@ -174,8 +161,7 @@ const getPreset = async (name: string): Promise<StoredPreset | undefined> => {
  */
 const createPreset = async (
 	name: string,
-	cssProperties: Record<string, StoredTweakEntry>,
-	tabId?: number,
+	cssProperties: StoredWorkingTweaks["cssProperties"],
 ) => {
 	const allPresets = await getAllPresets();
 
@@ -193,11 +179,7 @@ const createPreset = async (
 	try {
 		const dataToSave: StorageData = { saved_presets: allPresets };
 
-		if (tabId !== undefined) {
-			dataToSave.last_update_tab_id = tabId;
-		}
-
-		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		await browser.storage.sync.set(dataToSave);
 		logger.info("Storage: Created preset", { name });
 	} catch (err) {
 		logger.error("Storage: Create preset error:", err);
@@ -210,8 +192,7 @@ const createPreset = async (
  */
 const updatePreset = async (
 	name: string,
-	cssProperties: Record<string, StoredTweakEntry>,
-	tabId?: number,
+	cssProperties: StoredWorkingTweaks["cssProperties"],
 ) => {
 	const allPresets = await getAllPresets();
 
@@ -228,11 +209,7 @@ const updatePreset = async (
 	try {
 		const dataToSave: StorageData = { saved_presets: allPresets };
 
-		if (tabId !== undefined) {
-			dataToSave.last_update_tab_id = tabId;
-		}
-
-		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		await browser.storage.sync.set(dataToSave);
 		logger.info("Storage: Updated preset", { name });
 	} catch (err) {
 		logger.error("Storage: Update preset error:", err);
@@ -243,7 +220,7 @@ const updatePreset = async (
 /**
  * Deletes a preset
  */
-const deletePreset = async (name: string, tabId?: number) => {
+const deletePreset = async (name: string) => {
 	const allPresets = await getAllPresets();
 
 	if (!allPresets[name]) {
@@ -256,11 +233,7 @@ const deletePreset = async (name: string, tabId?: number) => {
 	try {
 		const dataToSave: StorageData = { saved_presets: allPresets };
 
-		if (tabId !== undefined) {
-			dataToSave.last_update_tab_id = tabId;
-		}
-
-		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		await browser.storage.sync.set(dataToSave);
 		logger.info("Storage: Deleted preset", { name });
 	} catch (err) {
 		logger.error("Storage: Delete preset error:", err);
@@ -271,11 +244,7 @@ const deletePreset = async (name: string, tabId?: number) => {
 /**
  * Renames a preset
  */
-const renamePreset = async (
-	oldName: string,
-	newName: string,
-	tabId?: number,
-) => {
+const renamePreset = async (oldName: string, newName: string) => {
 	const allPresets = await getAllPresets();
 
 	if (!allPresets[oldName]) {
@@ -303,11 +272,7 @@ const renamePreset = async (
 			dataToSave.selected_preset = newName;
 		}
 
-		if (tabId !== undefined) {
-			dataToSave.last_update_tab_id = tabId;
-		}
-
-		await browser.storage.sync.set(dataToSave as Record<string, unknown>);
+		await browser.storage.sync.set(dataToSave);
 		logger.info("Storage: Renamed preset", { oldName, newName });
 	} catch (err) {
 		logger.error("Storage: Rename preset error:", err);
