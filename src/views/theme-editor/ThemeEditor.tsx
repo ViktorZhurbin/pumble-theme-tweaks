@@ -96,9 +96,12 @@ export const ThemeEditor = () => {
 				</Show>
 
 				<Show when={error()}>
-					<p class="text-error text-wrap text-sm rounded-xl text-center p-4 bg-red-200 border border-red-500">
-						error()
-					</p>
+					<div
+						role="alert"
+						class="alert alert-warning alert-soft justify-center"
+					>
+						{error()}
+					</div>
 				</Show>
 
 				<Show when={isReady() && !error()}>

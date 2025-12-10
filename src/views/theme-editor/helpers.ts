@@ -36,7 +36,7 @@ export const initializeTab = async (): Promise<number> => {
 	}
 
 	if (!UrlUtils.isPumbleUrl(tab.url)) {
-		throw new Error("Please open this extension on a Pumble tab");
+		throw new Error("It only works on Pumble app tabs");
 	}
 
 	return tab.id;
