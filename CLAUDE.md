@@ -131,7 +131,7 @@ interface RuntimeState {
   tweaksOn: boolean;                 // Master toggle
   workingTweaks: WorkingTweaks;      // Current unsaved state
   selectedPreset: string | null;     // Active preset
-  savedPresets: Record<string, StoredPreset>;
+  savedPresets: StoredPresets;
   hasUnsavedChanges: boolean;        // Working ≠ saved?
 }
 ```

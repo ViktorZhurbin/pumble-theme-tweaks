@@ -1,6 +1,6 @@
 import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
-import type { StoredPreset } from "@/types/storage";
+import type { StoredPresets } from "@/types/storage";
 import { ColorPicker } from "./ColorPicker";
 
 interface TweakEntryRowProps {
@@ -113,7 +113,7 @@ export const TweakEntryRow = (props: TweakEntryRowProps) => {
 function getBaseValue(
 	propertyName: string,
 	selectedPreset: string | null,
-	savedPresets: Record<string, StoredPreset>,
+	savedPresets: StoredPresets,
 	initialValue: string,
 ): string {
 	if (!selectedPreset) {

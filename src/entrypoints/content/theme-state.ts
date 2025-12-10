@@ -1,8 +1,9 @@
-import { PROPERTY_NAMES } from "@/constants/properties";
+import { BASE_PROPERTY_NAMES, PROPERTIES } from "@/constants/properties";
+import { ColorDerivation } from "@/lib/color-derivation";
 import { logger } from "@/lib/logger";
 import { Storage } from "@/lib/storage";
 import type { RuntimeState } from "@/types/runtime";
-import type { StoredCssProperties, StoredPreset } from "@/types/storage";
+import type { StoredCssProperties, StoredPresets } from "@/types/storage";
 import type { TweakEntry, WorkingTweaks } from "@/types/tweaks";
 import { Background } from "../background/messenger";
 import { DomUtils } from "./dom-utils";
@@ -48,9 +49,6 @@ class ThemeStateManager {
 		const workingTweaks = this.buildWorkingTweaksWithInitialValues(
 			storedWorkingTweaks.cssProperties,
 		);
-
-		console.log("workingTweaks", workingTweaks.cssProperties);
-		console.log("storedWorkingTweaks", storedWorkingTweaks.cssProperties);
 
 		if (tweaksOn) {
 			// Apply to DOM
@@ -116,7 +114,7 @@ class ThemeStateManager {
 	/**
 	 * Loads a preset into working state
 	 */
-	async importPreset(cssProperties: StoredPreset["cssProperties"]) {
+	async importPreset(cssProperties: StoredCssProperties) {
 		logger.info("ThemeState: Importing preset");
 
 		// Set imported preset values as working tweaks
@@ -192,6 +190,7 @@ class ThemeStateManager {
 
 	/**
 	 * Updates a single CSS property in working state
+	 * Applies base + derived colors to DOM, but only saves base to storage
 	 */
 	updateWorkingProperty(propertyName: string, value: string) {
 		logger.debug("ThemeState: Updating working property", {
@@ -199,15 +198,24 @@ class ThemeStateManager {
 			value,
 		});
 
-		// Apply to DOM immediately for instant feedback
-		DomUtils.applyCSSProperty(propertyName, value);
+		const derivedColors = ColorDerivation.computeDerivedColorsFromBase(
+			propertyName,
+			value,
+		);
 
-		// Save to storage in background (debounced)
+		// Apply all colors (base + derived) to DOM for immediate visual feedback
+		DomUtils.applyManyCSSProperties({
+			[propertyName]: value,
+			...derivedColors,
+		});
+
+		// Save only base property to working storage (derived computed when needed)
 		Storage.saveWorkingPropertyDebounced(propertyName, value);
 	}
 
 	/**
 	 * Toggles a working property's enabled state
+	 * Also toggles all derived colors for the property
 	 */
 	toggleWorkingProperty(propertyName: string, enabled: boolean) {
 		logger.debug("ThemeState: Toggling working property", {
@@ -217,8 +225,19 @@ class ThemeStateManager {
 
 		const cssProperties = this.buildStoredCssProperties();
 
+		// Toggle base property
 		if (cssProperties[propertyName]) {
 			cssProperties[propertyName].enabled = enabled;
+		}
+
+		// Toggle all derived properties
+		const derivedProps =
+			ColorDerivation.getDerivedPropertyNamesForBase(propertyName);
+
+		for (const derivedProp of derivedProps) {
+			if (cssProperties[derivedProp] && derivedProp !== propertyName) {
+				cssProperties[derivedProp].enabled = enabled;
+			}
 		}
 
 		Storage.setWorkingTweaks(cssProperties);
@@ -226,22 +245,43 @@ class ThemeStateManager {
 
 	/**
 	 * Converts working tweaks to stored format (without initialValue)
+	 * Recomputes all derived colors from base properties to ensure consistency
 	 */
 	private buildStoredCssProperties(): StoredCssProperties {
 		const cssProperties: StoredCssProperties = {};
-		for (const [key, entry] of Object.entries(
-			this.currentState.workingTweaks.cssProperties,
-		)) {
-			cssProperties[key] = {
-				value: entry.value ?? entry.initialValue,
-				enabled: entry.enabled,
+
+		for (const base of PROPERTIES) {
+			const entry =
+				this.currentState.workingTweaks.cssProperties[base.propertyName];
+
+			const baseValue = entry?.value ?? entry?.initialValue;
+
+			// Save base property
+			cssProperties[base.propertyName] = {
+				value: baseValue,
+				enabled: entry?.enabled ?? true,
 			};
+
+			// Compute and save derived properties
+			const derivedColors = ColorDerivation.computeDerivedColorsFromBase(
+				base.propertyName,
+				baseValue,
+			);
+
+			for (const [derivedProp, derivedValue] of Object.entries(derivedColors)) {
+				cssProperties[derivedProp] = {
+					value: derivedValue,
+					enabled: entry?.enabled ?? true,
+				};
+			}
 		}
+
 		return cssProperties;
 	}
 
 	/**
 	 * Builds working tweaks with initial values from DOM
+	 * Stores only base properties; derived colors computed on-demand when needed
 	 */
 	private buildWorkingTweaksWithInitialValues(
 		storedProps: StoredCssProperties,
@@ -250,12 +290,13 @@ class ThemeStateManager {
 
 		const cssProperties: Record<string, TweakEntry> = {};
 
-		for (const propertyName of PROPERTY_NAMES) {
-			const stored = storedProps[propertyName];
+		// Add base properties
+		for (const basePropertyName of BASE_PROPERTY_NAMES) {
+			const stored = storedProps[basePropertyName];
 			const value = stored?.value ?? null;
-			const initialValue = currentDOMValues[propertyName] ?? value ?? "";
+			const initialValue = currentDOMValues[basePropertyName] ?? value ?? "";
 
-			cssProperties[propertyName] = {
+			cssProperties[basePropertyName] = {
 				value,
 				initialValue,
 				enabled: stored?.enabled ?? true,
@@ -271,7 +312,7 @@ class ThemeStateManager {
 	private computeUnsavedChanges(
 		workingTweaks: WorkingTweaks,
 		selectedPreset: string | null,
-		savedPresets: Record<string, StoredPreset>,
+		savedPresets: StoredPresets,
 	): boolean {
 		// No preset selected, check if user has changed some colors
 		if (!selectedPreset || !savedPresets[selectedPreset]) {
@@ -287,7 +328,7 @@ class ThemeStateManager {
 		const presetProps = preset.cssProperties;
 
 		// Check if all properties match
-		for (const key of PROPERTY_NAMES) {
+		for (const key of BASE_PROPERTY_NAMES) {
 			const workingEntry = workingProps[key];
 			const presetEntry = presetProps[key];
 

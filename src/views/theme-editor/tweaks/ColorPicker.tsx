@@ -1,4 +1,5 @@
 import { colord } from "colord";
+import { PROPERTIES_MAP } from "@/constants/properties";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import type { TweakEntry } from "@/types/tweaks";
 import styles from "./ColorPicker.module.css";
@@ -26,7 +27,7 @@ export const ColorPicker = (props: {
 		<input
 			type="color"
 			class={`${styles.colorInput} border-2 border-neutral-600 bg-none h-9 w-9`}
-			value={colord(getDisplayValue(tweakEntry())).toHex()}
+			value={getHexDisplayValue(tweakEntry(), props.propertyName)}
 			disabled={props.disabled}
 			onInput={handleInput}
 		/>
@@ -36,11 +37,23 @@ export const ColorPicker = (props: {
 /**
  * Gets the display value for a color picker
  * Returns the user's custom value if enabled and set, otherwise the initial DOM value
+ * Applies optional displayColor transform (e.g., to strip alpha for Chrome compatibility)
  */
-function getDisplayValue(entry: TweakEntry | undefined): string {
+function getHexDisplayValue(
+	entry: TweakEntry | undefined,
+	propertyName: string,
+): string {
 	if (!entry) return "";
 
-	return entry.enabled && entry.value !== null
-		? entry.value
-		: entry.initialValue;
+	const baseValue =
+		entry.enabled && entry.value !== null ? entry.value : entry.initialValue;
+
+	// Use displayColor transform if property has one
+	const property = PROPERTIES_MAP[propertyName];
+
+	if (property?.displayColor) {
+		return property.displayColor(baseValue);
+	}
+
+	return colord(baseValue).toHex();
 }

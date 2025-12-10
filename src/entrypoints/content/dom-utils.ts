@@ -1,34 +1,31 @@
-import { DERIVED_COLORS } from "@/constants/derived-colors";
-import { PROPERTY_NAMES } from "@/constants/properties";
-import { ColorDerivation } from "@/lib/color-derivation";
+import { ALL_PROPERTY_NAMES, PROPERTIES_MAP } from "@/constants/properties";
 
 /**
  * Applies a CSS property to the document root
  */
 const applyCSSProperty = (name: string, value: string) => {
-	if (DERIVED_COLORS[name]) {
-		ColorDerivation.applyDerivedColors(name, value);
-	} else {
-		document.documentElement.style.setProperty(name, value);
+	document.documentElement.style.setProperty(name, value);
+};
+
+const applyManyCSSProperties = (properties: Record<string, string>) => {
+	for (const [propertyName, value] of Object.entries(properties)) {
+		applyCSSProperty(propertyName, value);
 	}
 };
 
 /**
- * Applies a CSS property to the document root
+ * Removes a CSS property from the document root
  */
 const removeCSSProperty = (name: string) => {
-	if (DERIVED_COLORS[name]) {
-		ColorDerivation.removeDerivedColors(name);
-	} else {
-		document.documentElement.style.removeProperty(name);
-	}
+	document.documentElement.style.removeProperty(name);
 };
 
 /**
- * Removes only CSS properties that were applied by this extension
+ * Removes all CSS properties that were applied by this extension
+ * (base properties + derived colors)
  */
 const resetCSSTweaks = () => {
-	for (const propertyName of PROPERTY_NAMES) {
+	for (const propertyName of ALL_PROPERTY_NAMES) {
 		removeCSSProperty(propertyName);
 	}
 };
@@ -49,29 +46,38 @@ const getCurrentTheme = (): string | null => {
 };
 
 /**
- * Reads current computed values of CSS properties
+ * Returns all properties applied to DOM by this extension
  */
 const getCSSProperties = () => {
 	const computed = getComputedStyle(document.documentElement);
 
-	return PROPERTY_NAMES.reduce<Record<string, string>>((acc, propertyName) => {
-		acc[propertyName] = computed.getPropertyValue(propertyName).trim();
+	return ALL_PROPERTY_NAMES.reduce<Record<string, string>>(
+		(acc, propertyName) => {
+			const value = computed.getPropertyValue(propertyName).trim();
 
-		return acc;
-	}, {});
+			if (value) {
+				acc[propertyName] = value;
+			}
+
+			return acc;
+		},
+		{},
+	);
 };
 
 /**
- * Checks if a CSS property has been modified (exists as inline style)
- * Returns true if the property exists in element.style (applied by extension)
- * Returns false if the property only exists in computed styles (from stylesheet)
+ * Checks if a CSS property tweak has been applied to DOM
  */
 const isPropertyModified = (propertyName: string): boolean => {
-	return document.documentElement.style.getPropertyValue(propertyName) !== "";
+	return (
+		propertyName in PROPERTIES_MAP &&
+		!!document.documentElement.style.getPropertyValue(propertyName)
+	);
 };
 
 export const DomUtils = {
 	applyCSSProperty,
+	applyManyCSSProperties,
 	removeCSSProperty,
 	getCSSProperties,
 	resetCSSTweaks,

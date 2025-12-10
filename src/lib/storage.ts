@@ -73,6 +73,7 @@ const setWorkingTweaks = async (cssProperties: StoredCssProperties) => {
 
 /**
  * Saves a single CSS property to working state
+ * (Only base properties; derived colors computed when needed)
  */
 const saveWorkingProperty = async (propertyName: string, value: string) => {
 	const workingTweaks = await getWorkingTweaks();

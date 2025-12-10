@@ -1,5 +1,5 @@
 import { ThemeEditor } from "@/views/theme-editor/ThemeEditor";
-import { DialogProvider } from "./dialog";
+import { DialogProvider } from "./Dialog";
 import { NotificationProvider } from "./notification";
 
 export const App = () => {

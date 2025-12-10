@@ -1,4 +1,4 @@
-import type { StoredPreset } from "./storage";
+import type { StoredPresets } from "./storage";
 import type { WorkingTweaks } from "./tweaks";
 
 /**
@@ -9,6 +9,6 @@ export interface RuntimeState {
 	tweaksOn: boolean; // Are tweaks enabled?
 	workingTweaks: WorkingTweaks; // Current working state (may have unsaved changes)
 	selectedPreset: string | null; // Selected preset name (null = no preset selected)
-	savedPresets: Record<string, StoredPreset>; // All saved presets (for UI dropdown)
+	savedPresets: StoredPresets; // All saved presets (for UI dropdown)
 	hasUnsavedChanges: boolean; // workingTweaks differs from savedPresets[selectedPreset]?
 }
