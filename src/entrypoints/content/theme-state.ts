@@ -241,6 +241,31 @@ class ThemeStateManager {
 	}
 
 	/**
+	 * Builds working tweaks with initial values from DOM
+	 */
+	private buildWorkingTweaksWithInitialValues(
+		storedProps: StoredCssProperties,
+	): WorkingTweaks {
+		const currentDOMValues = DomUtils.getCSSProperties();
+
+		const cssProperties: Record<string, TweakEntry> = {};
+
+		for (const propertyName of PROPERTY_NAMES) {
+			const stored = storedProps[propertyName];
+			const value = stored?.value ?? null;
+			const initialValue = currentDOMValues[propertyName] ?? value ?? "";
+
+			cssProperties[propertyName] = {
+				value,
+				initialValue,
+				enabled: stored?.enabled ?? true,
+			};
+		}
+
+		return { cssProperties };
+	}
+
+	/**
 	 * Computes whether working state differs from selected preset
 	 */
 	private computeUnsavedChanges(
@@ -277,31 +302,6 @@ class ThemeStateManager {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Builds working tweaks with initial values from DOM
-	 */
-	private buildWorkingTweaksWithInitialValues(
-		storedProps: StoredCssProperties,
-	): WorkingTweaks {
-		const currentDOMValues = DomUtils.getCSSProperties();
-
-		const cssProperties: Record<string, TweakEntry> = {};
-
-		for (const propertyName of PROPERTY_NAMES) {
-			const stored = storedProps[propertyName];
-			const value = stored?.value ?? null;
-			const initialValue = currentDOMValues[propertyName] ?? value ?? "";
-
-			cssProperties[propertyName] = {
-				value,
-				initialValue,
-				enabled: stored?.enabled ?? true,
-			};
-		}
-
-		return { cssProperties };
 	}
 }
 
