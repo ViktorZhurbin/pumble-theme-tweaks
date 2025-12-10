@@ -4,11 +4,12 @@ export interface DropdownMenuItem {
 	/** Type discriminator */
 	type: "item";
 	/** Label text for the menu item */
-	label: string;
+	label: JSX.Element | string;
 	/** Click handler for the item */
 	onClick: () => void;
 	/** Whether the item is disabled */
 	disabled?: boolean;
+	selected?: boolean;
 	/** Visual variant - "error" for destructive actions */
 	variant?: "default" | "error";
 }
@@ -25,6 +26,7 @@ export interface DropdownTrigger {
 	content: JSX.Element | string;
 	/** Additional CSS classes for the button */
 	class?: string;
+	wrapperClass?: string;
 	/** Whether the button is disabled */
 	disabled?: boolean;
 	/** Tooltip text for the button */
@@ -36,6 +38,7 @@ export interface DropdownProps {
 	items: DropdownItem[];
 	/** Trigger button configuration */
 	trigger: DropdownTrigger;
+	class?: string;
 	/** Popover position relative to trigger */
 	// positionX?: "end" | "start" | "center";
 	// position?: "top" | "bottom" | "left" | "right";

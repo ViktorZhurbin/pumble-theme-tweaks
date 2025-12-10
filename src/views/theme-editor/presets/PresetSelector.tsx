@@ -1,9 +1,11 @@
 import { For } from "solid-js";
 import { useDialogs } from "@/components/dialog";
+import { PencilIcon } from "@/components/icons/PencilIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { ContentScript } from "@/entrypoints/content/messenger";
 import { logger } from "@/lib/logger";
 import { PresetMenu } from "./PresetMenu";
+import { useHandleRename } from "./useHandleRename";
 
 export const PresetSelector = () => {
 	const ctx = useThemeEditorContext();
@@ -12,8 +14,10 @@ export const PresetSelector = () => {
 	const disabled = () => !ctx.store.tweaksOn;
 
 	const handleChange = async (e: Event) => {
-		const select = e.target as HTMLSelectElement;
+		console.log(e);
+		const select = e.target as HTMLOptionElement;
 		const value = select.value;
+		console.log({ value, selectedPreset: ctx.store.selectedPreset });
 		const currentTabId = ctx.tabId();
 
 		if (!currentTabId) {
@@ -22,7 +26,7 @@ export const PresetSelector = () => {
 		}
 
 		// Check for unsaved changes
-		if (ctx.store.hasUnsavedChanges) {
+		if (ctx.store.hasUnsavedChanges && value !== ctx.store.selectedPreset) {
 			// Reset select to current value first (will update after confirmation)
 			select.value = ctx.store.selectedPreset ?? "";
 
@@ -61,6 +65,8 @@ export const PresetSelector = () => {
 		}
 	};
 
+	const handleRename = useHandleRename();
+
 	const presetNames = () => Object.keys(ctx.store.savedPresets).sort();
 
 	return (
@@ -71,7 +77,12 @@ export const PresetSelector = () => {
 					class="select bg-base-300 cursor-pointer"
 					// classList={{ "opacity-50": !ctx.store.selectedPreset }}
 					value={ctx.store.selectedPreset ?? ""}
-					onChange={handleChange}
+					// onChange={handleChange}
+					// onSelect={(e) => {
+					// 	const select = e.target as HTMLSelectElement;
+
+					// 	console.log("onSelect", { select, value: select.value });
+					// }}
 					disabled={disabled()}
 				>
 					<option value="" class="opacity-50">
@@ -82,8 +93,23 @@ export const PresetSelector = () => {
 							<option
 								value={presetName}
 								selected={presetName === ctx.store.selectedPreset}
+								onClick={handleChange}
 							>
-								{presetName}
+								<div class="flex gap-3 items-center justify-between w-full">
+									<span>{presetName}</span>
+
+									<div class="tooltip" data-tip="Rename">
+										<button
+											class="btn btn-sm btn-ghost btn-square"
+											onClick={(e) => {
+												e.stopPropagation();
+												handleRename(presetName);
+											}}
+										>
+											<PencilIcon class="h-4 w-4" />
+										</button>
+									</div>
+								</div>
 							</option>
 						)}
 					</For>

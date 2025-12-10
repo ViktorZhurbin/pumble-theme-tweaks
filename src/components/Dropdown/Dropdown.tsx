@@ -20,8 +20,11 @@ export const Dropdown = (props: DropdownProps) => {
 	const menuWidth = () => props.menuWidth ?? "w-36";
 
 	return (
-		<div>
-			<div class="tooltip" data-tip={props.trigger.title}>
+		<div class={props.class}>
+			<div
+				class={`tooltip ${props.trigger.wrapperClass}`}
+				data-tip={props.trigger.title}
+			>
 				<button
 					class={props.trigger.class ?? "btn"}
 					popoverTarget={popoverId}
@@ -53,7 +56,11 @@ export const Dropdown = (props: DropdownProps) => {
 								}}
 								onClick={() => handleItemClick(item)}
 							>
-								<button disabled={item.disabled}>{item.label}</button>
+								{typeof item.label === "string" ? (
+									<button disabled={item.disabled}>{item.label}</button>
+								) : (
+									item.label
+								)}
 							</li>
 						);
 					}}
