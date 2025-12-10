@@ -1,0 +1,1 @@
+- When creating new theme, and not changing sidebar text color, derived colors won't be saved
