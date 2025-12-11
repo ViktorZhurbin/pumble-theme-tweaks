@@ -42,19 +42,28 @@ class ThemeStateManager {
 		const selectedPreset = await Storage.getSelectedPreset();
 		const savedPresets = await Storage.getAllPresets();
 
-		// Clear DOM first
-		DomUtils.resetCSSTweaks();
-
-		// Build working tweaks with initial values from DOM
+		// Build working tweaks with initial values from DOM (BEFORE clearing)
 		const workingTweaks = this.buildWorkingTweaksWithInitialValues(
 			storedWorkingTweaks.cssProperties,
 		);
 
+		// Clear DOM after reading initial values
+		DomUtils.resetCSSTweaks();
+
 		if (tweaksOn) {
-			// Apply to DOM
+			// Apply to DOM (base + derived colors)
 			for (const [key, prop] of Object.entries(workingTweaks.cssProperties)) {
 				if (prop.enabled && prop.value !== null) {
+					// Apply base property
 					DomUtils.applyCSSProperty(key, prop.value);
+
+					// Compute and apply derived colors
+					const derivedColors = ColorDerivation.computeDerivedColorsFromBase(
+						key,
+						prop.value,
+					);
+
+					DomUtils.applyManyCSSProperties(derivedColors);
 				}
 			}
 		}

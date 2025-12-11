@@ -497,4 +497,122 @@ describe("ThemeState - Integration Tests", () => {
 			expect(state.hasUnsavedChanges).toBe(true);
 		});
 	});
+
+	describe("Derived colors application (Bug: derived colors removed after storage sync)", () => {
+		it("should apply derived colors when reloading state with base property", async () => {
+			// Arrange - Storage has a base property with a custom value
+			vi.mocked(Storage.getWorkingTweaks).mockResolvedValue({
+				cssProperties: {
+					"--palette-secondary-main": { value: "#ff5733", enabled: true },
+				},
+			});
+
+			// Act
+			await ThemeState.reloadState();
+
+			// Assert - Should apply base property individually
+			expect(DomUtils.applyCSSProperty).toHaveBeenCalledWith(
+				"--palette-secondary-main",
+				"#ff5733",
+			);
+			// Should apply derived colors via applyManyCSSProperties
+			expect(DomUtils.applyManyCSSProperties).toHaveBeenCalledWith(
+				expect.objectContaining({
+					"--palette-secondary-dark": expect.any(String),
+					"--palette-secondary-light": expect.any(String),
+				}),
+			);
+		});
+
+		it("should apply derived colors for left-nav-text-high", async () => {
+			// Arrange
+			vi.mocked(Storage.getWorkingTweaks).mockResolvedValue({
+				cssProperties: {
+					"--left-nav-text-high": { value: "#ffffff", enabled: true },
+				},
+			});
+
+			// Act
+			await ThemeState.reloadState();
+
+			// Assert - Should apply base property
+			expect(DomUtils.applyCSSProperty).toHaveBeenCalledWith(
+				"--left-nav-text-high",
+				"#ffffff",
+			);
+			// Should apply all 5 derived colors via applyManyCSSProperties
+			expect(DomUtils.applyManyCSSProperties).toHaveBeenCalledWith(
+				expect.objectContaining({
+					"--left-nav-hover": expect.any(String),
+					"--left-nav-selected": expect.any(String),
+					"--left-nav-icons": expect.any(String),
+					"--left-nav-text-medium": expect.any(String),
+					"--left-nav-text-high": expect.any(String), // Derived with alpha
+				}),
+			);
+		});
+
+		it("should not apply derived colors when base property is disabled", async () => {
+			// Arrange
+			vi.mocked(Storage.getWorkingTweaks).mockResolvedValue({
+				cssProperties: {
+					"--palette-secondary-main": { value: "#ff5733", enabled: false },
+				},
+			});
+
+			// Clear previous calls
+			vi.clearAllMocks();
+
+			// Act
+			await ThemeState.reloadState();
+
+			// Assert - Should not apply any colors when disabled
+			expect(DomUtils.applyCSSProperty).not.toHaveBeenCalled();
+			expect(DomUtils.applyManyCSSProperties).not.toHaveBeenCalled();
+		});
+
+		it("should apply derived colors for multiple base properties", async () => {
+			// Arrange
+			vi.mocked(Storage.getWorkingTweaks).mockResolvedValue({
+				cssProperties: {
+					"--palette-secondary-main": { value: "#ff5733", enabled: true },
+					"--left-nav-text-high": { value: "#ffffff", enabled: true },
+				},
+			});
+
+			// Clear any previous calls
+			vi.clearAllMocks();
+
+			// Act
+			await ThemeState.reloadState();
+
+			// Assert - Should apply base properties individually
+			expect(DomUtils.applyCSSProperty).toHaveBeenCalledWith(
+				"--palette-secondary-main",
+				"#ff5733",
+			);
+			expect(DomUtils.applyCSSProperty).toHaveBeenCalledWith(
+				"--left-nav-text-high",
+				"#ffffff",
+			);
+
+			// Should apply derived colors via applyManyCSSProperties (called twice, once per base property)
+			expect(DomUtils.applyManyCSSProperties).toHaveBeenCalledTimes(2);
+			expect(DomUtils.applyManyCSSProperties).toHaveBeenCalledWith(
+				expect.objectContaining({
+					"--palette-secondary-dark": expect.any(String),
+					"--palette-secondary-light": expect.any(String),
+				}),
+			);
+			expect(DomUtils.applyManyCSSProperties).toHaveBeenCalledWith(
+				expect.objectContaining({
+					"--left-nav-hover": expect.any(String),
+					"--left-nav-selected": expect.any(String),
+					"--left-nav-icons": expect.any(String),
+					"--left-nav-text-medium": expect.any(String),
+					"--left-nav-text-high": expect.any(String),
+				}),
+			);
+		});
+	});
 });
