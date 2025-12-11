@@ -180,7 +180,7 @@ class ThemeStateManager {
 
 		// If deleted preset was selected, deselect
 		if (this.currentState.selectedPreset === presetName) {
-			await Storage.setSelectedPreset(null);
+			await this.resetWorkingTweaks();
 		}
 	}
 
