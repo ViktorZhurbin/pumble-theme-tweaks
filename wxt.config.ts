@@ -9,11 +9,11 @@ export default defineConfig({
 	outDir: "dist",
 	modules: ["@wxt-dev/module-solid"],
 	manifest: {
-		name: "Pumble Tweaks",
+		name: "Pumble Theme Tweaks",
 		version: "2.2.2",
-		description: "Change Pumble colors in web browser.",
+		description: "Tweak Pumble theme colors",
 		permissions: ["storage", "scripting"],
-		host_permissions: [...PUMBLE_URL_PATTERNS],
+		host_permissions: PUMBLE_URL_PATTERNS,
 		action: {
 			default_title: "Change Pumble theme colors",
 		},
