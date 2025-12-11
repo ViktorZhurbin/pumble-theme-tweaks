@@ -93,6 +93,10 @@ export const COLOR_PICKERS_MAP: Record<string, PickerItem> = {
 				propertyName: "--palette-primary-main",
 				derive: (base) => base,
 			},
+			{
+				propertyName: "--create-button-hover",
+				derive: (base) => colord(base).alpha(0.7).toRgbString(),
+			},
 		],
 	},
 	"--background": {
