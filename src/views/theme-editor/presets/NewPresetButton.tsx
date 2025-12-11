@@ -5,6 +5,8 @@ import { buttonClass } from "./classes";
 export const NewPresetButton = () => {
 	const ctx = useThemeEditorContext();
 
+	const disabled = () => !ctx.store.selectedPreset;
+
 	const dialogs = useDialogs();
 
 	const handleNewPreset = async () => {
@@ -24,8 +26,12 @@ export const NewPresetButton = () => {
 	};
 
 	return (
-		<div class="tooltip" data-tip="Create a new preset">
-			<button class={`${buttonClass} btn-primary`} onClick={handleNewPreset}>
+		<div class="tooltip" data-tip={disabled() ? "" : "Create a new preset"}>
+			<button
+				disabled={disabled()}
+				class={`${buttonClass} btn-primary`}
+				onClick={handleNewPreset}
+			>
 				+ New
 			</button>
 		</div>
