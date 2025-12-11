@@ -5,6 +5,7 @@
 			"Bash(npm run build:*)",
 			"Bash(npm install:*)",
 			"Bash(npm run format:*)",
+			"Bash(npm test:*)",
 			"Bash(git add:*)",
 			"Bash(git commit:*)",
 			"Bash(git checkout:*)",

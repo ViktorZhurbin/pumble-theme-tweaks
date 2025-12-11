@@ -5,6 +5,10 @@
 ## Table of Contents
 
 1. [Coding Rules & Conventions](#coding-rules--conventions)
+   - [SolidJS](#solidjs-not-react)
+   - [TypeScript & General](#typescript--general)
+   - [Styling](#styling)
+   - [Testing](#testing)
 2. [Project Overview](#project-overview)
 3. [Architecture](#architecture)
 4. [Key Files](#key-files)
@@ -44,6 +48,21 @@
 - **Primary**: Tailwind CSS + daisyUI classes
 - **Never** use `transition: all` - specify properties: `transition: background 0.2s ease`
 - Prefer Tailwind utilities over custom CSS
+
+### Testing
+After making changes to code:
+- **ALWAYS run tests** `npm test`
+- **Run type checking** `npm run compile`
+- **Update CLAUDE.md** to make sure the docs are up to date
+
+- Write tests for new features alongside implementation
+- Update existing tests when modifying behavior
+- Test utilities available in `src/test/test-utils.ts`
+- Quick test commands:
+  - `npm test` - Run all tests once
+  - `npm run test:watch` - Run tests in watch mode
+  - `npm run test:ui` - Open Vitest UI
+  - `npm run test:coverage` - Generate coverage report
 
 ---
 
@@ -388,6 +407,7 @@ npm run dev       # Start dev server
 npm run build     # Build extension
 npm run format    # Format (Biome)
 npm run compile   # Type-check
+npm test.         # Run tests
 ```
 
 ### Critical Files
