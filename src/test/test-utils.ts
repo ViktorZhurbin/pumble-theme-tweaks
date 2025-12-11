@@ -42,7 +42,6 @@ export function createMockStoredPresets(
 
 	for (const name of presetNames) {
 		presets[name] = {
-			name,
 			cssProperties: {},
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
@@ -55,9 +54,8 @@ export function createMockStoredPresets(
 /**
  * Create a mock StoredPreset with some default colors
  */
-export function createMockPreset(name: string): StoredPreset {
+export function createMockPreset(): StoredPreset {
 	return {
-		name,
 		cssProperties: {
 			"--left-nav-text-high": {
 				value: "#ffffff",

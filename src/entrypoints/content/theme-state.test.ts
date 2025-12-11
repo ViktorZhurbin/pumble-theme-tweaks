@@ -40,7 +40,6 @@ describe("ThemeState - Integration Tests", () => {
 			// Arrange
 			const mockPresets = {
 				"Dark Theme": {
-					name: "Dark Theme",
 					cssProperties: {
 						"--palette-secondary-main": { value: "#ff5733", enabled: true },
 					},
@@ -173,7 +172,6 @@ describe("ThemeState - Integration Tests", () => {
 			};
 
 			vi.mocked(Storage.getPreset).mockResolvedValue({
-				name: "Dark Theme",
 				cssProperties,
 				createdAt: "2024-01-01",
 				updatedAt: "2024-01-01",
@@ -205,7 +203,6 @@ describe("ThemeState - Integration Tests", () => {
 			// Arrange - First load a preset
 			const mockPresets = {
 				"Dark Theme": {
-					name: "Dark Theme",
 					cssProperties: {
 						"--palette-secondary-main": { value: "#ff5733", enabled: true },
 					},
@@ -426,7 +423,6 @@ describe("ThemeState - Integration Tests", () => {
 			// Arrange - Load a preset
 			const mockPresets = {
 				"Dark Theme": {
-					name: "Dark Theme",
 					cssProperties: {
 						"--palette-secondary-main": { value: "#ff5733", enabled: true },
 					},
@@ -463,7 +459,6 @@ describe("ThemeState - Integration Tests", () => {
 
 			const mockPresets = {
 				"Dark Theme": {
-					name: "Dark Theme",
 					cssProperties,
 					createdAt: "2024-01-01",
 					updatedAt: "2024-01-01",

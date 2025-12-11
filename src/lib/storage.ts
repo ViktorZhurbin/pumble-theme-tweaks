@@ -170,7 +170,6 @@ const createPreset = async (
 	}
 
 	allPresets[name] = {
-		name,
 		cssProperties,
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
@@ -257,7 +256,6 @@ const renamePreset = async (oldName: string, newName: string) => {
 
 	allPresets[newName] = {
 		...allPresets[oldName],
-		name: newName,
 		updatedAt: new Date().toISOString(),
 	};
 

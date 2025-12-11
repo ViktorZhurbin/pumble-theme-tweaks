@@ -192,7 +192,6 @@ describe("Storage", () => {
 			await Storage.createPreset("Dark Theme", cssProperties);
 
 			const result = await Storage.getPreset("Dark Theme");
-			expect(result?.name).toBe("Dark Theme");
 			expect(result?.cssProperties).toEqual(cssProperties);
 		});
 
@@ -211,7 +210,6 @@ describe("Storage", () => {
 			await Storage.createPreset("Dark Theme", cssProperties);
 
 			const preset = await Storage.getPreset("Dark Theme");
-			expect(preset?.name).toBe("Dark Theme");
 			expect(preset?.cssProperties).toEqual(cssProperties);
 			expect(preset?.createdAt).toBeDefined();
 			expect(preset?.updatedAt).toBeDefined();
@@ -334,7 +332,6 @@ describe("Storage", () => {
 			const newPreset = await Storage.getPreset("New Name");
 
 			expect(oldPreset).toBeUndefined();
-			expect(newPreset?.name).toBe("New Name");
 			expect(newPreset?.cssProperties).toEqual(cssProperties);
 		});
 

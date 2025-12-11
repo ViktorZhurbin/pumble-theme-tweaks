@@ -11,9 +11,9 @@ export type StoredCssProperties = Record<string, StoredTweakEntry>;
 
 /**
  * Preset data (persisted to browser.storage)
+ * Note: name is stored as the dictionary key, not duplicated here
  */
 export interface StoredPreset {
-	name: string;
 	cssProperties: StoredCssProperties;
 	createdAt: string;
 	updatedAt: string;
