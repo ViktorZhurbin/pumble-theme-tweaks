@@ -140,11 +140,36 @@ Tests:      78 passed (78)
 Duration:   ~450ms
 ```
 
+### ✅ Phase 2: Core Confidence (Completed - Partial)
+
+**State Management Integration Tests** (26 tests ✅)
+- ✅ `reloadState()` - Load from storage, apply to DOM, broadcast changes
+- ✅ `loadPreset()` - Load preset into working state
+- ✅ `savePreset()` - Save working state to selected preset
+- ✅ `savePresetAs()` - Create new preset from working state
+- ✅ `deletePreset()` - Delete preset and handle selection
+- ✅ `setTweaksOn()` - Toggle tweaks on/off
+- ✅ `resetWorkingTweaks()` - Clear working state
+- ✅ `updateWorkingProperty()` - Update single property + derived colors
+- ✅ `toggleWorkingProperty()` - Toggle enabled state for base + derived
+- ✅ `importPreset()` - Import external preset data
+- ✅ Unsaved changes detection (preset vs working state)
+- ✅ Badge state updates based on tweaks/preset status
+- ✅ DOM manipulation (apply/reset CSS properties)
+- ✅ Multi-tab sync simulation (storage → reloadState)
+- **File:** `src/entrypoints/content/theme-state.test.ts`
+
+**Test Coverage Summary (Updated)**
+```
+Test Files: 4 passed (4)
+Tests:      104 passed (104)
+Duration:   ~500ms
+```
+
 ### 🚧 Next Steps
 
-**Phase 2: Core Confidence**
-- [ ] State management integration tests (`theme-state.ts`)
-- [ ] E2E happy path test
+**Phase 2: Remaining**
+- [ ] E2E happy path test (Playwright/Puppeteer)
 
 **Phase 3: UI Reliability**
 - [ ] Dialog component tests
