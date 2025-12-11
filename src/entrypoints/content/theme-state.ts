@@ -1,3 +1,4 @@
+import { predefinedPresets } from "@/constants/predefined-presets";
 import { PICKER_IDS } from "@/constants/properties";
 import { ColorDerivation } from "@/lib/color-derivation";
 import { logger } from "@/lib/logger";
@@ -40,7 +41,16 @@ class ThemeStateManager {
 		const tweaksOn = await Storage.getTweaksOn();
 		const storedWorkingTweaks = await Storage.getWorkingTweaks();
 		const selectedPreset = await Storage.getSelectedPreset();
-		const savedPresets = await Storage.getAllPresets();
+		let savedPresets = await Storage.getAllPresets();
+
+		// Seed predefined presets on first run
+		const hasBeenSeeded = await Storage.getPredefinedPresetsSeeded();
+		if (!hasBeenSeeded) {
+			await this.seedPredefinedPresets();
+			await Storage.setPredefinedPresetsSeeded();
+			// Reload presets after seeding
+			savedPresets = await Storage.getAllPresets();
+		}
 
 		// Build working tweaks with initial values from DOM (BEFORE clearing)
 		const workingTweaks = this.buildWorkingTweaksWithInitialValues(
@@ -336,6 +346,29 @@ class ThemeStateManager {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Seeds predefined presets on first install
+	 * Only runs once - flag prevents re-injection after user modifications
+	 */
+	private async seedPredefinedPresets() {
+		logger.info("ThemeState: Seeding predefined presets");
+
+		for (const preset of predefinedPresets) {
+			try {
+				await Storage.createPreset(preset.name, preset.cssProperties);
+				logger.info("ThemeState: Created predefined preset", {
+					name: preset.name,
+				});
+			} catch (err) {
+				// Preset already exists, skip (race condition with another tab or manual creation)
+				logger.debug("ThemeState: Could not create predefined preset", {
+					name: preset.name,
+					error: err,
+				});
+			}
+		}
 	}
 }
 

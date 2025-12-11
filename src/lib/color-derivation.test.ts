@@ -159,7 +159,10 @@ describe("ColorDerivation", () => {
 			);
 
 			// Now includes identity + hover
-			expect(result).toEqual(["--palette-primary-main", "--create-button-hover"]);
+			expect(result).toEqual([
+				"--palette-primary-main",
+				"--create-button-hover",
+			]);
 		});
 
 		it("should return CSS property for --background (identity)", () => {

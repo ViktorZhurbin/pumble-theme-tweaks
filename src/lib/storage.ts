@@ -278,6 +278,36 @@ const renamePreset = async (oldName: string, newName: string) => {
 	}
 };
 
+/**
+ * Gets whether predefined presets have been seeded
+ */
+const getPredefinedPresetsSeeded = async (): Promise<boolean> => {
+	try {
+		const result = (await browser.storage.sync.get(
+			"predefined_presets_seeded",
+		)) as StorageData;
+
+		return result.predefined_presets_seeded ?? false;
+	} catch (err) {
+		logger.error("Storage read error:", err);
+		return false;
+	}
+};
+
+/**
+ * Sets the predefined presets seeded flag
+ */
+const setPredefinedPresetsSeeded = async () => {
+	try {
+		const dataToSave: StorageData = { predefined_presets_seeded: true };
+
+		await browser.storage.sync.set(dataToSave);
+		logger.info("Storage: Marked predefined presets as seeded");
+	} catch (err) {
+		logger.warn("Storage write error:", err);
+	}
+};
+
 export const Storage = {
 	// Tweaks toggle
 	getTweaksOn,
@@ -299,4 +329,8 @@ export const Storage = {
 	updatePreset,
 	deletePreset,
 	renamePreset,
+
+	// Predefined presets seeding
+	getPredefinedPresetsSeeded,
+	setPredefinedPresetsSeeded,
 };

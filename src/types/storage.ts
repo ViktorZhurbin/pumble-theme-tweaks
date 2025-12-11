@@ -33,4 +33,5 @@ export interface StorageData {
 	selected_preset?: string | null;
 	saved_presets?: StoredPresets;
 	tweaks_on?: boolean;
+	predefined_presets_seeded?: boolean;
 }
