@@ -110,6 +110,17 @@ export const COLOR_PICKERS_MAP: Record<string, PickerItem> = {
 			},
 		],
 	},
+	"--warning-high": {
+		label: "Unread badge",
+		id: "--warning-high",
+		// Identity: picker value = CSS value
+		cssProperties: [
+			{
+				propertyName: "--warning-high",
+				derive: (base) => base,
+			},
+		],
+	},
 };
 
 export const PICKER_IDS = Object.keys(COLOR_PICKERS_MAP);
