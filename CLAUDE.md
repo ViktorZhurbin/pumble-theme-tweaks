@@ -118,8 +118,8 @@
 | `src/lib/storage.ts` | Storage facade | Storage operations |
 | `src/lib/import-export.ts` | Import/export utilities | Import/export features |
 | `src/lib/messages/createMessenger.ts` | Message factory | IPC infrastructure |
-| `src/constants/properties.ts` | **Customizable CSS properties** | **Add/remove properties** |
-| `src/constants/derived-colors.ts` | Color derivation rules | Auto-derivation |
+| `src/constants/properties.ts` | **Customizable CSS properties + derivation rules** | **Add/remove properties** |
+| `src/lib/color-derivation.ts` | Color derivation utilities | Helper functions |
 
 ---
 
@@ -149,6 +149,46 @@ interface RuntimeState {
 - **Reset**: Context-aware (revert to preset OR clear to defaults)
 - **Theme Detection**: Auto-disables tweaks when Pumble theme changes
 - **Multi-Tab Sync**: Write to storage → All tabs receive `onChanged` → Re-apply
+
+### Color Derivation Architecture
+
+**Single Source of Truth**: `PROPERTIES_MAP` in `src/constants/properties.ts` defines all properties and their derivation rules inline.
+
+```typescript
+type PropertyItem = {
+  label: string;
+  propertyName: string;
+  /** Optional transform for color picker display (e.g., strip alpha for Chrome) */
+  displayColor?: (color: string) => string;
+  derivedProperties?: DerivedColorConfig[];
+};
+
+export const PROPERTIES_MAP: Record<string, PropertyItem> = {
+  "--left-nav-text-high": {
+    label: "Sidebar text",
+    propertyName: "--left-nav-text-high",
+    displayColor: (color) => colord(color).alpha(1).toHex(), // Strip alpha for color picker
+    derivedProperties: [
+      { propertyName: "--left-nav-hover", derive: (base) => colord(base).alpha(0.22).toRgbString() },
+      { propertyName: "--left-nav-text-high", derive: (base) => colord(base).alpha(0.87).toRgbString() },
+      // ... more derived colors
+    ]
+  }
+};
+```
+
+**Key Concepts**:
+- **Base Properties** (4 total): User-customizable colors shown in UI with color pickers
+- **Derived Properties** (9 total): Auto-computed variants (lighter, darker, alpha) from base colors
+- **On-Demand Computation**: Working state stores only 4 base properties, derived colors computed when needed
+- **displayColor Transform**: Optional function to transform color for display in `<input type="color">` (Chrome requires 6-char hex, rejects 8-char hex with alpha)
+
+**Utilities**: `src/lib/color-derivation.ts` provides helpers:
+- `computeAllColorsFromBase()` - Returns base + all derived colors
+- `computeDerivedColorsFromBase()` - Returns only derived colors
+- `getDerivedPropertyNamesForBase()` - Returns list of derived property names
+
+**Storage Strategy**: Store only base properties (4) → Reduces storage/memory 3× → Compute derived (9) on-demand for DOM, export, etc.
 
 ---
 
@@ -351,11 +391,11 @@ npm run compile   # Type-check
 ```
 
 ### Critical Files
-- **Add property**: `src/constants/properties.ts`
-- **Add derivation**: `src/constants/derived-colors.ts`
+- **Add property + derivation**: `src/constants/properties.ts` (single source for both)
 - **State logic**: `src/entrypoints/content/theme-state.ts`
 - **UI root**: `src/views/theme-editor/ThemeEditor.tsx`
 - **Storage**: `src/lib/storage.ts`
+- **Color utils**: `src/lib/color-derivation.ts`
 
 ### Message Protocols
 - `src/entrypoints/content/protocol.ts`
