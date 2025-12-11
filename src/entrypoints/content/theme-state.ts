@@ -324,7 +324,9 @@ class ThemeStateManager {
 			const tweakEntry = workingProps[pickerId];
 			const storedEntry = presetProps[pickerId];
 
-			const workingEntryValue = tweakEntry?.value ?? tweakEntry.initialValue;
+			// When comparing to preset: if working value is null, assume preset value
+			// (user hasn't changed it yet, so it matches the preset)
+			const workingEntryValue = tweakEntry?.value ?? storedEntry?.value;
 
 			// Different value
 			if (workingEntryValue !== storedEntry?.value) return true;

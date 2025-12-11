@@ -54,15 +54,18 @@ describe("ColorDerivation", () => {
 			);
 		});
 
-		it("should return identity for properties without transformations", () => {
+		it("should return identity plus hover for --palette-primary-main", () => {
 			const baseColor = "#ff5733";
 			const result = ColorDerivation.computeCssProperties(
 				"--palette-primary-main",
 				baseColor,
 			);
 
-			// Now includes identity transform
-			expect(result).toEqual({ "--palette-primary-main": "#ff5733" });
+			// Now includes identity + hover transform
+			expect(result).toEqual({
+				"--palette-primary-main": "#ff5733",
+				"--create-button-hover": "rgba(255, 87, 51, 0.7)",
+			});
 		});
 
 		it("should handle various color formats", () => {
@@ -150,13 +153,13 @@ describe("ColorDerivation", () => {
 			]);
 		});
 
-		it("should return identity for properties without transformations", () => {
+		it("should return identity plus hover for --palette-primary-main", () => {
 			const result = ColorDerivation.getCssPropertyNames(
 				"--palette-primary-main",
 			);
 
-			// Now includes identity transform
-			expect(result).toEqual(["--palette-primary-main"]);
+			// Now includes identity + hover
+			expect(result).toEqual(["--palette-primary-main", "--create-button-hover"]);
 		});
 
 		it("should return CSS property for --background (identity)", () => {

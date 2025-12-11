@@ -458,6 +458,7 @@ describe("ThemeState - Integration Tests", () => {
 				"--left-nav-text-high": { value: "#ffffff", enabled: true },
 				"--palette-primary-main": { value: "#0066cc", enabled: true },
 				"--background": { value: "#ffffff", enabled: true },
+				"--warning-high": { value: "#ff0000", enabled: true },
 			};
 
 			const mockPresets = {
@@ -504,6 +505,61 @@ describe("ThemeState - Integration Tests", () => {
 
 			// Assert
 			expect(state.hasUnsavedChanges).toBe(true);
+		});
+
+		it("should preserve initialValue across reloads (not re-read from modified DOM)", async () => {
+			// Bug: After updateWorkingProperty applies color to DOM, reloadState
+			// was re-reading initialValue from the modified DOM, causing
+			// initialValue === storedValue → no changes detected
+
+			// Arrange - First load with DOM values
+			vi.mocked(DomUtils.getCSSProperties).mockReturnValue({
+				"--palette-secondary-main": "#000000", // Original DOM value
+				"--left-nav-text-high": "#ffffff",
+				"--palette-primary-main": "#0066cc",
+				"--background": "#ffffff",
+			});
+
+			vi.mocked(Storage.getWorkingTweaks).mockResolvedValue({
+				cssProperties: {},
+			});
+
+			// Act - Initial load
+			await ThemeState.reloadState();
+			const initialState = ThemeState.getCurrentState();
+
+			// Assert - initialValue captured from DOM
+			expect(
+				initialState.workingTweaks.cssProperties["--palette-secondary-main"]
+					?.initialValue,
+			).toBe("#000000");
+
+			// Arrange - Simulate user changing color (DOM now has new value)
+			vi.mocked(DomUtils.getCSSProperties).mockReturnValue({
+				"--palette-secondary-main": "#ff5733", // NEW value in DOM
+				"--left-nav-text-high": "#ffffff",
+				"--palette-primary-main": "#0066cc",
+				"--background": "#ffffff",
+			});
+
+			vi.mocked(Storage.getWorkingTweaks).mockResolvedValue({
+				cssProperties: {
+					"--palette-secondary-main": { value: "#ff5733", enabled: true },
+				},
+			});
+
+			// Act - Reload state (triggered by storage change after 500ms)
+			await ThemeState.reloadState();
+			const reloadedState = ThemeState.getCurrentState();
+
+			// Assert - initialValue should be PRESERVED (not re-read from DOM)
+			expect(
+				reloadedState.workingTweaks.cssProperties["--palette-secondary-main"]
+					?.initialValue,
+			).toBe("#000000"); // Still the original, NOT #ff5733
+
+			// Assert - Changes should be detected
+			expect(reloadedState.hasUnsavedChanges).toBe(true);
 		});
 	});
 
