@@ -1,40 +1,39 @@
-import { PROPERTIES_MAP } from "@/constants/properties";
+import { COLOR_PICKERS_MAP } from "@/constants/properties";
 
 /**
- * Utility module for managing derived color generation and application
+ * Utility module for computing CSS properties from picker values
  */
 export const ColorDerivation = {
-	computeDerivedColorsFromBase(
-		basePropertyName: string,
-		baseValue: string,
+	/**
+	 * Computes all CSS properties from a picker value
+	 * @param pickerId - The picker ID (storage key)
+	 * @param pickerValue - The opaque HEX picker value
+	 * @returns Record of CSS property names to computed values
+	 */
+	computeCssProperties(
+		pickerId: string,
+		pickerValue: string,
 	): Record<string, string> {
 		const result: Record<string, string> = {};
-		const derivedColors = PROPERTIES_MAP[basePropertyName].derivedProperties;
+		const pickerItem = COLOR_PICKERS_MAP[pickerId];
 
-		if (!derivedColors) {
-			return result;
-		}
+		for (const cssProp of pickerItem.cssProperties) {
+			const cssValue = cssProp.derive(pickerValue);
 
-		for (const item of derivedColors) {
-			const derivedValue = item.derive(baseValue);
-			result[item.propertyName] = derivedValue;
+			result[cssProp.propertyName] = cssValue;
 		}
 
 		return result;
 	},
 
 	/**
-	 * Gets all derived property names for a specific base property (including the base itself)
-	 * @param basePropertyName - The base CSS property name
-	 * @returns Array of property names (base + derived)
+	 * Gets all CSS property names for a specific picker control
+	 * @param pickerId - The picker ID (storage key)
+	 * @returns Array of CSS property names
 	 */
-	getDerivedPropertyNamesForBase(basePropertyName: string): string[] {
-		const derivedConfigs = PROPERTIES_MAP[basePropertyName].derivedProperties;
+	getCssPropertyNames(pickerId: string): string[] {
+		const pickerItem = COLOR_PICKERS_MAP[pickerId];
 
-		if (!derivedConfigs) {
-			return [];
-		}
-
-		return derivedConfigs.map((config) => config.propertyName);
+		return pickerItem.cssProperties.map((css) => css.propertyName);
 	},
 };

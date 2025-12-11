@@ -1,37 +1,27 @@
 import { colord } from "colord";
-import { BASE_PROPERTY_NAMES } from "@/constants/properties";
+import { PICKER_IDS } from "@/constants/properties";
 import { ColorDerivation } from "@/lib/color-derivation";
 import type { StoredCssProperties } from "@/types/storage";
 import type { WorkingTweaks } from "@/types/tweaks";
 
 /**
- * Gets all property values as an object for copying to clipboard
- * Returns object with property names as keys and current values (custom or initial)
- * Exports all properties (base + derived computed from base)
+ * Gets picker values as JSON for copying to clipboard
+ * Exports only picker values (storage keys), not computed CSS properties
  */
 export const getExportJson = (tweaks: WorkingTweaks) => {
 	const result: Record<string, string> = {};
 
-	// Export base properties and compute their derived colors
-	for (const basePropertyName of BASE_PROPERTY_NAMES) {
-		const entry = tweaks.cssProperties[basePropertyName];
+	// Export only picker values
+	for (const pickerId of PICKER_IDS) {
+		const entry = tweaks.cssProperties[pickerId];
 
 		if (entry) {
-			const baseValue =
+			const pickerValue =
 				entry.enabled && entry.value !== null
 					? entry.value
 					: entry.initialValue;
 
-			// Add base property
-			result[basePropertyName] = baseValue;
-
-			// // Compute and add derived colors
-			// const derivedColors = ColorDerivation.computeDerivedColorsFromBase(
-			// 	basePropertyName,
-			// 	baseValue,
-			// );
-
-			// Object.assign(result, derivedColors);
+			result[pickerId] = pickerValue;
 		}
 	}
 
@@ -42,30 +32,27 @@ export const getExportJson = (tweaks: WorkingTweaks) => {
 
 /**
  * Generates a script string that can be run in DevTools console
- * Includes all properties (base + derived computed from base)
+ * Includes all CSS properties (computed from picker values)
  */
 export const getScriptString = (workingTweaks: WorkingTweaks) => {
 	const properties: Array<{ name: string; value: string }> = [];
 
-	// Generate script with base + derived colors
-	for (const basePropertyName of BASE_PROPERTY_NAMES) {
-		const entry = workingTweaks.cssProperties[basePropertyName];
+	// Compute all CSS properties from picker values
+	for (const pickerId of PICKER_IDS) {
+		const entry = workingTweaks.cssProperties[pickerId];
 
 		if (!entry) continue;
 
-		const baseValue =
+		const pickerValue =
 			entry.enabled && entry.value !== null ? entry.value : entry.initialValue;
 
-		// Add base property
-		properties.push({ name: basePropertyName, value: baseValue });
-
-		// Add derived colors
-		const derivedColors = ColorDerivation.computeDerivedColorsFromBase(
-			basePropertyName,
-			baseValue,
+		// Compute CSS properties from picker value
+		const cssProperties = ColorDerivation.computeCssProperties(
+			pickerId,
+			pickerValue,
 		);
 
-		for (const [name, value] of Object.entries(derivedColors)) {
+		for (const [name, value] of Object.entries(cssProperties)) {
 			properties.push({ name, value });
 		}
 	}
@@ -77,9 +64,8 @@ export const getScriptString = (workingTweaks: WorkingTweaks) => {
 
 /**
  * Parses imported JSON and converts to stored CSS properties format
- * Provides backward compatibility: accepts imports with only base properties
- * and auto-computes derived colors. If derived colors are provided, they are
- * recomputed from base (base wins).
+ * Stores only picker values (not computed CSS properties)
+ * CSS properties are computed on-the-fly when applying to DOM
  */
 export const parseImportJSON = (input: string): StoredCssProperties | null => {
 	try {
@@ -94,25 +80,13 @@ export const parseImportJSON = (input: string): StoredCssProperties | null => {
 			return null;
 		}
 
-		// Loop over base properties only
-		for (const basePropertyName of BASE_PROPERTY_NAMES) {
-			const value = parsed[basePropertyName];
+		// Extract only picker values
+		for (const pickerId of PICKER_IDS) {
+			const value = parsed[pickerId];
 
 			if (typeof value === "string" && colord(value).isValid()) {
-				// Save base property
-				cssProperties[basePropertyName] = { value, enabled: true };
-
-				// Compute and add derived colors (override any manually-set derived)
-				const derivedColors = ColorDerivation.computeDerivedColorsFromBase(
-					basePropertyName,
-					value,
-				);
-
-				for (const [derivedProp, derivedValue] of Object.entries(
-					derivedColors,
-				)) {
-					cssProperties[derivedProp] = { value: derivedValue, enabled: true };
-				}
+				// Store only picker value (opaque base color)
+				cssProperties[pickerId] = { value, enabled: true };
 			}
 		}
 

@@ -1,4 +1,4 @@
-import { ALL_PROPERTY_NAMES, PROPERTIES_MAP } from "@/constants/properties";
+import { ALL_PROPERTY_NAMES, COLOR_PICKERS_MAP } from "@/constants/properties";
 
 /**
  * Applies a CSS property to the document root
@@ -66,11 +66,11 @@ const getCSSProperties = () => {
 };
 
 /**
- * Checks if a CSS property tweak has been applied to DOM
+ * Checks if a picker item has been applied to DOM
  */
 const isPropertyModified = (propertyName: string): boolean => {
 	return (
-		propertyName in PROPERTIES_MAP &&
+		propertyName in COLOR_PICKERS_MAP &&
 		!!document.documentElement.style.getPropertyValue(propertyName)
 	);
 };

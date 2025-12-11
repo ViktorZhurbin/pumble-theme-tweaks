@@ -185,7 +185,7 @@ describe("Import/Export", () => {
 			});
 		});
 
-		it("should auto-compute derived colors from base properties", () => {
+		it("should import only picker values (CSS properties computed on-the-fly)", () => {
 			const input = JSON.stringify({
 				"--palette-secondary-main": "#ff5733",
 			});
@@ -193,13 +193,20 @@ describe("Import/Export", () => {
 			const result = parseImportJSON(input);
 
 			expect(result).not.toBeNull();
-			// Should have base property
+			if (!result) return; // Type guard for TypeScript
+
+			// Should have base picker property
 			expect(result).toHaveProperty("--palette-secondary-main");
-			// Should have derived properties
-			expect(result).toHaveProperty("--palette-secondary-dark");
-			expect(result).toHaveProperty("--palette-secondary-light");
-			// All should be enabled
-			expect(result?.["--palette-secondary-dark"]?.enabled).toBe(true);
+			expect(result["--palette-secondary-main"]?.value).toBe("#ff5733");
+			expect(result["--palette-secondary-main"]?.enabled).toBe(true);
+
+			// Should NOT have derived CSS properties in storage
+			// (they're computed on-the-fly when applying to DOM)
+			expect(result).not.toHaveProperty("--palette-secondary-dark");
+			expect(result).not.toHaveProperty("--palette-secondary-light");
+
+			// Only picker IDs in result
+			expect(Object.keys(result)).toEqual(["--palette-secondary-main"]);
 		});
 
 		it("should return null for invalid JSON", () => {

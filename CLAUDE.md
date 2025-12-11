@@ -171,43 +171,70 @@ interface RuntimeState {
 
 ### Color Derivation Architecture
 
-**Single Source of Truth**: `PROPERTIES_MAP` in `src/constants/properties.ts` defines all properties and their derivation rules inline.
+**Single Source of Truth**: `COLOR_PICKERS_MAP` in `src/constants/properties.ts` defines all properties and their derivation rules inline.
 
 ```typescript
 type PropertyItem = {
   label: string;
-  propertyName: string;
-  /** Optional transform for color picker display (e.g., strip alpha for Chrome) */
-  displayColor?: (color: string) => string;
-  derivedProperties?: DerivedColorConfig[];
+  /** Storage key for the picker value (opaque base color) */
+  id: string;
+  /**
+   * CSS properties to compute from this picker value.
+   * ALWAYS defined - at minimum includes identity transform for the base property.
+   */
+  cssProperties: CssPropertyConfig[];
 };
 
-export const PROPERTIES_MAP: Record<string, PropertyItem> = {
+type CssPropertyConfig = {
+  propertyName: string; // CSS property name
+  derive: (baseColor: string) => string; // Transform function
+};
+
+export const COLOR_PICKERS_MAP: Record<string, PropertyItem> = {
   "--left-nav-text-high": {
     label: "Sidebar text",
-    propertyName: "--left-nav-text-high",
-    displayColor: (color) => colord(color).alpha(1).toHex(), // Strip alpha for color picker
-    derivedProperties: [
+    id: "--left-nav-text-high", // Storage key for opaque picker value
+    cssProperties: [
       { propertyName: "--left-nav-hover", derive: (base) => colord(base).alpha(0.22).toRgbString() },
+      { propertyName: "--left-nav-selected", derive: (base) => colord(base).alpha(0.34).toRgbString() },
+      // Base property derives itself with alpha for actual CSS
       { propertyName: "--left-nav-text-high", derive: (base) => colord(base).alpha(0.87).toRgbString() },
       // ... more derived colors
+    ]
+  },
+  "left-nav-content": {
+    label: "Top & sidebar",
+    id: "left-nav-content", // Storage key for opaque picker value
+    cssProperties: [
+      // Identity transform - picker value applied as-is
+      { propertyName: "--palette-secondary-main", derive: (base) => base },
+      // Plus derived variants
+      { propertyName: "--palette-secondary-dark", derive: (base) => colord(base).darken(0.2).toRgbString() },
+      { propertyName: "--palette-secondary-light", derive: (base) => colord(base).lighten(0.2).toRgbString() },
     ]
   }
 };
 ```
 
 **Key Concepts**:
-- **Base Properties** (4 total): User-customizable colors shown in UI with color pickers
-- **Derived Properties** (9 total): Auto-computed variants (lighter, darker, alpha) from base colors
-- **On-Demand Computation**: Working state stores only 4 base properties, derived colors computed when needed
-- **displayColor Transform**: Optional function to transform color for display in `<input type="color">` (Chrome requires 6-char hex, rejects 8-char hex with alpha)
+- **Picker IDs = Storage Keys** (4 total): Opaque HEX colors stored in state/storage for color pickers ONLY
+- **CSS Properties = Computed Values** (15 total): Always computed on-the-fly from picker values, applied to DOM
+- **Storage Model**: Store ONLY picker values (opaque HEX) → Compute CSS properties when applying to DOM
+- **Consistent Pattern**: ALL controls have `cssProperties` array:
+  - **With transforms** (e.g., `--left-nav-text-high`): Applies alpha/color transformations
+  - **Identity only** (e.g., `--background`): Picker value applied as-is via `(base) => base`
+  - **Identity + derived** (e.g., `--palette-secondary-main`): Base as-is + darker/lighter variants
+
+**Benefits**:
+- **No format mismatches**: Working and saved states have identical structure (picker values only)
+- **75% smaller storage**: 4 picker values vs 15 total CSS properties
+- **Consistent architecture**: No conditional logic - ALL properties go through same derivation flow
+- **Single source of truth**: Base picker values never diverge from presets
+- **Simpler comparisons**: Direct HEX comparison for unsaved changes detection
 
 **Utilities**: `src/lib/color-derivation.ts` provides helpers:
-- `computeAllColorsFromBase()` - Returns base + all derived colors
-- `computeDerivedColorsFromBase()` - Returns only derived colors
-- `getDerivedPropertyNamesForBase()` - Returns list of derived property names
-
-**Storage Strategy**: Store only base properties (4) → Reduces storage/memory 3× → Compute derived (9) on-demand for DOM, export, etc.
+- `computeCssProperties(pickerId, pickerValue)` - Returns all CSS properties computed from picker value
+- `getCssPropertyNames(pickerId)` - Returns list of all CSS property names for a picker
 
 ---
 

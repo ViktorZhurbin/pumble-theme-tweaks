@@ -82,15 +82,24 @@ describe("ThemeState - Integration Tests", () => {
 			// Act
 			await ThemeState.reloadState();
 
-			// Assert - only enabled properties should be applied
-			expect(DomUtils.applyCSSProperty).toHaveBeenCalledWith(
-				"--palette-secondary-main",
-				"#ff5733",
-			);
-			expect(DomUtils.applyCSSProperty).not.toHaveBeenCalledWith(
-				"--left-nav-text-high",
-				expect.anything(),
-			);
+			// Assert - only enabled properties should be applied via applyManyCSSProperties
+			expect(DomUtils.applyManyCSSProperties).toHaveBeenCalled();
+
+			// Get the actual call to verify it includes the expected properties
+			const calls = vi.mocked(DomUtils.applyManyCSSProperties).mock.calls;
+			const allAppliedProperties: Record<string, string> = {};
+			for (const [props] of calls) {
+				Object.assign(allAppliedProperties, props);
+			}
+
+			// Should have applied --palette-secondary-main and its derived colors
+			expect(allAppliedProperties).toHaveProperty("--palette-secondary-main");
+			expect(allAppliedProperties).toHaveProperty("--palette-secondary-dark");
+			expect(allAppliedProperties).toHaveProperty("--palette-secondary-light");
+
+			// Should NOT have applied disabled property
+			expect(allAppliedProperties).not.toHaveProperty("--left-nav-hover");
+			expect(allAppliedProperties).not.toHaveProperty("--left-nav-text-high");
 		});
 
 		it("should not apply CSS properties when tweaks are off", async () => {
@@ -369,13 +378,11 @@ describe("ThemeState - Integration Tests", () => {
 			);
 		});
 
-		it("should toggle derived properties along with base", async () => {
-			// Arrange
+		it("should toggle base property only (derived colors handled on apply)", async () => {
+			// Arrange - Storage only has base properties now
 			vi.mocked(Storage.getWorkingTweaks).mockResolvedValue({
 				cssProperties: {
 					"--palette-secondary-main": { value: "#ff5733", enabled: true },
-					"--palette-secondary-dark": { value: "#cc4422", enabled: true },
-					"--palette-secondary-light": { value: "#ff8844", enabled: true },
 				},
 			});
 			await ThemeState.reloadState();
@@ -383,17 +390,19 @@ describe("ThemeState - Integration Tests", () => {
 			// Act
 			await ThemeState.toggleWorkingProperty("--palette-secondary-main", false);
 
-			// Assert - All derived properties should be disabled
-			expect(Storage.setWorkingTweaks).toHaveBeenCalledWith(
+			// Assert - Only base property stored, derived colors applied on-the-fly
+			const call = vi.mocked(Storage.setWorkingTweaks).mock.calls[0][0];
+
+			// Base property should be disabled
+			expect(call["--palette-secondary-main"]).toEqual(
 				expect.objectContaining({
-					"--palette-secondary-dark": expect.objectContaining({
-						enabled: false,
-					}),
-					"--palette-secondary-light": expect.objectContaining({
-						enabled: false,
-					}),
+					enabled: false,
 				}),
 			);
+
+			// Derived properties should NOT be in storage
+			expect(call["--palette-secondary-dark"]).toBeUndefined();
+			expect(call["--palette-secondary-light"]).toBeUndefined();
 		});
 	});
 
@@ -499,8 +508,8 @@ describe("ThemeState - Integration Tests", () => {
 	});
 
 	describe("Derived colors application (Bug: derived colors removed after storage sync)", () => {
-		it("should apply derived colors when reloading state with base property", async () => {
-			// Arrange - Storage has a base property with a custom value
+		it("should apply all CSS properties when reloading state with picker value", async () => {
+			// Arrange - Storage has a picker value
 			vi.mocked(Storage.getWorkingTweaks).mockResolvedValue({
 				cssProperties: {
 					"--palette-secondary-main": { value: "#ff5733", enabled: true },
@@ -510,14 +519,10 @@ describe("ThemeState - Integration Tests", () => {
 			// Act
 			await ThemeState.reloadState();
 
-			// Assert - Should apply base property individually
-			expect(DomUtils.applyCSSProperty).toHaveBeenCalledWith(
-				"--palette-secondary-main",
-				"#ff5733",
-			);
-			// Should apply derived colors via applyManyCSSProperties
+			// Assert - Should apply ALL CSS properties (base + derived) via applyManyCSSProperties
 			expect(DomUtils.applyManyCSSProperties).toHaveBeenCalledWith(
 				expect.objectContaining({
+					"--palette-secondary-main": "#ff5733", // Base (identity)
 					"--palette-secondary-dark": expect.any(String),
 					"--palette-secondary-light": expect.any(String),
 				}),
@@ -535,12 +540,14 @@ describe("ThemeState - Integration Tests", () => {
 			// Act
 			await ThemeState.reloadState();
 
-			// Assert - Should apply base property
-			expect(DomUtils.applyCSSProperty).toHaveBeenCalledWith(
+			// Assert - Should NOT apply base property directly
+			// (base property is in derived list with alpha transform)
+			expect(DomUtils.applyCSSProperty).not.toHaveBeenCalledWith(
 				"--left-nav-text-high",
 				"#ffffff",
 			);
 			// Should apply all 5 derived colors via applyManyCSSProperties
+			// (includes base property with alpha)
 			expect(DomUtils.applyManyCSSProperties).toHaveBeenCalledWith(
 				expect.objectContaining({
 					"--left-nav-hover": expect.any(String),
@@ -586,15 +593,8 @@ describe("ThemeState - Integration Tests", () => {
 			// Act
 			await ThemeState.reloadState();
 
-			// Assert - Should apply base properties individually
-			expect(DomUtils.applyCSSProperty).toHaveBeenCalledWith(
-				"--palette-secondary-main",
-				"#ff5733",
-			);
-			expect(DomUtils.applyCSSProperty).toHaveBeenCalledWith(
-				"--left-nav-text-high",
-				"#ffffff",
-			);
+			// Assert - All CSS properties applied via applyManyCSSProperties
+			// NO individual applyCSSProperty calls (new architecture)
 
 			// Should apply derived colors via applyManyCSSProperties (called twice, once per base property)
 			expect(DomUtils.applyManyCSSProperties).toHaveBeenCalledTimes(2);

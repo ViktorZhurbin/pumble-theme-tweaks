@@ -1,4 +1,4 @@
-import { BASE_PROPERTY_NAMES, PROPERTIES } from "@/constants/properties";
+import { PICKER_IDS } from "@/constants/properties";
 import { ColorDerivation } from "@/lib/color-derivation";
 import { logger } from "@/lib/logger";
 import { Storage } from "@/lib/storage";
@@ -51,19 +51,19 @@ class ThemeStateManager {
 		DomUtils.resetCSSTweaks();
 
 		if (tweaksOn) {
-			// Apply to DOM (base + derived colors)
-			for (const [key, prop] of Object.entries(workingTweaks.cssProperties)) {
-				if (prop.enabled && prop.value !== null) {
-					// Apply base property
-					DomUtils.applyCSSProperty(key, prop.value);
-
-					// Compute and apply derived colors
-					const derivedColors = ColorDerivation.computeDerivedColorsFromBase(
-						key,
-						prop.value,
+			// Apply CSS properties to DOM (computed from picker values)
+			for (const [pickerId, tweakEntry] of Object.entries(
+				workingTweaks.cssProperties,
+			)) {
+				if (tweakEntry.enabled && tweakEntry.value !== null) {
+					// Compute all CSS properties from picker value
+					const cssProperties = ColorDerivation.computeCssProperties(
+						pickerId,
+						tweakEntry.value,
 					);
 
-					DomUtils.applyManyCSSProperties(derivedColors);
+					// Apply all CSS properties
+					DomUtils.applyManyCSSProperties(cssProperties);
 				}
 			}
 		}
@@ -207,16 +207,14 @@ class ThemeStateManager {
 			value,
 		});
 
-		const derivedColors = ColorDerivation.computeDerivedColorsFromBase(
+		// Compute all CSS properties from picker value
+		const cssProperties = ColorDerivation.computeCssProperties(
 			propertyName,
 			value,
 		);
 
-		// Apply all colors (base + derived) to DOM for immediate visual feedback
-		DomUtils.applyManyCSSProperties({
-			[propertyName]: value,
-			...derivedColors,
-		});
+		// Apply all CSS properties to DOM for immediate visual feedback
+		DomUtils.applyManyCSSProperties(cssProperties);
 
 		// Save only base property to working storage (derived computed when needed)
 		Storage.saveWorkingPropertyDebounced(propertyName, value);
@@ -224,7 +222,7 @@ class ThemeStateManager {
 
 	/**
 	 * Toggles a working property's enabled state
-	 * Also toggles all derived colors for the property
+	 * Derived colors are automatically enabled/disabled when applying to DOM
 	 */
 	toggleWorkingProperty(propertyName: string, enabled: boolean) {
 		logger.debug("ThemeState: Toggling working property", {
@@ -234,19 +232,9 @@ class ThemeStateManager {
 
 		const cssProperties = this.buildStoredCssProperties();
 
-		// Toggle base property
+		// Toggle base property (derived colors handled automatically on apply)
 		if (cssProperties[propertyName]) {
 			cssProperties[propertyName].enabled = enabled;
-		}
-
-		// Toggle all derived properties
-		const derivedProps =
-			ColorDerivation.getDerivedPropertyNamesForBase(propertyName);
-
-		for (const derivedProp of derivedProps) {
-			if (cssProperties[derivedProp] && derivedProp !== propertyName) {
-				cssProperties[derivedProp].enabled = enabled;
-			}
 		}
 
 		Storage.setWorkingTweaks(cssProperties);
@@ -254,35 +242,23 @@ class ThemeStateManager {
 
 	/**
 	 * Converts working tweaks to stored format (without initialValue)
-	 * Recomputes all derived colors from base properties to ensure consistency
+	 * Stores ONLY base properties (opaque picker values)
+	 * Derived colors are computed on-the-fly when applying to DOM
 	 */
 	private buildStoredCssProperties(): StoredCssProperties {
 		const cssProperties: StoredCssProperties = {};
 
-		for (const base of PROPERTIES) {
-			const entry =
-				this.currentState.workingTweaks.cssProperties[base.propertyName];
+		for (const pickerId of PICKER_IDS) {
+			const tweakEntry =
+				this.currentState.workingTweaks.cssProperties[pickerId];
 
-			const baseValue = entry?.value ?? entry?.initialValue;
+			const pickerValue = tweakEntry?.value ?? tweakEntry?.initialValue;
 
-			// Save base property
-			cssProperties[base.propertyName] = {
-				value: baseValue,
-				enabled: entry?.enabled ?? true,
+			// Save only picker value (opaque base color)
+			cssProperties[pickerId] = {
+				value: pickerValue,
+				enabled: tweakEntry?.enabled ?? true,
 			};
-
-			// Compute and save derived properties
-			const derivedColors = ColorDerivation.computeDerivedColorsFromBase(
-				base.propertyName,
-				baseValue,
-			);
-
-			for (const [derivedProp, derivedValue] of Object.entries(derivedColors)) {
-				cssProperties[derivedProp] = {
-					value: derivedValue,
-					enabled: entry?.enabled ?? true,
-				};
-			}
 		}
 
 		return cssProperties;
@@ -299,13 +275,20 @@ class ThemeStateManager {
 
 		const cssProperties: Record<string, TweakEntry> = {};
 
-		// Add base properties
-		for (const basePropertyName of BASE_PROPERTY_NAMES) {
-			const stored = storedProps[basePropertyName];
+		// Add picker controls (storage keys)
+		for (const pickerId of PICKER_IDS) {
+			const stored = storedProps[pickerId];
 			const value = stored?.value ?? null;
-			const initialValue = currentDOMValues[basePropertyName] ?? value ?? "";
 
-			cssProperties[basePropertyName] = {
+			// Preserve existing initialValue to avoid re-reading from modified DOM
+			const existingInitialValue =
+				this.currentState.workingTweaks?.cssProperties[pickerId]?.initialValue;
+
+			// Only read value from currentDOMValues on first load (when no existingInitialValue)
+			const initialValue =
+				existingInitialValue ?? currentDOMValues[pickerId] ?? value ?? "";
+
+			cssProperties[pickerId] = {
 				value,
 				initialValue,
 				enabled: stored?.enabled ?? true,
@@ -336,19 +319,18 @@ class ThemeStateManager {
 		const workingProps = workingTweaks.cssProperties;
 		const presetProps = preset.cssProperties;
 
-		// Check if all properties match
-		for (const key of BASE_PROPERTY_NAMES) {
-			const workingEntry = workingProps[key];
-			const presetEntry = presetProps[key];
+		// Check if all picker values match
+		for (const pickerId of PICKER_IDS) {
+			const tweakEntry = workingProps[pickerId];
+			const storedEntry = presetProps[pickerId];
 
-			const workingEntryValue =
-				workingEntry?.value ?? workingEntry.initialValue;
+			const workingEntryValue = tweakEntry?.value ?? tweakEntry.initialValue;
 
 			// Different value
-			if (workingEntryValue !== presetEntry?.value) return true;
+			if (workingEntryValue !== storedEntry?.value) return true;
 
 			// Different enabled state
-			if (workingEntry?.enabled !== presetEntry?.enabled) return true;
+			if (tweakEntry?.enabled !== storedEntry?.enabled) return true;
 		}
 
 		return false;

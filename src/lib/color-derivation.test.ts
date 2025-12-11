@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { ColorDerivation } from "./color-derivation";
 
 describe("ColorDerivation", () => {
-	describe("computeDerivedColorsFromBase", () => {
+	describe("computeCssProperties", () => {
 		it("should compute derived colors for --palette-secondary-main", () => {
 			const baseColor = "#ff5733";
-			const result = ColorDerivation.computeDerivedColorsFromBase(
+			const result = ColorDerivation.computeCssProperties(
 				"--palette-secondary-main",
 				baseColor,
 			);
@@ -25,7 +25,7 @@ describe("ColorDerivation", () => {
 
 		it("should compute derived colors with alpha for --left-nav-text-high", () => {
 			const baseColor = "#ffffff";
-			const result = ColorDerivation.computeDerivedColorsFromBase(
+			const result = ColorDerivation.computeCssProperties(
 				"--left-nav-text-high",
 				baseColor,
 			);
@@ -54,14 +54,15 @@ describe("ColorDerivation", () => {
 			);
 		});
 
-		it("should return empty object for properties without derived colors", () => {
+		it("should return identity for properties without transformations", () => {
 			const baseColor = "#ff5733";
-			const result = ColorDerivation.computeDerivedColorsFromBase(
+			const result = ColorDerivation.computeCssProperties(
 				"--palette-primary-main",
 				baseColor,
 			);
 
-			expect(result).toEqual({});
+			// Now includes identity transform
+			expect(result).toEqual({ "--palette-primary-main": "#ff5733" });
 		});
 
 		it("should handle various color formats", () => {
@@ -73,7 +74,7 @@ describe("ColorDerivation", () => {
 			];
 
 			for (const { color } of testCases) {
-				const result = ColorDerivation.computeDerivedColorsFromBase(
+				const result = ColorDerivation.computeCssProperties(
 					"--palette-secondary-main",
 					color,
 				);
@@ -93,7 +94,7 @@ describe("ColorDerivation", () => {
 			];
 
 			for (const { color } of edgeCases) {
-				const result = ColorDerivation.computeDerivedColorsFromBase(
+				const result = ColorDerivation.computeCssProperties(
 					"--palette-secondary-main",
 					color,
 				);
@@ -108,11 +109,11 @@ describe("ColorDerivation", () => {
 		it("should produce consistent results for same input", () => {
 			const baseColor = "#3498db";
 
-			const result1 = ColorDerivation.computeDerivedColorsFromBase(
+			const result1 = ColorDerivation.computeCssProperties(
 				"--palette-secondary-main",
 				baseColor,
 			);
-			const result2 = ColorDerivation.computeDerivedColorsFromBase(
+			const result2 = ColorDerivation.computeCssProperties(
 				"--palette-secondary-main",
 				baseColor,
 			);
@@ -121,20 +122,22 @@ describe("ColorDerivation", () => {
 		});
 	});
 
-	describe("getDerivedPropertyNamesForBase", () => {
-		it("should return all derived property names for --palette-secondary-main", () => {
-			const result = ColorDerivation.getDerivedPropertyNamesForBase(
+	describe("getCssPropertyNames", () => {
+		it("should return all CSS property names for --palette-secondary-main", () => {
+			const result = ColorDerivation.getCssPropertyNames(
 				"--palette-secondary-main",
 			);
 
+			// Now includes identity transform for the base property
 			expect(result).toEqual([
+				"--palette-secondary-main",
 				"--palette-secondary-dark",
 				"--palette-secondary-light",
 			]);
 		});
 
 		it("should return all derived property names for --left-nav-text-high", () => {
-			const result = ColorDerivation.getDerivedPropertyNamesForBase(
+			const result = ColorDerivation.getCssPropertyNames(
 				"--left-nav-text-high",
 			);
 
@@ -147,42 +150,45 @@ describe("ColorDerivation", () => {
 			]);
 		});
 
-		it("should return empty array for properties without derived colors", () => {
-			const result = ColorDerivation.getDerivedPropertyNamesForBase(
+		it("should return identity for properties without transformations", () => {
+			const result = ColorDerivation.getCssPropertyNames(
 				"--palette-primary-main",
 			);
 
-			expect(result).toEqual([]);
+			// Now includes identity transform
+			expect(result).toEqual(["--palette-primary-main"]);
 		});
 
-		it("should return empty array for --background", () => {
-			const result =
-				ColorDerivation.getDerivedPropertyNamesForBase("--background");
+		it("should return CSS property for --background (identity)", () => {
+			const result = ColorDerivation.getCssPropertyNames("--background");
 
-			expect(result).toEqual([]);
+			// Now includes identity transform
+			expect(result).toEqual(["--background"]);
 		});
 
-		it("should return correct count of derived properties", () => {
-			const secondaryResult = ColorDerivation.getDerivedPropertyNamesForBase(
+		it("should return correct count of CSS properties", () => {
+			const secondaryResult = ColorDerivation.getCssPropertyNames(
 				"--palette-secondary-main",
 			);
-			expect(secondaryResult).toHaveLength(2);
+			// Now 3: base (identity) + dark + light
+			expect(secondaryResult).toHaveLength(3);
 
-			const navTextResult = ColorDerivation.getDerivedPropertyNamesForBase(
+			const navTextResult = ColorDerivation.getCssPropertyNames(
 				"--left-nav-text-high",
 			);
+			// Still 5: all with alpha transforms
 			expect(navTextResult).toHaveLength(5);
 		});
 	});
 
-	describe("Integration: computeDerivedColorsFromBase + getDerivedPropertyNamesForBase", () => {
-		it("should produce colors for all property names returned by getDerivedPropertyNamesForBase", () => {
+	describe("Integration: computeCssProperties + getCssPropertyNames", () => {
+		it("should produce colors for all property names returned by getCssPropertyNames", () => {
 			const baseColor = "#ff5733";
 			const basePropertyName = "--palette-secondary-main";
 
 			const propertyNames =
-				ColorDerivation.getDerivedPropertyNamesForBase(basePropertyName);
-			const colors = ColorDerivation.computeDerivedColorsFromBase(
+				ColorDerivation.getCssPropertyNames(basePropertyName);
+			const colors = ColorDerivation.computeCssProperties(
 				basePropertyName,
 				baseColor,
 			);
@@ -198,8 +204,8 @@ describe("ColorDerivation", () => {
 			const basePropertyName = "--left-nav-text-high";
 
 			const propertyNames =
-				ColorDerivation.getDerivedPropertyNamesForBase(basePropertyName);
-			const colors = ColorDerivation.computeDerivedColorsFromBase(
+				ColorDerivation.getCssPropertyNames(basePropertyName);
+			const colors = ColorDerivation.computeCssProperties(
 				basePropertyName,
 				baseColor,
 			);
