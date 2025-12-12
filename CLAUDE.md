@@ -63,7 +63,6 @@ After making changes to code:
 
 - Write tests for new features alongside implementation
 - Update existing tests when modifying behavior
-- Test utilities available in `src/test/test-utils.ts`
 - Quick test commands:
   - `npm test` - Run all tests once
   - `npm run test:watch` - Run tests in watch mode
