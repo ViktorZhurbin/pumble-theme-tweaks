@@ -2,7 +2,7 @@ import { UndoIcon } from "@/components/icons/UndoIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { useSelectedPresetValue, useWorkingTweak } from "../hooks";
 
-export const RevertColorToSaved = (props: { propertyName: string }) => {
+export const ResetToPresetColor = (props: { propertyName: string }) => {
 	const ctx = useThemeEditorContext();
 
 	const tweakEntry = useWorkingTweak(props.propertyName);

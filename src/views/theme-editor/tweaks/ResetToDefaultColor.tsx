@@ -2,7 +2,7 @@ import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { useWorkingTweak } from "../hooks";
 
-export const ResetColorToDefault = (props: { propertyName: string }) => {
+export const ResetToDefaultColor = (props: { propertyName: string }) => {
 	const ctx = useThemeEditorContext();
 
 	const tweakEntry = useWorkingTweak(props.propertyName);

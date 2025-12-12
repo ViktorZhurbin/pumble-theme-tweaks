@@ -1,6 +1,5 @@
 import { NewPresetButton } from "./NewPresetButton";
 import { PresetSelector } from "./PresetSelector";
-import { ResetButton } from "./ResetButton";
 import { SaveButton } from "./SaveButton";
 
 export const PresetsContainer = () => {
@@ -11,7 +10,6 @@ export const PresetsContainer = () => {
 			<div class="flex gap-3">
 				<NewPresetButton />
 				<SaveButton />
-				<ResetButton />
 			</div>
 		</div>
 	);

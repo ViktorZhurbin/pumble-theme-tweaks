@@ -1,5 +1,7 @@
 import { For } from "solid-js";
 import { COLOR_PICKERS } from "@/constants/properties";
+import { ResetToDefaults } from "./ResetToDefaults";
+import { ResetToPreset } from "./ResetToPreset";
 import { TweakEntryRow } from "./TweakEntryRow";
 import { TweaksToggle } from "./TweaksToggle";
 
@@ -8,12 +10,17 @@ export const TweaksContainer = () => {
 		<table class="table">
 			<thead>
 				<tr>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td>
+					<th></th>
+					<th>
+						<div class="flex gap-1">
+							<ResetToDefaults />
+							<ResetToPreset />
+						</div>
+					</th>
+					<th></th>
+					<th>
 						<TweaksToggle />
-					</td>
+					</th>
 				</tr>
 			</thead>
 			<tbody>
