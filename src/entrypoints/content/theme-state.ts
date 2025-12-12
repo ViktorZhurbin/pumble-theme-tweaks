@@ -15,6 +15,7 @@ const initialState: RuntimeState = {
 	selectedPreset: null,
 	savedPresets: {},
 	hasUnsavedChanges: false,
+	currentTheme: null,
 };
 /**
  * ThemeState - Single source of truth for theme tweaks state
@@ -28,6 +29,21 @@ class ThemeStateManager {
 	 */
 	getCurrentState(): RuntimeState {
 		return { ...this.currentState };
+	}
+
+	/**
+	 * Initializes state on page load
+	 * Gets current theme and calls reloadState
+	 */
+	async initialize() {
+		// Get current Pumble theme from DOM
+		const currentTheme = DomUtils.getCurrentTheme();
+		this.currentState.currentTheme = currentTheme;
+
+		logger.debug("ThemeState: Initializing", { currentTheme });
+
+		// Load and apply state
+		await this.reloadState();
 	}
 
 	/**
@@ -192,6 +208,37 @@ class ThemeStateManager {
 
 		// Update tweaks enabled state
 		await Storage.setTweaksOn(enabled);
+	}
+
+	/**
+	 * Handles Pumble theme changes (light/dark)
+	 * Updates currentTheme in state and auto-disables tweaks
+	 */
+	async onThemeChanged(newTheme: string | null) {
+		// Early return if theme hasn't actually changed
+		if (newTheme === this.currentState.currentTheme) {
+			return;
+		}
+
+		logger.info("ThemeState: Theme changed", {
+			from: this.currentState.currentTheme,
+			to: newTheme,
+		});
+
+		// Update current theme in state
+		this.currentState.currentTheme = newTheme;
+
+		// Broadcast state change to popup
+		const tabId = await Background.sendMessage("getTabId", undefined);
+		Background.sendMessage("stateChanged", {
+			state: this.currentState,
+			tabId,
+		});
+
+		// Auto-disable tweaks so user can see the actual Pumble theme
+		if (newTheme) {
+			await this.setTweaksOn(false);
+		}
 	}
 
 	/**

@@ -3,26 +3,17 @@ import { DomUtils } from "./dom-utils";
 import { ThemeState } from "./theme-state";
 
 /**
- * Watches for theme changes and handles theme tweak application
+ * Watches for theme changes and delegates to ThemeState
  * Returns MutationObserver for cleanup
  */
 export const watchThemeChanges = (): MutationObserver => {
-	let currentTheme = DomUtils.getCurrentTheme();
-
 	const observer = new MutationObserver(() => {
 		const newTheme = DomUtils.getCurrentTheme();
 
-		if (currentTheme && newTheme !== currentTheme) {
-			const oldTheme = currentTheme;
-			currentTheme = newTheme;
+		logger.debug("Theme watcher: Checking theme", { newTheme });
 
-			logger.info("Theme changed", { from: oldTheme, to: newTheme });
-
-			if (newTheme) {
-				// Auto-disable tweaks so user can see the actual Pumble theme
-				ThemeState.setTweaksOn(false);
-			}
-		}
+		// Delegate to ThemeState to handle the change
+		ThemeState.onThemeChanged(newTheme);
 	});
 
 	observer.observe(document.documentElement, {

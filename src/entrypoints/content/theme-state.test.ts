@@ -32,6 +32,8 @@ describe("ThemeState - Integration Tests", () => {
 			"--background": "#ffffff",
 		});
 
+		vi.mocked(DomUtils.getCurrentTheme).mockReturnValue("theme-dark");
+
 		vi.mocked(Background.sendMessage).mockResolvedValue(undefined as never);
 	});
 
@@ -664,6 +666,123 @@ describe("ThemeState - Integration Tests", () => {
 					"--left-nav-text-high": expect.any(String),
 				}),
 			);
+		});
+	});
+
+	describe("initialize", () => {
+		it("should get current theme from DOM and call reloadState", async () => {
+			// Arrange
+			vi.mocked(DomUtils.getCurrentTheme).mockReturnValue("theme-light");
+
+			// Act
+			await ThemeState.initialize();
+			const state = ThemeState.getCurrentState();
+
+			// Assert
+			expect(DomUtils.getCurrentTheme).toHaveBeenCalledOnce();
+			expect(state.currentTheme).toBe("theme-light");
+		});
+
+		it("should handle null theme", async () => {
+			// Arrange
+			vi.mocked(DomUtils.getCurrentTheme).mockReturnValue(null);
+
+			// Act
+			await ThemeState.initialize();
+			const state = ThemeState.getCurrentState();
+
+			// Assert
+			expect(state.currentTheme).toBeNull();
+		});
+	});
+
+	describe("onThemeChanged", () => {
+		it("should update currentTheme in state", async () => {
+			// Arrange
+			await ThemeState.initialize();
+
+			// Act
+			await ThemeState.onThemeChanged("theme-light");
+			const state = ThemeState.getCurrentState();
+
+			// Assert
+			expect(state.currentTheme).toBe("theme-light");
+		});
+
+		it("should broadcast state change to popup", async () => {
+			// Arrange
+			vi.mocked(Background.sendMessage).mockImplementation(
+				async (method: string) => {
+					if (method === "getTabId") return 123 as never;
+					return undefined as never;
+				},
+			);
+			await ThemeState.initialize();
+
+			// Act
+			await ThemeState.onThemeChanged("theme-light");
+
+			// Assert
+			expect(Background.sendMessage).toHaveBeenCalledWith("stateChanged", {
+				state: expect.objectContaining({
+					currentTheme: "theme-light",
+				}),
+				tabId: 123,
+			});
+		});
+
+		it("should auto-disable tweaks when theme changes", async () => {
+			// Arrange
+			await ThemeState.initialize();
+			vi.clearAllMocks();
+
+			// Act
+			await ThemeState.onThemeChanged("theme-light");
+
+			// Assert
+			expect(Storage.setTweaksOn).toHaveBeenCalledWith(false);
+		});
+
+		it("should not auto-disable tweaks if theme is null", async () => {
+			// Arrange
+			await ThemeState.initialize();
+			vi.clearAllMocks();
+
+			// Act
+			await ThemeState.onThemeChanged(null);
+
+			// Assert
+			expect(Storage.setTweaksOn).not.toHaveBeenCalled();
+		});
+
+		it("should early return if theme hasn't changed", async () => {
+			// Arrange
+			vi.mocked(DomUtils.getCurrentTheme).mockReturnValue("theme-dark");
+			await ThemeState.initialize();
+			vi.clearAllMocks();
+
+			// Act - Call with same theme
+			await ThemeState.onThemeChanged("theme-dark");
+
+			// Assert - Should not broadcast or disable tweaks
+			expect(Background.sendMessage).not.toHaveBeenCalledWith(
+				"stateChanged",
+				expect.anything(),
+			);
+			expect(Storage.setTweaksOn).not.toHaveBeenCalled();
+		});
+
+		it("should handle theme change from dark to light", async () => {
+			// Arrange
+			vi.mocked(DomUtils.getCurrentTheme).mockReturnValue("theme-dark");
+			await ThemeState.initialize();
+			expect(ThemeState.getCurrentState().currentTheme).toBe("theme-dark");
+
+			// Act
+			await ThemeState.onThemeChanged("theme-light");
+
+			// Assert
+			expect(ThemeState.getCurrentState().currentTheme).toBe("theme-light");
 		});
 	});
 });

@@ -20,7 +20,7 @@ export default defineContentScript({
 
 		// Initialize: Apply saved tweaks on page load
 		const initializeTheme = async () => {
-			await ThemeState.reloadState();
+			await ThemeState.initialize();
 
 			themeObserver = watchThemeChanges();
 		};

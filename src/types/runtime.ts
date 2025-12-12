@@ -11,4 +11,5 @@ export interface RuntimeState {
 	selectedPreset: string | null; // Selected preset name (null = no preset selected)
 	savedPresets: StoredPresets; // All saved presets (for UI dropdown)
 	hasUnsavedChanges: boolean; // workingTweaks differs from savedPresets[selectedPreset]?
+	currentTheme: string | null; // Current Pumble theme (light/dark)
 }
