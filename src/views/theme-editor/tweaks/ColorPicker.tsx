@@ -1,6 +1,7 @@
 import { colord } from "colord";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import type { TweakEntry } from "@/types/tweaks";
+import { useWorkingTweak } from "../hooks";
 import styles from "./ColorPicker.module.css";
 
 export const ColorPicker = (props: {
@@ -9,9 +10,7 @@ export const ColorPicker = (props: {
 }) => {
 	const ctx = useThemeEditorContext();
 
-	// Derive from context instead of props
-	const tweakEntry = () =>
-		ctx.store.workingTweaks?.cssProperties[props.propertyName];
+	const tweakEntry = useWorkingTweak(props.propertyName);
 
 	const handleInput = (e: Event) => {
 		const value = (e.target as HTMLInputElement).value;
@@ -23,13 +22,15 @@ export const ColorPicker = (props: {
 	};
 
 	return (
-		<input
-			type="color"
-			class={`${styles.colorInput} border-2 border-neutral-600 bg-none h-9 w-9`}
-			value={getHexDisplayValue(tweakEntry())}
-			disabled={props.disabled}
-			onInput={handleInput}
-		/>
+		<div class="tooltip" data-tip="Pick a color">
+			<input
+				type="color"
+				class={`${styles.colorInput} border-2 border-neutral-600 bg-none h-9 w-9`}
+				value={getHexDisplayValue(tweakEntry())}
+				disabled={props.disabled}
+				onInput={handleInput}
+			/>
+		</div>
 	);
 };
 

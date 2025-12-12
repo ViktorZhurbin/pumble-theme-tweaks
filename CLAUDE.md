@@ -32,10 +32,16 @@
 - **createMemo**: Only for expensive computations - simple store access is already reactive
   - ✅ `const value = () => ctx.store.property` (reactive, no memo needed)
   - ❌ `const value = createMemo(() => ctx.store.property)` (unnecessary)
-- **Naming**: "use" prefix ONLY for context hooks
-  - ✅ `useThemeEditorContext()` (context hook)
-  - ✅ `getBaseValue(...)` (helper function)
-  - ❌ `useBaseValue(...)` (not a context hook)
+- **Naming conventions for functions**:
+  - ✅ **"use" prefix for hooks** - Functions that call other hooks (context, signals, etc.) and/or return reactive accessors
+    - `useThemeEditorContext()` - Context hook
+    - `useWorkingTweak()` - Custom hook that returns reactive accessor
+    - `useSelectedPreset()` - Custom hook that returns reactive accessor
+    - `useBaseValue()` - Custom hook that calls other hooks and returns accessor
+  - ✅ **No "use" prefix for pure helpers** - Functions with no hooks, no reactivity
+    - `getBaseValue(...)` - Pure helper function (takes params, returns value)
+    - `computeCssProperties(...)` - Pure utility function
+  - 🔑 **Key rule**: If it calls hooks or returns an accessor `() => value`, use "use" prefix
 
 ### TypeScript & General
 - No non-null assertions: `value?.property ?? fallback` not `value!.property`
@@ -326,7 +332,51 @@ const ctx = useThemeEditorContext();
 // ctx.store (store), ctx.tabId() (signal), ctx.isReady() (signal)
 ```
 
+### Custom Hooks (Reusable Logic)
+
+**Custom hooks encapsulate logic that calls other hooks and/or returns reactive accessors:**
+
+```typescript
+// ✅ Custom hook that returns reactive accessor
+function useWorkingTweak(propertyName: string) {
+  const ctx = useThemeEditorContext();  // Calls context hook
+  return () => ctx.store.workingTweaks?.cssProperties[propertyName];  // Returns accessor
+}
+
+// ✅ Custom hook that calls other hooks and returns accessor
+function useBaseValue(propertyName: string) {
+  const ctx = useThemeEditorContext();  // Calls context hook
+  const tweakEntry = useWorkingTweak(propertyName);  // Calls another custom hook
+  const selectedPreset = useSelectedPreset();  // Calls another custom hook
+
+  // Returns accessor that recomputes on every access
+  return () => {
+    if (!ctx.store.selectedPreset) {
+      return tweakEntry()?.initialValue ?? "";
+    }
+    return selectedPreset()?.cssProperties[propertyName]?.value
+           ?? tweakEntry()?.initialValue
+           ?? "";
+  };
+}
+
+// ✅ Usage in component
+const MyComponent = (props) => {
+  const tweakEntry = useWorkingTweak(props.name);  // Hook at top level
+  const baseValue = useBaseValue(props.name);  // Hook at top level
+
+  return <div>{tweakEntry()?.value ?? baseValue()}</div>;
+};
+```
+
+**Key Points:**
+- ✅ Custom hooks can call other hooks freely (no React "rules of hooks" in SolidJS)
+- ✅ Custom hooks should return accessors `() => value` for reactivity
+- ✅ Call hooks at component top-level for best performance
+- ✅ Accessor must recompute reactive dependencies on every call
+
 ### Common Patterns
+
 ```typescript
 // ✅ Reactive accessor (no memo needed)
 const isModified = () => {
@@ -334,7 +384,7 @@ const isModified = () => {
   return entry?.value !== entry?.initialValue;
 };
 
-// ✅ Pure helper function
+// ✅ Pure helper function (no hooks, no "use" prefix)
 function getBaseValue(name, preset, presets, initial) {
   if (!preset) return initial;
   return presets[preset]?.cssProperties[name]?.value ?? initial;
