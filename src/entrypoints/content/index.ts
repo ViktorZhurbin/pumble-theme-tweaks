@@ -1,6 +1,7 @@
 import { type Browser, browser } from "wxt/browser";
 import type { ContentScriptContext } from "wxt/utils/content-script-context";
 import { defineContentScript } from "wxt/utils/define-content-script";
+import { PUMBLE_URL_PATTERNS } from "@/constants/pumble-urls";
 import { logger } from "@/lib/logger";
 import { Storage } from "@/lib/storage";
 import { ContentScript } from "./messenger";
@@ -8,11 +9,7 @@ import { ThemeState } from "./theme-state";
 import { watchThemeChanges } from "./theme-watcher";
 
 export default defineContentScript({
-	matches: [
-		"https://app.pumble.com/*",
-		"https://app.stage.ops.pumble.com/*",
-		"https://*.fe.pumble-dev.com/*",
-	],
+	matches: PUMBLE_URL_PATTERNS,
 	main(ctx: ContentScriptContext) {
 		logger.info("Content script loaded", {
 			timestamp: new Date().toISOString(),
