@@ -10,7 +10,7 @@ export default defineConfig({
 	modules: ["@wxt-dev/module-solid"],
 	manifest: {
 		name: "Pumble Theme Tweaks",
-		version: "2.2.2",
+		version: "2.2.3",
 		description: "Tweak Pumble theme colors",
 		permissions: ["storage", "scripting"],
 		host_permissions: PUMBLE_URL_PATTERNS,
