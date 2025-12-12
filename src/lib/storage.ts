@@ -90,7 +90,7 @@ const saveWorkingPropertyDebounced = Utils.debounce(
 	(propertyName: string, value: string) => {
 		Storage.saveWorkingProperty(propertyName, value);
 	},
-	500,
+	300,
 );
 
 /**
