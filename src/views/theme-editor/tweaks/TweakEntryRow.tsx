@@ -48,7 +48,7 @@ export const TweakEntryRow = (props: TweakEntryRowProps) => {
 				<div class="tooltip" data-tip="Toggle">
 					<input
 						type="checkbox"
-						class="checkbox checkbox-primary checkbox-sm"
+						class="checkbox checkbox-xs checkbox-accent"
 						checked={tweakEntry()?.enabled ?? true}
 						disabled={areTweaksOff()}
 						onChange={handleToggle}

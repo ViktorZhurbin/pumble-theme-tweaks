@@ -1,6 +1,7 @@
 import { UndoIcon } from "@/components/icons/UndoIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { useSelectedPresetValue, useWorkingTweak } from "../hooks";
+import { bodyButtonClasses } from "./classes";
 
 export const ResetToPresetColor = (props: { propertyName: string }) => {
 	const ctx = useThemeEditorContext();
@@ -41,7 +42,7 @@ export const ResetToPresetColor = (props: { propertyName: string }) => {
 	return (
 		<div class="tooltip" data-tip="Revert to last saved color">
 			<button
-				class="btn btn-xs btn-ghost btn-circle"
+				class={bodyButtonClasses}
 				onClick={handleResetToPreset}
 				disabled={disabled()}
 			>

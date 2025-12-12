@@ -13,7 +13,7 @@ export const TweaksToggle = () => {
 		<div class="tooltip" data-tip="Toggle all">
 			<input
 				type="checkbox"
-				class="checkbox checkbox-primary checkbox-sm"
+				class="checkbox checkbox-sm checkbox-accent"
 				disabled={false}
 				checked={ctx.store.tweaksOn}
 				onChange={handleChange}

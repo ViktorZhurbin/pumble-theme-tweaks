@@ -1,6 +1,7 @@
 import { ResetIcon } from "@/components/icons/ResetIcon";
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { useWorkingTweak } from "../hooks";
+import { bodyButtonClasses } from "./classes";
 
 export const ResetToDefaultColor = (props: { propertyName: string }) => {
 	const ctx = useThemeEditorContext();
@@ -9,6 +10,7 @@ export const ResetToDefaultColor = (props: { propertyName: string }) => {
 
 	// Shared disabled state (tweaks off or property disabled)
 	const disabled = () => !ctx.store.tweaksOn || !tweakEntry()?.enabled;
+	const hidden = () => !ctx.store.selectedPreset;
 
 	// Check if modified from initialValue (for ResetToDefault)
 	const isModifiedFromInitial = () => {
@@ -35,9 +37,15 @@ export const ResetToDefaultColor = (props: { propertyName: string }) => {
 	};
 
 	return (
-		<div class="tooltip" data-tip="Reset to Pumble theme color">
+		<div
+			class="tooltip"
+			data-tip="Reset to Pumble theme color"
+			classList={{
+				invisible: hidden(),
+			}}
+		>
 			<button
-				class="btn btn-xs btn-ghost btn-circle opacity-60 hover:opacity-100"
+				class={bodyButtonClasses}
 				onClick={handleResetToDefault}
 				disabled={disabled() || !isModifiedFromInitial()}
 			>
