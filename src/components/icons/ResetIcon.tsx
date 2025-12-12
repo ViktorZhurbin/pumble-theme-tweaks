@@ -1,15 +1,13 @@
-interface ResetIconButtonProps {
-	size?: number;
-}
+import { getIconSize } from "./helpers";
+import type { IconProps } from "./types";
 
-export const ResetIcon = (props: ResetIconButtonProps) => {
-	const size = () => props.size ?? 16;
-
+export const ResetIcon = (props: IconProps) => {
 	return (
 		<svg
+			width={getIconSize(props)}
+			height={getIconSize(props)}
+			class={props.class}
 			xmlns="http://www.w3.org/2000/svg"
-			width={size()}
-			height={size()}
 			viewBox="0 0 24 24"
 			fill="none"
 			stroke="currentColor"

@@ -14,16 +14,16 @@ export const NotificationRenderer = (props: Props) => {
 	const { type, message } = props.notification;
 
 	// Map type to icon component
-	const Icon = () => {
+	const getIcon = () => {
 		switch (type) {
 			case "success":
-				return <SuccessIcon />;
+				return SuccessIcon;
 			case "error":
-				return <ErrorIcon />;
+				return ErrorIcon;
 			case "info":
-				return <InfoIcon />;
+				return InfoIcon;
 			case "warning":
-				return <WarningIcon />;
+				return WarningIcon;
 		}
 	};
 
@@ -41,9 +41,11 @@ export const NotificationRenderer = (props: Props) => {
 		}
 	};
 
+	const Icon = getIcon();
+
 	return (
 		<div role="alert" class={`alert ${alertClass()}`}>
-			<Icon />
+			<Icon class="h-6 w-6 shrink-0 stroke-current" />
 			<span class="flex-1">{message}</span>
 			<button
 				class="btn btn-ghost btn-xs btn-circle"

@@ -6,13 +6,7 @@ import { TweaksToggle } from "./TweaksToggle";
 export const TweaksContainer = () => {
 	return (
 		<table class="table">
-			<tbody>
-				<For each={COLOR_PICKERS}>
-					{({ label, id }) => <TweakEntryRow label={label} propertyName={id} />}
-				</For>
-			</tbody>
-
-			<tfoot>
+			<thead>
 				<tr>
 					<td></td>
 					<td></td>
@@ -21,7 +15,12 @@ export const TweaksContainer = () => {
 						<TweaksToggle />
 					</td>
 				</tr>
-			</tfoot>
+			</thead>
+			<tbody>
+				<For each={COLOR_PICKERS}>
+					{({ label, id }) => <TweakEntryRow label={label} propertyName={id} />}
+				</For>
+			</tbody>
 		</table>
 	);
 };

@@ -1,7 +1,8 @@
 import { useThemeEditorContext } from "@/context/ThemeEditorContext";
 import { useWorkingTweak } from "../hooks";
 import { ColorPicker } from "./ColorPicker";
-import { ResetColorButton } from "./ResetColorButton";
+import { ResetColorToDefault } from "./ResetColorToDefault";
+import { RevertColorToSaved } from "./RevertColorToSaved";
 
 interface TweakEntryRowProps {
 	label: string;
@@ -33,7 +34,10 @@ export const TweakEntryRow = (props: TweakEntryRowProps) => {
 			<td class={`${inactiveClass()}`.trim()}>{props.label}</td>
 
 			<td class={inactiveClass()}>
-				<ResetColorButton propertyName={props.propertyName} />
+				<div class="flex gap-1">
+					<ResetColorToDefault propertyName={props.propertyName} />
+					<RevertColorToSaved propertyName={props.propertyName} />
+				</div>
 			</td>
 
 			<td class={inactiveClass()}>

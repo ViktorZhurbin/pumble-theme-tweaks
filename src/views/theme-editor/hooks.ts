@@ -14,3 +14,9 @@ export const useSelectedPreset = () => {
 			? ctx.store.savedPresets[ctx.store.selectedPreset]
 			: null;
 };
+
+export const useSelectedPresetValue = (propertyName: string) => {
+	const selectedPreset = useSelectedPreset();
+
+	return () => selectedPreset()?.cssProperties[propertyName]?.value ?? "";
+};
